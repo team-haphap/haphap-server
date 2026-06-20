@@ -28,6 +28,5 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/haphap
-            docker compose down
             docker compose pull
-            docker compose up -d
+            docker compose up -d --remove-orphans
