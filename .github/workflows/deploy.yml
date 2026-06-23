@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Set up JDK 21
-        uses: actions/setup-java@9469a2b3de4e37526f9e1dd482580daf936cb08d # v3.13.00
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: appleboy/ssh-action@37a3aad6b06ab8b8e1d49f29fcdaf4b15f3d6ed3 # v1.11.0
+      - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
