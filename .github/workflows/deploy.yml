@@ -38,23 +38,22 @@ jobs:
           TAG=${{ github.sha }}
           docker build -t $IMAGE:$TAG .
           docker push $IMAGE:$TAG
-
-cd:
-  needs: ci
-  runs-on: ubuntu-latest
-  if: github.ref = 'refs/heads/main'
-  steps:
-    - uses: appleboy/ssh-action@37a3aad6b06ab8b8e1d49f29fcdaf4b15f3d6ed3 # v1.11.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          set -e
-          cd /home/ubuntu/haphap
-          git pull origin main
-          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
-          echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
-          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
-          chmod +x scripts/deploy.sh
-          IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh
+  cd:
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: appleboy/ssh-action@37a3aad6b06ab8b8e1d49f29fcdaf4b15f3d6ed3 # v1.11.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
+            cd /home/ubuntu/haphap
+            git pull origin main
+            echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
+            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
+            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            chmod +x scripts/deploy.sh
+            IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh
