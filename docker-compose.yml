@@ -1,0 +1,11 @@
+services:
+  redis:
+    image: redis:7
+    restart: always
+    networks:
+      - haphap-net
+
+networks:
+  haphap-net:
+    name: haphap-net
+    driver: bridge
