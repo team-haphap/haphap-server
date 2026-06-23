@@ -1,7 +1,4 @@
 spring:
-spring:
-  application:
-    name: haphap
   application:
     name: haphap
 

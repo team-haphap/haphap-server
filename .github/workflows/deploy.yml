@@ -1,33 +1,60 @@
-name: Deploy to EC2
+name: CI/CD
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          persist-credentials: false
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@9469a2b3de4e37526f9e1dd482580daf936cb08d # v3.13.00
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Build with Gradle
+      - name: Build JAR
         run: ./gradlew bootJar
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            cd /home/ubuntu/haphap
-            docker compose down
-            docker compose pull
-            docker compose up -d
+      - name: Docker login
+        if: github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build & Push Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          IMAGE=haphapsopt/haphap-server
+          TAG=${{ github.sha }}
+          docker build -t $IMAGE:$TAG .
+          docker push $IMAGE:$TAG
+
+cd:
+  needs: ci
+  runs-on: ubuntu-latest
+  if: github.ref = 'refs/heads/main'
+  steps:
+    - uses: appleboy/ssh-action@37a3aad6b06ab8b8e1d49f29fcdaf4b15f3d6ed3 # v1.11.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          set -e
+          cd /home/ubuntu/haphap
+          git pull origin main
+          echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
+          echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
+          echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+          chmod +x scripts/deploy.sh
+          IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh

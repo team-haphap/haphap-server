@@ -1,15 +1,11 @@
 services:
-  app:
-    image: haphapsopt/haphap-server:latest
-    ports:
-      - "8080:8080"
-    environment:
-      - RDS_ENDPOINT=${RDS_ENDPOINT}
-      - RDS_USERNAME=${RDS_USERNAME}
-      - RDS_PASSWORD=${RDS_PASSWORD}
-      - REDIS_HOST=redis
-    restart: always
-
   redis:
     image: redis:7
     restart: always
+    networks:
+      - haphap-net
+
+networks:
+  haphap-net:
+    name: haphap-net
+    driver: bridge

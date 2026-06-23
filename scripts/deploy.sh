@@ -1,0 +1,63 @@
+set -e
+
+IMAGE="haphapsopt/haphap-server:${IMAGE_TAG:?IMAGE_TAG is required}"
+WORK_DIR="/home/ubuntu/haphap"
+
+cd "$WORK_DIR"
+docker compose up -d redis
+
+if docker ps --format '{{.Names}}' | grep -q "^haphap-blue$"; then
+  CURRENT="blue"
+  NEXT="green"
+  NEXT_PORT=8081
+else
+  CURRENT="green"
+  NEXT="blue"
+  NEXT_PORT=8080
+fi
+
+echo ">>> 배포 시작: $CURRENT → $NEXT (port $NEXT_PORT)"
+
+docker pull "$IMAGE"
+
+docker stop "haphap-$NEXT" 2>/dev/null || true
+docker rm   "haphap-$NEXT" 2>/dev/null || true
+
+docker run -d \
+  --name "haphap-$NEXT" \
+  --network haphap-net \
+  -p "${NEXT_PORT}:8080" \
+  --env-file "$WORK_DIR/.env" \
+  -e REDIS_HOST=redis \
+  --restart unless-stopped \
+  "$IMAGE"
+
+# health check
+echo ">>> haphap-$NEXT health check 중..."
+for i in $(seq 1 15); do
+  if curl -sf "http://localhost:${NEXT_PORT}/actuator/health" > /dev/null 2>&1; then
+    echo "Health check 통과 (시도 $i)"
+    break
+  fi
+  if [ "$i" -eq 15 ]; then
+    echo "Health check 실패. 롤백합니다."
+    docker stop "haphap-$NEXT" || true
+    docker rm   "haphap-$NEXT" || true
+    exit 1
+  fi
+  echo "  시도 $i 실패, 2초 후 재시도..."
+  sleep 2
+done
+
+# nginx 포트 전환 (무중단배포)
+sudo sed -i "s/127\.0\.0\.1:808[01]/127.0.0.1:${NEXT_PORT}/" /etc/nginx/conf.d/haphap.conf
+sudo nginx -s reload
+echo "Nginx → port $NEXT_PORT (무중단 전환 완료)"
+
+if docker ps --format '{{.Names}}' | grep -q "^haphap-$CURRENT$"; then
+  docker stop "haphap-$CURRENT"
+  docker rm   "haphap-$CURRENT"
+  echo "haphap-$CURRENT 종료"
+fi
+
+echo "배포 완료! Active: haphap-$NEXT (port $NEXT_PORT)"
