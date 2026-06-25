@@ -1,4 +1,4 @@
-package org.sopt.haphap.posting.entity;
+package org.sopt.haphap.posting.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

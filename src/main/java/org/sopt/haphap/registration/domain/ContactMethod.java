@@ -1,4 +1,4 @@
-package org.sopt.haphap.registration.entity;
+package org.sopt.haphap.registration.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

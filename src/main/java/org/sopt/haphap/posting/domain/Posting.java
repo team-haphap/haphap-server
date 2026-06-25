@@ -1,4 +1,4 @@
-package org.sopt.haphap.posting.entity;
+package org.sopt.haphap.posting.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

@@ -1,4 +1,4 @@
-package org.sopt.haphap.registration.entity;
+package org.sopt.haphap.registration.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
