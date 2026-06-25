@@ -6,8 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.haphap.global.common.BaseEntity;
-import org.sopt.haphap.member.entity.Member;
-import org.sopt.haphap.posting.entity.Posting;
+import org.sopt.haphap.member.domain.Member;
+import org.sopt.haphap.posting.domain.Posting;
 
 @Getter
 @Entity
