@@ -1,0 +1,23 @@
+### Register my status
+POST http://localhost:8080/api/v1/status-reports
+Content-Type: application/json
+X-Member-Id: 1
+
+{
+  "announcementId": 1,
+  "stage": "DOCUMENT",
+  "notifiedDate": "2026-06-22",
+  "notifiedTimeText": "14시대",
+  "notificationChannel": "SMS",
+  "result": "PASSED"
+}
+
+### Realtime home feed
+GET http://localhost:8080/api/v1/realtime/feed?size=20
+
+### Announcement realtime summary
+GET http://localhost:8080/api/v1/realtime/announcements/1/summary
+
+### Announcement SSE stream
+GET http://localhost:8080/api/v1/realtime/announcements/1/stream
+Accept: text/event-stream
