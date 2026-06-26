@@ -1,0 +1,61 @@
+package org.sopt.haphap.registration.service;
+
+import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.alram.domain.AlramSetting;
+import org.sopt.haphap.alram.repository.AlramSettingRepository;
+import org.sopt.haphap.global.exception.CustomException;
+import org.sopt.haphap.member.domain.Member;
+import org.sopt.haphap.member.repository.MemberRepository;
+import org.sopt.haphap.posting.domain.Posting;
+import org.sopt.haphap.posting.repository.PostingRepository;
+import org.sopt.haphap.registration.code.RegistrationErrorCode;
+import org.sopt.haphap.registration.domain.Registration;
+import org.sopt.haphap.registration.dto.RegistrationCreateRequest;
+import org.sopt.haphap.registration.dto.RegistrationCreateResponse;
+import org.sopt.haphap.registration.event.RegistrationCreatedEvent;
+import org.sopt.haphap.registration.repository.RegistrationRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class RegistrationService {
+
+    private final MemberRepository memberRepository;
+    private final PostingRepository postingRepository;
+    private final RegistrationRepository registrationRepository;
+    private final AlramSettingRepository alramSettingRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Transactional
+    public RegistrationCreateResponse createRegistration(Long memberId, RegistrationCreateRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.MEMBER_NOT_FOUND));
+        Posting posting = postingRepository.findById(request.postingId())
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
+
+        Registration registration = Registration.create(
+                member, posting, request.stage(), request.result(),
+                request.contactMethod(), request.contactedAt(), request.anonymous());
+        registrationRepository.save(registration);
+
+        applyAlramSetting(member, posting, request.alarmEnabled());
+
+        // 등록이 커밋된 뒤 알람 모듈이 이 이벤트를 받아 처리.
+        eventPublisher.publishEvent(new RegistrationCreatedEvent(
+                registration.getId(), posting.getId(), registration.getStage(), member.getId()));
+
+        return RegistrationCreateResponse.from(registration.getId());
+    }
+
+    // (member, posting) 당 알람설정은 1개. 있으면 토글, 없으면 생성.
+    // 이걸로 할지 아니면 분리??
+    private void applyAlramSetting(Member member, Posting posting, boolean enabled) {
+        alramSettingRepository.findByMemberIdAndPostingId(member.getId(), posting.getId())
+                .ifPresentOrElse(
+                        setting -> setting.updateEnabled(enabled),
+                        () -> alramSettingRepository.save(AlramSetting.create(member, posting, enabled))
+                );
+    }
+}
