@@ -8,3 +8,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+jwt:
+  secret: local-secret-key-must-be-at-least-32-characters-long

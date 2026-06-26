@@ -58,6 +58,8 @@ dependencies {
     // actuator (블루그린 헬스체크)
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // WebClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {
