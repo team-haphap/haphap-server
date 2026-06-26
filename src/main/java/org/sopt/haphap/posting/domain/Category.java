@@ -8,11 +8,12 @@ import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sopt.haphap.global.common.BaseEntity;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Category {
+public class Category extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +21,12 @@ public class Category {
 
     @Column(nullable = false, length = 50)
     private String name;
+
+    private Category(String name) {
+        this.name = name;
+    }
+
+    public static Category create(String name) {
+        return new Category(name);
+    }
 }

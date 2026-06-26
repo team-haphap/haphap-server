@@ -8,13 +8,13 @@ import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sopt.haphap.global.common.BaseEntity;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Company {
+public class Company extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,12 @@ public class Company {
     @Column(nullable = false, length = 100)
     private String name;
 
-    private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+    private Company(String name) {
+        this.name = name;
+    }
+
+    public static Company create(String name) {
+        return new Company(name);
+    }
 }
