@@ -1,6 +1,7 @@
 package org.sopt.haphap.global.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -75,8 +76,6 @@ public class JwtProvider {
         try {
             parseClaims(token);
             return true;
-        } catch (Exception e) {
-            return false;
-        }
+        } catch (JwtException | IllegalArgumentException e) { return false; }
     }
 }

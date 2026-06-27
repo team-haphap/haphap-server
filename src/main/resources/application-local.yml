@@ -10,4 +10,4 @@ spring:
       ddl-auto: update
 
 jwt:
-  secret: local-secret-key-must-be-at-least-32-characters-long
+  secret: happycats0613!happycats0613!happycats0613!
