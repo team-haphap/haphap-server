@@ -1,74 +1,63 @@
 package org.sopt.haphap.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
-import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.global.client.KakaoApiClient;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.jwt.JwtProvider;
-import org.sopt.haphap.global.util.AnonymousNameGenerator;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final JwtProvider jwtProvider;
-    private final WebClient webClient;
     private final RedisTemplate<String, String> redisTemplate;
-    private final AnonymousNameGenerator anonymousNameGenerator;
+    private final KakaoApiClient kakaoApiClient;
 
-    @Transactional
+    // @Transactional 없음 — 외부 HTTP 호출이 트랜잭션 밖에서 실행됨
     public AuthResponse kakaoLogin(String kakaoAccessToken) {
-        // 1. 카카오에서 유저 정보 조회
-        Map<String, Object> kakaoUser = getKakaoUserInfo(kakaoAccessToken);
+        // 1. 카카오에서 유저 정보 조회 (HTTP, 트랜잭션 밖)
+        Map<String, Object> kakaoUser = kakaoApiClient.getUserInfo(kakaoAccessToken);
         String providerId = String.valueOf(kakaoUser.get("id"));
 
         Map<String, Object> kakaoAccount = (Map<String, Object>) kakaoUser.get("kakao_account");
+        if (kakaoAccount == null) {
+            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+        }
+
         String name = (String) kakaoAccount.get("name");
         String email = (String) kakaoAccount.get("email");
         String birthyear = (String) kakaoAccount.getOrDefault("birthyear", "");
         String birthday = (String) kakaoAccount.getOrDefault("birthday", "");
         LocalDate birthDate = parseBirthDate(birthyear, birthday);
 
-        // 2. DB에서 유저 찾기
-        boolean[] isNew = {false};
-        User user = userRepository.findByProviderAndProviderId(Provider.KAKAO, providerId)
-                .orElseGet(() -> {
-                    isNew[0] = true;
-                    return userRepository.save(
-                            User.builder()
-                                    .provider(Provider.KAKAO)
-                                    .providerId(providerId)
-                                    .name(name)
-                                    .email(email)
-                                    .birthDate(birthDate)
-                                    .anonymousName(anonymousNameGenerator.generate())
-                                    .build()
-                    );
-                });
+        // 2. DB 유저 조회/생성
+        UserService.FindOrCreateResult result =
+                userService.findOrCreate(Provider.KAKAO, providerId, name, email, birthDate);
 
         // 3. JWT 발급
         return new AuthResponse(
-                jwtProvider.createAccessToken(user.getId()),
-                jwtProvider.createRefreshToken(user.getId()),
-                user.getAnonymousName(),
-                isNew[0]
+                jwtProvider.createAccessToken(result.user().getId()),
+                jwtProvider.createRefreshToken(result.user().getId()),
+                result.user().getAnonymousName(),
+                result.isNew()
         );
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public AuthResponse reissue(String refreshToken) {
         if (!jwtProvider.validate(refreshToken)) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
@@ -76,9 +65,9 @@ public class AuthService {
         Long userId = jwtProvider.getUserId(refreshToken);
         String stored = redisTemplate.opsForValue().get("refresh:" + userId);
         if (!refreshToken.equals(stored)) {
-            throw new IllegalArgumentException("일치하지 않는 refreshToken");
+            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
         }
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userService.findById(userId);
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
                 jwtProvider.createRefreshToken(userId),
@@ -90,15 +79,6 @@ public class AuthService {
     public void logout(String accessToken) {
         Long userId = jwtProvider.getUserId(accessToken);
         redisTemplate.delete("refresh:" + userId);
-    }
-
-    private final KakaoApiClient kakaoApiClient; {
-        return webClient.get()
-                .uri("https://kapi.kakao.com/v2/user/me")
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
     }
 
     private LocalDate parseBirthDate(String birthyear, String birthday) {
