@@ -3,6 +3,7 @@ package org.sopt.haphap.global.util;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class AnonymousNameGenerator {
