@@ -1,6 +1,9 @@
 package org.sopt.haphap.global.client;
 
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.global.code.GlobalErrorCode;
+import org.sopt.haphap.global.exception.CustomException;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -17,7 +20,7 @@ public class KakaoApiClient {
                 .uri("https://kapi.kakao.com/v2/user/me")
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
-                .bodyToMono(Map.class)
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();
     }
 }
