@@ -18,6 +18,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> kakaoLogin(@RequestBody KakaoLoginRequest request) {
         return ResponseEntity.ok(authService.kakaoLogin(request.accessToken()));
     }
+
     @PostMapping("/reissue")
     public ResponseEntity<AuthResponse> reissue(@RequestHeader("Authorization") String refreshToken) {
         return ResponseEntity.ok(authService.reissue(refreshToken.substring(7)));

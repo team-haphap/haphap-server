@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.user.entity;
+package org.sopt.haphap.domain.user.repository;
 
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
