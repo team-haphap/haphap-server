@@ -14,9 +14,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: 커밋 정보 출력
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          echo "========================================"
+          echo "  브랜치  : $BRANCH"
+          echo "  커밋 SHA: $SHA"
+          echo "  작성자  : $ACTOR"
+          echo "========================================"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -25,35 +38,57 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: ./gradlew bootJar
+        run: |
+          echo "[CI] Gradle bootJar 빌드 시작..."
+          ./gradlew bootJar
+          echo "[CI] JAR 빌드 완료"
 
       - name: Docker login
         if: github.ref == 'refs/heads/main'
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: |
+          echo "[CI] Docker Hub 로그인 중..."
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          echo "[CI] Docker Hub 로그인 완료"
 
       - name: Build & Push Docker image
         if: github.ref == 'refs/heads/main'
         run: |
           IMAGE=haphapsopt/haphap-server
           TAG=${{ github.sha }}
+          echo "[CI] 이미지 빌드 중: $IMAGE:$TAG"
           docker build -t $IMAGE:$TAG .
+          echo "[CI] Docker Hub 푸시 중..."
           docker push $IMAGE:$TAG
+          echo "[CI] 푸시 완료: $IMAGE:$TAG"
   cd:
     needs: ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: appleboy/ssh-action@v1
+      - name: EC2 배포
+        uses: appleboy/ssh-action@v1
+        env:
+          GIT_SHA: ${{ github.sha }}
+          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
+          RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+          JWT_SECRET:
+            ${{ secrets.JWT_SECRET }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
+          envs: GIT_SHA,RDS_ENDPOINT,RDS_USERNAME,RDS_PASSWORD,JWT_SECRET
           script: |
             set -e
+            echo "[CD] EC2 배포 시작 - $(date '+%Y-%m-%d %H:%M:%S')"
             cd /home/ubuntu/haphap
-            git pull origin main
-            echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
-            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
-            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            git fetch origin "$GIT_SHA"
+            git checkout --force "$GIT_SHA"
+            printf 'RDS_ENDPOINT=%s\n'  "$RDS_ENDPOINT"  > .env
+            printf 'RDS_USERNAME=%s\n'  "$RDS_USERNAME"  >> .env
+            printf 'RDS_PASSWORD=%s\n'  "$RDS_PASSWORD"  >> .env
+            printf 'JWT_SECRET=%s\n'    "$JWT_SECRET"    >> .env
             chmod +x scripts/deploy.sh
-            IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh
+            IMAGE_TAG="$GIT_SHA" bash scripts/deploy.sh
+            echo "[CD] EC2 배포 완료 - $(date '+%Y-%m-%d %H:%M:%S')"
