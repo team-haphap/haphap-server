@@ -13,8 +13,6 @@ public interface AlramSettingRepository extends JpaRepository<AlramSetting, Long
 
     Optional<AlramSetting> findByUserIdAndPostingId(Long userId, Long postingId);
 
-    List<AlramSetting> findAllByPostingAndEnabledTrueAndUserIdNot(Posting posting, Long excludedUserId);
-
     @Query("""
         select s from AlramSetting s
         join fetch s.user
