@@ -7,12 +7,12 @@ import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.global.client.KakaoApiClient;
 import org.sopt.haphap.global.client.dto.KakaoUserResponse;
-import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.jwt.JwtProvider;
 import org.sopt.haphap.global.jwt.TokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.sopt.haphap.global.code.AuthErrorCode;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +35,7 @@ public class AuthService {
 
         KakaoUserResponse.KakaoAccount account = kakaoUser.kakaoAccount();
         if (account == null) {
-            throw new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED);
+            throw new CustomException(AuthErrorCode.KAKAO_ACCOUNT_NOT_FOUND);
         }
 
         String providerId = String.valueOf(kakaoUser.id());
@@ -63,11 +63,11 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResponse reissue(String refreshToken) {
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
-            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
         Long userId = jwtProvider.getUserId(refreshToken);
         if (!tokenService.isValid(userId, refreshToken)) {
-            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
         }
         User user = userService.findById(userId);
         String newRefreshToken = tokenService.issueRefreshToken(userId);
@@ -81,7 +81,7 @@ public class AuthService {
 
     public void logout(String accessToken) {
         if (!jwtProvider.validateAccessToken(accessToken)) {
-            throw new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED);
+            throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
         Long userId = jwtProvider.getUserId(accessToken);
         tokenService.blacklistAccessToken(accessToken);
