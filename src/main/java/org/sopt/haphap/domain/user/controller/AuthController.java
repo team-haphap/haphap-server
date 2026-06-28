@@ -19,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/kakao")
-    public ResponseEntity<AuthResponse> KakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
+    public ResponseEntity<AuthResponse> kakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
         return ResponseEntity.ok(authService.kakaoLogin(request.accessToken()));
     }
 
@@ -32,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken) {
-            String token = BearerTokenExtractor.extract(authorization);
+            String token = BearerTokenExtractor.extract(accessToken);
             if (token == null) { throw new CustomException(GlobalErrorCode.BAD_REQUEST); }
             authService.logout(token);
         return ResponseEntity.noContent().build();
