@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import org.sopt.haphap.global.code.AuthErrorCode;
 
 @Component
 @RequiredArgsConstructor
@@ -22,14 +23,14 @@ public class KakaoApiClient {
                 .retrieve()
                 .onStatus(
                         status -> status.value() == 401,
-                        response -> Mono.error(new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED))
+                        response -> Mono.error(new CustomException(AuthErrorCode.KAKAO_INVALID_TOKEN))
                 )
                 .onStatus(
                         HttpStatusCode::isError,
                         response -> Mono.error(new CustomException(GlobalErrorCode.INTERNAL_SERVER_ERROR))
                 )
                 .bodyToMono(KakaoUserResponse.class)
-                .switchIfEmpty(Mono.error(new CustomException(GlobalErrorCode.BAD_REQUEST)))
+                .switchIfEmpty(Mono.error(new CustomException(AuthErrorCode.KAKAO_ACCOUNT_NOT_FOUND)))
                 .onErrorMap(
                         ex -> !(ex instanceof CustomException),
                         ex -> new CustomException(GlobalErrorCode.INTERNAL_SERVER_ERROR)
