@@ -58,7 +58,6 @@ public class AuthService {
         );
     }
 
-    @Transactional(readOnly = true)
     public AuthResponse reissue(String refreshToken) {
         if (!jwtProvider.validate(refreshToken)) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
@@ -78,6 +77,9 @@ public class AuthService {
     }
 
     public void logout(String accessToken) {
+        if (!jwtProvider.validate(accessToken)) {
+            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+        }
         Long userId = jwtProvider.getUserId(accessToken);
         redisTemplate.delete("refresh:" + userId);
     }
