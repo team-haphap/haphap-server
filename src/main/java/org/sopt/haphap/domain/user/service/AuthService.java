@@ -33,6 +33,7 @@ public class AuthService {
         Map<String, Object> kakaoUser = kakaoApiClient.getUserInfo(kakaoAccessToken);
         String providerId = String.valueOf(kakaoUser.get("id"));
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> kakaoAccount = (Map<String, Object>) kakaoUser.get("kakao_account");
         if (kakaoAccount == null) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
