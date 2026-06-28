@@ -10,8 +10,8 @@ import org.sopt.haphap.global.client.dto.KakaoUserResponse;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.jwt.JwtProvider;
+import org.sopt.haphap.global.jwt.TokenService;
 import org.springframework.stereotype.Service;
-import org.sopt.haphap.global.jwt.RefreshTokenStore;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -24,7 +24,7 @@ public class AuthService {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
-    private final RefreshTokenStore refreshTokenStore;
+    private final TokenService tokenService;
     private final KakaoApiClient kakaoApiClient;
 
     // @Transactional 없음 — 외부 HTTP 호출이 트랜잭션 밖에서 실행됨
@@ -50,8 +50,7 @@ public class AuthService {
 
         // 3. JWT 발급
         Long userId = result.user().getId();
-        String newRefreshToken = jwtProvider.createRefreshToken(userId);
-        refreshTokenStore.save(userId, newRefreshToken);
+        String newRefreshToken = tokenService.issueRefreshToken(userId);
 
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
@@ -67,12 +66,11 @@ public class AuthService {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
         }
         Long userId = jwtProvider.getUserId(refreshToken);
-        if (!refreshTokenStore.isValid(userId, refreshToken)) {
+        if (!tokenService.isValid(userId, refreshToken)) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
         }
         User user = userService.findById(userId);
-        String newRefreshToken = jwtProvider.createRefreshToken(userId);
-        refreshTokenStore.save(userId, newRefreshToken);
+        String newRefreshToken = tokenService.issueRefreshToken(userId);
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
                 newRefreshToken,
@@ -86,7 +84,7 @@ public class AuthService {
             throw new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED);
         }
         Long userId = jwtProvider.getUserId(accessToken);
-        refreshTokenStore.delete(userId);
+        tokenService.deleteRefreshToken(userId);
     }
 
     private LocalDate parseBirthDate(String birthyear, String birthday) {
