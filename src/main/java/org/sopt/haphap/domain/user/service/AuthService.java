@@ -59,7 +59,7 @@ public class AuthService {
     }
 
     public AuthResponse reissue(String refreshToken) {
-        if (!jwtProvider.validate(refreshToken)) {
+        if (!jwtProvider.validateAccessToken(refreshToken)) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
         }
         Long userId = jwtProvider.getUserId(refreshToken);
@@ -77,7 +77,7 @@ public class AuthService {
     }
 
     public void logout(String accessToken) {
-        if (!jwtProvider.validate(accessToken)) {
+        if (!jwtProvider.validateAccessToken(accessToken)) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
         }
         Long userId = jwtProvider.getUserId(accessToken);
