@@ -58,6 +58,12 @@ dependencies {
     // actuator (블루그린 헬스체크)
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Fcm
+    implementation 'com.google.firebase:firebase-admin:9.4.1'
+
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 }
 
 tasks.named('test') {
