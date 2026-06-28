@@ -59,7 +59,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse reissue(String refreshToken) {
-        if (!jwtProvider.validate(refreshToken)) {
+        if (!jwtProvider.validateAccessToken(refreshToken)) {
             throw new CustomException(GlobalErrorCode.BAD_REQUEST);
         }
         Long userId = jwtProvider.getUserId(refreshToken);
