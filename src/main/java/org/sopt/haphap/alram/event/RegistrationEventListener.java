@@ -37,7 +37,7 @@ public class RegistrationEventListener {
             alramService.notifySubscribers(event);
         } catch (Exception e) {
             log.error("알람 발송 실패 - postingId={}, stage={}, registrant={}",
-                    event.postingId(), event.stage(), event.registrantMemberId(), e);
+                    event.postingId(), event.stage(), event.registrantUserId(), e);
             saveFailure(event, e);
         }
     }
@@ -46,6 +46,6 @@ public class RegistrationEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFailure(RegistrationCreatedEvent event, Exception e) {
         alramFailureRepository.save(AlramFailure.from(
-                event.postingId(), event.registrantMemberId(), event.stage(), e));
+                event.postingId(), event.registrantUserId(), event.stage(), e));
     }
 }

@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.haphap.global.common.BaseEntity;
-import org.sopt.haphap.member.domain.Member;
+import org.sopt.haphap.member.domain.User;
 import org.sopt.haphap.posting.domain.Posting;
 
 @Getter
@@ -40,12 +40,12 @@ public class Registration extends BaseEntity {
     private Posting posting;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private Registration(Member member, Posting posting, String stage, RegistrationResult result,
+    private Registration(User user, Posting posting, String stage, RegistrationResult result,
                          ContactMethod contactMethod, LocalDate contactedAt, boolean anonymous) {
-        this.member = member;
+        this.user = user;
         this.posting = posting;
         this.stage = stage;
         this.result = result;
@@ -54,9 +54,9 @@ public class Registration extends BaseEntity {
         this.anonymous = anonymous;
     }
 
-    public static Registration create(Member member, Posting posting, String stage,
+    public static Registration create(User user, Posting posting, String stage,
                                       RegistrationResult result, ContactMethod contactMethod,
                                       LocalDate contactedAt, boolean anonymous) {
-        return new Registration(member, posting, stage, result, contactMethod, contactedAt, anonymous);
+        return new Registration(user, posting, stage, result, contactMethod, contactedAt, anonymous);
     }
 }

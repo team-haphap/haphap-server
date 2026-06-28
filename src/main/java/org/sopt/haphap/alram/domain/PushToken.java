@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.haphap.global.common.BaseEntity;
-import org.sopt.haphap.member.domain.Member;
+import org.sopt.haphap.member.domain.User;
 
 @Getter
 @Entity
@@ -19,7 +19,7 @@ public class PushToken extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member member;
+    private User user;
 
     @Column(nullable = false, length = 255)
     private String fcmToken;
@@ -31,15 +31,15 @@ public class PushToken extends BaseEntity {
     @Column(nullable = false)
     private boolean active;
 
-    private PushToken(Member member, String fcmToken, DeviceType deviceType) {
-        this.member = member;
+    private PushToken(User user, String fcmToken, DeviceType deviceType) {
+        this.user = user;
         this.fcmToken = fcmToken;
         this.deviceType = deviceType;
         this.active = true;
     }
 
-    public static PushToken create(Member member, String fcmToken, DeviceType deviceType) {
-        return new PushToken(member, fcmToken, deviceType);
+    public static PushToken create(User user, String fcmToken, DeviceType deviceType) {
+        return new PushToken(user, fcmToken, deviceType);
     }
 
     public void deactivate() {

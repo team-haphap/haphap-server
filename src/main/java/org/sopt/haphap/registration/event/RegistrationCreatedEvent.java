@@ -4,6 +4,6 @@ public record RegistrationCreatedEvent(
         Long registrationId,
         Long postingId,
         String stage,
-        Long registrantMemberId
+        Long registrantUserId
 ) {
 }

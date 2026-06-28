@@ -14,7 +14,7 @@ import org.sopt.haphap.alram.repository.AlramRepository;
 import org.sopt.haphap.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.alram.repository.PushTokenRepository;
 import org.sopt.haphap.global.exception.CustomException;
-import org.sopt.haphap.member.domain.Member;
+import org.sopt.haphap.member.domain.User;
 import org.sopt.haphap.posting.domain.Posting;
 import org.sopt.haphap.posting.repository.PostingRepository;
 import org.sopt.haphap.registration.event.RegistrationCreatedEvent;
@@ -36,7 +36,7 @@ public class AlramService {
     @Transactional
     public void notifySubscribers(RegistrationCreatedEvent event) {
         List<AlramSetting> subscribers = alramSettingRepository
-                .findActiveSubscribers(event.postingId(), event.registrantMemberId());
+                .findActiveSubscribers(event.postingId(), event.registrantUserId());
 
         if (subscribers.isEmpty()) {
             log.debug("알람 수신 대상 없음 - postingId={}", event.postingId());
@@ -48,7 +48,7 @@ public class AlramService {
         NotificationMessage message = createMessage(posting, event.stage());
 
         for (AlramSetting subscriber : subscribers) {
-            Member receiver = subscriber.getMember();
+            User receiver = subscriber.getUser();
             alramRepository.save(Alram.create(receiver, posting, AlramType.STAGE_REGISTERED,message.title(), message.body()));
             pushToAllDevices(receiver, message);
         }
@@ -61,8 +61,8 @@ public class AlramService {
         return new NotificationMessage(title, body);
     }
 
-    private void pushToAllDevices(Member receiver, NotificationMessage message) {
-        List<PushToken> tokens = pushTokenRepository.findByMemberIdAndActiveTrue(receiver.getId());
+    private void pushToAllDevices(User receiver, NotificationMessage message) {
+        List<PushToken> tokens = pushTokenRepository.findByUserIdAndActiveTrue(receiver.getId());
         if (tokens.isEmpty()) {
             log.debug("활성 푸시 토큰 없음 - memberId={}", receiver.getId());
             return;

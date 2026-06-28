@@ -20,10 +20,10 @@ public class RegistrationController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<RegistrationCreateResponse>> createRegistration(
-            @RequestHeader("X-Member-Id") Long memberId,
+            @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody RegistrationCreateRequest request
     ) {
-        RegistrationCreateResponse response = registrationService.createRegistration(memberId, request);
+        RegistrationCreateResponse response = registrationService.createRegistration(userId, request);
 
         SuccessResponse<RegistrationCreateResponse> body =
                 ApiResponse.success(RegistrationSuccessCode.REGISTRATION_CREATED, response);

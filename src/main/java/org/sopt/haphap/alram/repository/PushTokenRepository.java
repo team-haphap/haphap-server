@@ -6,7 +6,7 @@ import org.sopt.haphap.alram.domain.PushToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PushTokenRepository extends JpaRepository<PushToken, Long> {
-    List<PushToken> findByMemberIdAndActiveTrue(Long memberId);
+    List<PushToken> findByUserIdAndActiveTrue(Long userId);
 
-    List<PushToken> findAllByMemberIdInAndActiveTrue(Collection<Long> memberIds);
+    List<PushToken> findAllByUserIdInAndActiveTrue(Collection<Long> userIds);
 }

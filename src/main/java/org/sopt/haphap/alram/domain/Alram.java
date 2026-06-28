@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.haphap.global.common.BaseEntity;
-import org.sopt.haphap.member.domain.Member;
+import org.sopt.haphap.member.domain.User;
 import org.sopt.haphap.posting.domain.Posting;
 
 @Getter
@@ -20,7 +20,7 @@ public class Alram extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member receiver;
+    private User receiver;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "posting_id", nullable = false)
@@ -39,7 +39,7 @@ public class Alram extends BaseEntity {
     @Column(nullable = false)
     private boolean isRead;
 
-    private Alram(Member receiver, Posting posting, String title, String body) {
+    private Alram(User receiver, Posting posting, String title, String body) {
         this.receiver = receiver;
         this.posting = posting;
         this.title = title;
@@ -47,8 +47,8 @@ public class Alram extends BaseEntity {
         this.isRead = false;
     }
 
-    private Alram(Member member, Posting posting, AlramType type, String title, String body) {
-        this.receiver = member;
+    private Alram(User user, Posting posting, AlramType type, String title, String body) {
+        this.receiver = user;
         this.posting = posting;
         this.type = type;
         this.title = title;
@@ -56,9 +56,9 @@ public class Alram extends BaseEntity {
         this.isRead = false;
     }
 
-    public static Alram newStageRegistration(Member member, Posting posting, String stageName) {
+    public static Alram newStageRegistration(User user, Posting posting, String stageName) {
         return new Alram(
-                member,
+                user,
                 posting,
                 AlramType.NEW_STAGE_REGISTRATION,
                 "새 전형 제보가 등록됐어요",
@@ -66,11 +66,11 @@ public class Alram extends BaseEntity {
         );
     }
 
-    public static Alram create(Member receiver, Posting posting, String title, String body) {
+    public static Alram create(User receiver, Posting posting, String title, String body) {
         return new Alram(receiver, posting, title, body);
     }
 
-    public static Alram create(Member receiver, Posting posting, AlramType type, String title, String body) {
+    public static Alram create(User receiver, Posting posting, AlramType type, String title, String body) {
         return new Alram(receiver, posting, type, title, body);
     }
 

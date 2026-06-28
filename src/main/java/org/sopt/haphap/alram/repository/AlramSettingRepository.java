@@ -11,16 +11,16 @@ import java.util.Optional;
 
 public interface AlramSettingRepository extends JpaRepository<AlramSetting, Long> {
 
-    Optional<AlramSetting> findByMemberIdAndPostingId(Long memberId, Long postingId);
+    Optional<AlramSetting> findByUserIdAndPostingId(Long userId, Long postingId);
 
-    List<AlramSetting> findAllByPostingAndEnabledTrueAndMemberIdNot(Posting posting, Long excludedMemberId);
+    List<AlramSetting> findAllByPostingAndEnabledTrueAndUserIdNot(Posting posting, Long excludedUserId);
 
     @Query("""
         select s from AlramSetting s
-        join fetch s.member
+        join fetch s.user
         where s.posting.id = :postingId
           and s.enabled = true
-          and s.member.id <> :registrantId
+          and s.user.id <> :registrantId
     """)
     List<AlramSetting> findActiveSubscribers(@Param("postingId") Long postingId,
                                              @Param("registrantId") Long registrantId);
