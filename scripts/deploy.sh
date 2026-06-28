@@ -65,7 +65,9 @@ for i in $(seq 1 15); do
   fi
   if [ "$i" -eq 15 ]; then
     ERROR "Health check 15회 모두 실패"
-    ERROR "컨테이너 로그 확인: docker logs haphap-$NEXT"
+    ERROR "컨테이너 로그 출력 시작"
+    docker logs "haphap-$NEXT" 2>&1 || true
+    ERROR "컨테이너 로그 출력 종료"
     docker stop "haphap-$NEXT" || true
     docker rm   "haphap-$NEXT" || true
     exit 1

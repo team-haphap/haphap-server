@@ -20,11 +20,15 @@ jobs:
           persist-credentials: false
 
       - name: 커밋 정보 출력
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
         run: |
           echo "========================================"
-          echo "  브랜치  : ${{ github.ref_name }}"
-          echo "  커밋 SHA: ${{ github.sha }}"
-          echo "  작성자  : ${{ github.actor }}"
+          echo "  브랜치  : $BRANCH"
+          echo "  커밋 SHA: $SHA"
+          echo "  작성자  : $ACTOR"
           echo "========================================"
 
       - name: Set up JDK 21
@@ -63,19 +67,28 @@ jobs:
     steps:
       - name: EC2 배포
         uses: appleboy/ssh-action@v1
+        env:
+          GIT_SHA: ${{ github.sha }}
+          RDS_ENDPOINT: ${{ secrets.RDS_ENDPOINT }}
+          RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+          JWT_SECRET:
+            ${{ secrets.JWT_SECRET }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
+          envs: GIT_SHA,RDS_ENDPOINT,RDS_USERNAME,RDS_PASSWORD,JWT_SECRET
           script: |
             set -e
             echo "[CD] EC2 배포 시작 - $(date '+%Y-%m-%d %H:%M:%S')"
             cd /home/ubuntu/haphap
-            git pull origin main
-            echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
-            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
-            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env 
+            git fetch origin "$GIT_SHA"
+            git checkout --force "$GIT_SHA"
+            printf 'RDS_ENDPOINT=%s\n'  "$RDS_ENDPOINT"  > .env
+            printf 'RDS_USERNAME=%s\n'  "$RDS_USERNAME"  >> .env
+            printf 'RDS_PASSWORD=%s\n'  "$RDS_PASSWORD"  >> .env
+            printf 'JWT_SECRET=%s\n'    "$JWT_SECRET"    >> .env
             chmod +x scripts/deploy.sh
-            IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh
+            IMAGE_TAG="$GIT_SHA" bash scripts/deploy.sh
             echo "[CD] EC2 배포 완료 - $(date '+%Y-%m-%d %H:%M:%S')"
