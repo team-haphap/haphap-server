@@ -83,7 +83,7 @@ public class AuthService {
 
     public void logout(String accessToken) {
         if (!jwtProvider.validateAccessToken(accessToken)) {
-            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+            throw new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED);
         }
         Long userId = jwtProvider.getUserId(accessToken);
         refreshTokenStore.delete(userId);
@@ -93,7 +93,7 @@ public class AuthService {
         try {
             return LocalDate.parse(birthyear + birthday, DateTimeFormatter.ofPattern("yyyyMMdd"));
         } catch (Exception e) {
-            log.warn("생년월일 파싱 실패: birthyear={}, birthday={}", birthyear, birthday);
+            log.warn("생년월일 파싱 실패");
             return null;
         }
     }
