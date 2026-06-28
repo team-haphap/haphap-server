@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/haphap
     username: haphap
-    password: happycats0613!
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -10,4 +10,4 @@ spring:
       ddl-auto: update
 
 jwt:
-  secret: happycats0613!happycats0613!happycats0613!
+  secret: ${JWT_SECRET}
