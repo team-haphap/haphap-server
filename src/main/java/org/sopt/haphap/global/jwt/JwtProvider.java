@@ -72,10 +72,12 @@ public class JwtProvider {
         return Long.parseLong(parseClaims(token).getSubject());
     }
 
-    public boolean validate(String token) {
+    public boolean validateAccessToken(String token) {
         try {
-            parseClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) { return false; }
+            Claims claims = parseClaims(token);
+            return "access".equals(claims.get("type", String.class));
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 }

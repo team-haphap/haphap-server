@@ -26,7 +26,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
 
-        if (StringUtils.hasText(token) && jwtProvider.validate(token)) {
+        //refresh 토큰도 access 토큰 자리에서 사용할 수 있도록 하였습니다
+        if (StringUtils.hasText(token) && jwtProvider.validateAccessToken(token)) {
             Long userId = jwtProvider.getUserId(token);
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(userId, null, List.of());
