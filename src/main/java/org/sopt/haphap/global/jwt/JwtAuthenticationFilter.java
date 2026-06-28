@@ -19,6 +19,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final TokenService tokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         //refresh 토큰도 access 토큰 자리에서 사용할 수 있도록 하였습니다
-        if (StringUtils.hasText(token) && jwtProvider.validateAccessToken(token)) {
+        if (StringUtils.hasText(token) && jwtProvider.validateAccessToken(token) && !tokenService.isBlacklisted(token)) {
             Long userId = jwtProvider.getUserId(token);
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(userId, null, List.of());
