@@ -73,4 +73,9 @@ public class JwtProvider {
             return false;
         }
     }
+
+    public long getExpiration(String token) {
+        Date expiration = parseClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 }

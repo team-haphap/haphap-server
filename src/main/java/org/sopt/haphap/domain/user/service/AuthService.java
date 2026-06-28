@@ -35,7 +35,7 @@ public class AuthService {
 
         KakaoUserResponse.KakaoAccount account = kakaoUser.kakaoAccount();
         if (account == null) {
-            throw new CustomException(GlobalErrorCode.BAD_REQUEST);
+            throw new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED);
         }
 
         String providerId = String.valueOf(kakaoUser.id());
@@ -84,6 +84,7 @@ public class AuthService {
             throw new CustomException(GlobalErrorCode.KAKAO_UNAUTHORIZED);
         }
         Long userId = jwtProvider.getUserId(accessToken);
+        tokenService.blacklistAccessToken(accessToken);
         tokenService.deleteRefreshToken(userId);
     }
 
