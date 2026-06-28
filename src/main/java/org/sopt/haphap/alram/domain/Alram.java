@@ -39,14 +39,6 @@ public class Alram extends BaseEntity {
     @Column(nullable = false)
     private boolean isRead;
 
-    private Alram(User receiver, Posting posting, String title, String body) {
-        this.receiver = receiver;
-        this.posting = posting;
-        this.title = title;
-        this.body = body;
-        this.isRead = false;
-    }
-
     private Alram(User user, Posting posting, AlramType type, String title, String body) {
         this.receiver = user;
         this.posting = posting;
@@ -64,10 +56,6 @@ public class Alram extends BaseEntity {
                 "새 전형 제보가 등록됐어요",
                 posting.getTitle() + " 공고에 " + stageName + " 전형 제보가 올라왔어요."
         );
-    }
-
-    public static Alram create(User receiver, Posting posting, String title, String body) {
-        return new Alram(receiver, posting, title, body);
     }
 
     public static Alram create(User receiver, Posting posting, AlramType type, String title, String body) {
