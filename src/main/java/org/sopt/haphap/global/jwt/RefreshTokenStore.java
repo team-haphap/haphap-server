@@ -3,6 +3,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -29,6 +30,6 @@ public class RefreshTokenStore {
     }
 
     public boolean isValid(Long userId, String token) {
-        return token.equals(get(userId));
+        return Objects.equals(get(userId), token);
     }
 }
