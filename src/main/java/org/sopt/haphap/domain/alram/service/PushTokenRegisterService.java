@@ -6,6 +6,7 @@ import org.sopt.haphap.domain.alram.dto.PushTokenRegisterRequest;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
 import org.sopt.haphap.domain.member.domain.User;
 import org.sopt.haphap.domain.member.repository.UserRepository;
+import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

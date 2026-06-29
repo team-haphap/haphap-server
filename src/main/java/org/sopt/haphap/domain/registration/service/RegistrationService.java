@@ -31,7 +31,7 @@ public class RegistrationService {
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
         Posting posting = postingRepository.findById(request.postingId())
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
 
