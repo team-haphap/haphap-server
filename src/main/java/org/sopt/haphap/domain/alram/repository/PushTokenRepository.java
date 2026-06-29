@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PushTokenRepository extends JpaRepository<PushToken, Long> {
     List<PushToken> findByUserIdAndActiveTrue(Long userId);
-    Optional<PushToken> findByFcmToken(String fcmToken);
+    Optional<PushToken> findByUserIdAndDeviceId(Long userId, String deviceId);
     List<PushToken> findAllByUserIdInAndActiveTrue(Collection<Long> userIds);
 }

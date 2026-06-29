@@ -23,12 +23,12 @@ public class PushTokenRegisterService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
 
-        // 같은 토큰이 이미 있으면 갱신(재활성화), 없으면 새로 생성
-        pushTokenRepository.findByFcmToken(request.fcmToken())
+        // (유저, 이 기기)의 토큰이 이미 있으면 갱신, 없으면 새로 생성
+        pushTokenRepository.findByUserIdAndDeviceId(userId, request.deviceId())
                 .ifPresentOrElse(
-                        token -> token.activate(request.deviceType()),
-                        () -> pushTokenRepository.save(
-                                PushToken.create(user, request.fcmToken(), request.deviceType()))
+                        token -> token.renew(request.fcmToken(), request.deviceType()),
+                        () -> pushTokenRepository.save(PushToken.create(
+                                user, request.deviceId(), request.fcmToken(), request.deviceType()))
                 );
     }
 }
