@@ -22,7 +22,7 @@ public class PushTokenController {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<Void>> register(
-            @RequestHeader("X-Member-Id") Long userId,
+            @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody PushTokenRegisterRequest request) {
 
         pushTokenRegisterService.register(userId, request);
