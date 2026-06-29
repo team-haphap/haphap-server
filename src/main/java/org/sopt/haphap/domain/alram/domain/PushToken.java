@@ -42,6 +42,11 @@ public class PushToken extends BaseEntity {
         return new PushToken(user, fcmToken, deviceType);
     }
 
+    public void activate(DeviceType deviceType) {
+        this.active = true;
+        this.deviceType = deviceType;
+    }
+
     public void deactivate() {
         this.active = false;
     }
