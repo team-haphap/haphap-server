@@ -14,7 +14,7 @@ import org.sopt.haphap.domain.alram.repository.AlramRepository;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
 import org.sopt.haphap.global.exception.CustomException;
-import org.sopt.haphap.domain.member.domain.User;
+import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.registration.event.RegistrationCreatedEvent;

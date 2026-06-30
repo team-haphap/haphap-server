@@ -25,7 +25,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: ./gradlew bootJar
+        run: ./gradlew build
 
       - name: Docker login
         if: github.ref == 'refs/heads/main'
@@ -52,8 +52,11 @@ jobs:
             set -e
             cd /home/ubuntu/haphap
             git pull origin main
-            echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > .env
-            echo "RDS_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
-            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            cat >> .env <<'ENVEOF'
+            RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
+            RDS_USERNAME=${{ secrets.RDS_USERNAME }}
+            RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            ENVEOF
             chmod +x scripts/deploy.sh
             IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh
