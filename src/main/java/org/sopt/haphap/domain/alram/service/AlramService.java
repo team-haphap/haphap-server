@@ -1,6 +1,9 @@
 package org.sopt.haphap.domain.alram.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.alram.code.AlramErrorCode;
@@ -47,11 +50,33 @@ public class AlramService {
                 .orElseThrow(() -> new CustomException(AlramErrorCode.POSTING_NOT_FOUND));
         NotificationMessage message = createMessage(posting, event.stage());
 
+        // 1) 알람 여부 동의한 userId 수집
+        List<Long> userIds = subscribers.stream()
+                .map(s -> s.getUser().getId())
+                .toList();
+
+        // 2) 토큰을 한 번에 조회 후 userId 기준으로 그룹핑
+        Map<Long, List<PushToken>> tokensByUserId = pushTokenRepository
+                .findAllByUserIdInAndActiveTrue(userIds).stream()
+                .collect(Collectors.groupingBy(token -> token.getUser().getId()));
+
+        // 3) 알람 내역 저장 + 발송
+        for (AlramSetting subscriber : subscribers) {
+            User receiver = subscriber.getUser();
+            alramRepository.save(Alram.create(receiver, posting, AlramType.STAGE_REGISTERED,
+                    message.title(), message.body()));
+
+            List<PushToken> tokens = tokensByUserId.getOrDefault(receiver.getId(), List.of());
+            tokens.forEach(token -> notificationSender.send(token.getFcmToken(), message));
+        }
+        /*
+
         for (AlramSetting subscriber : subscribers) {
             User receiver = subscriber.getUser();
             alramRepository.save(Alram.create(receiver, posting, AlramType.STAGE_REGISTERED,message.title(), message.body()));
-            pushToAllDevices(receiver, message);
-        }
+
+
+         */
     }
 
     private NotificationMessage createMessage(Posting posting, String stage) {
