@@ -24,9 +24,12 @@ public record RegistrationCreateRequest(
         @NotNull(message = "전형 결과는 필수입니다.")
         RegistrationResult result,
 
+        @NotNull(message = "익명 여부는 필수입니다.")
         boolean anonymous,
 
         @NotNull(message = "알람 수신 여부는 필수입니다.")
-        boolean alarmEnabled
+        boolean alarmEnabled,
+
+        boolean force
 ) {
 }
