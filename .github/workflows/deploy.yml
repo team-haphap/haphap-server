@@ -58,5 +58,8 @@ jobs:
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             ENVEOF
+            ENVEOF
+            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json
+            chmod 600 firebase-service-account.json
             chmod +x scripts/deploy.sh
             IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh
