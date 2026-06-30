@@ -16,3 +16,6 @@ management:
 
 jwt:
   secret: ${JWT_SECRET}
+
+firebase:
+  service-account-path: ${FIREBASE_CONFIG_PATH:/app/firebase-service-account.json}
