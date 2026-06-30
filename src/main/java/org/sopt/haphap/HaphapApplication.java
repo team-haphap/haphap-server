@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @EnableAsync
-@EnableJpaAuditing
+//@EnableJpaAuditing
 @SpringBootApplication
 public class HaphapApplication {
     public static void main(String[] args) {
