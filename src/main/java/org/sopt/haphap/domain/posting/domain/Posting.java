@@ -17,7 +17,8 @@ public class Posting extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 200,
+            columnDefinition = "varchar(200) COLLATE \"ko-KR-x-icu\"")
     private String title;
 
     private LocalDate deadline;
