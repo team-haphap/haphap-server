@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Slf4j
-@Configuration
-@Profile("prod")
+//@Configuration
+//@Profile("prod")
 public class FirebaseConfig {
 
     @Value("${firebase.service-account-path}")
