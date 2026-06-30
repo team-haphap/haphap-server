@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.alram.code.AlramSuccessCode;
 import org.sopt.haphap.domain.alram.dto.PushTokenRegisterRequest;
 import org.sopt.haphap.domain.alram.service.PushTokenRegisterService;
+import org.sopt.haphap.domain.alram.service.PushTokenService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/alrams/device")
 @RequiredArgsConstructor
-public class PushTokenController {
+public class PushTokenController implements PushTokenApiDocs {
 
     private final PushTokenRegisterService pushTokenRegisterService;
 
