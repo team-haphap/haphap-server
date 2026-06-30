@@ -9,7 +9,7 @@ import org.sopt.haphap.global.common.BaseEntity;
 
 @Getter
 @Entity
-@Table(name = "posting")
+@Table(name = "posting", indexes = @Index(name = "idx_posting_title", columnList = "title"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Posting extends BaseEntity {
 
