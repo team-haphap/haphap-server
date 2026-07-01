@@ -20,7 +20,7 @@ public class RegistrationCheckService {
     @Transactional(readOnly = true)
     public SuccessResultCode check(Long userId, Long postingId, Long stageId) {
         return registrationRepository
-                .findByUserIdAndPostingIdAndPostingStageId(userId, postingId, stageId)
+                .findByUserIdAndPostingIdAndStageId(userId, postingId, stageId)
                 .map(this::judgeExisting)
                 .orElse(RegistrationSuccessCode.NEW_REGISTRATION);  // 등록 이력 없음 → 신규
     }
