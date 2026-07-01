@@ -27,16 +27,8 @@ public class RegistrationController implements RegistrationApiDocs {
             @Valid @RequestBody RegistrationCreateRequest request
     ) {
         RegistrationCreateResponse response = registrationService.createRegistration(userId, request);
-
-        RegistrationSuccessCode code = switch (response.status()) {
-            case CREATED -> RegistrationSuccessCode.REGISTRATION_CREATED;
-            case UPDATED -> RegistrationSuccessCode.REGISTRATION_UPDATED;
-            case CONFIRM_REQUIRED -> RegistrationSuccessCode.REGISTRATION_CONFIRM_REQUIRED;
-        };
-
         SuccessResponse<RegistrationCreateResponse> body =
-                ApiResponse.success(code, response);
-
+                ApiResponse.success(RegistrationSuccessCode.REGISTRATION_CREATED, response);
         return ResponseEntity.status(body.status()).body(body);
     }
 

@@ -3,6 +3,8 @@ package org.sopt.haphap.domain.registration.service;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.alram.domain.AlramSetting;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
+import org.sopt.haphap.domain.posting.domain.PostingStage;
+import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.UserRepository;
@@ -26,6 +28,7 @@ public class RegistrationService {
 
     private final UserRepository userRepository;
     private final PostingRepository postingRepository;
+    private final PostingStageRepository postingStageRepository;
     private final RegistrationRepository registrationRepository;
     private final AlramSettingRepository alramSettingRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -37,55 +40,48 @@ public class RegistrationService {
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
         Posting posting = postingRepository.findById(request.postingId())
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
+        PostingStage stage = postingStageRepository.findById(request.stageId())
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.STAGE_NOT_FOUND));
+
+        if (!stage.belongsTo(posting)) {
+            throw new CustomException(RegistrationErrorCode.STAGE_NOT_IN_POSTING);
+        }
 
         Optional<Registration> existing = registrationRepository
-                .findByUserIdAndPostingIdAndStage(userId, request.postingId(), request.stage());
+                .findByUserIdAndPostingIdAndStageId(userId, request.postingId(), request.stageId());
 
-        if (existing.isPresent()) {
-            return handleExisting(existing.get(), request, posting, user);
-        }
-        return createNew(user, posting, request);
+        Registration registration = existing
+                .map(e -> updateExisting(e, request))       // 기존 있으면 갱신 or 막기
+                .orElseGet(() -> createNew(user, posting, stage, request));  // 없으면 신규
 
-    }
-    private RegistrationCreateResponse handleExisting(Registration existing,
-                                                      RegistrationCreateRequest request, Posting posting, User user) {
-
-        // 결과까지 완전히 동일
-        if (existing.hasSameResult(request.result())) {
-            throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
-        }
-
-        // 기존이 대기 상태 → 변경 가능
-        if (existing.isPending()) {
-            if (!request.force()) {
-                // 아직 확인 안 받음 → 모달 띄우라고 신호만
-                return RegistrationCreateResponse.confirmRequired(existing.getId());
-            }
-            // force=true → 실제로 갱신
-            existing.updateRegistration(request.result(), request.contactMethod(),
-                    request.contactedAt(), request.anonymous());
-            applyAlramSetting(user, posting, request.alarmEnabled());
-            // 변경도 '새 전형 소식'이므로 구독자에게 알람
-            publishEvent(existing, posting, user);
-            return RegistrationCreateResponse.updated(existing.getId());
-        }
-
-        // 기존이 이미 확정(PASS/FAIL)인데 다른 결과가 들어온 경우
-        throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
-    }
-    private RegistrationCreateResponse createNew(User user, Posting posting,
-                                                 RegistrationCreateRequest request) {
-        Registration registration = Registration.create(
-                user, posting, request.stage(), request.result(),
-                request.contactMethod(), request.contactedAt(), request.anonymous());
-        registrationRepository.save(registration);
         applyAlramSetting(user, posting, request.alarmEnabled());
         publishEvent(registration, posting, user);
-        return RegistrationCreateResponse.created(registration.getId());
+        return RegistrationCreateResponse.from(registration.getId());
+
     }
+
+    private Registration updateExisting(Registration existing, RegistrationCreateRequest request) {
+        // 대기 상태였으면 갱신 허용 (확인 API에서 CONFIRM 받고 온 케이스)
+        if (existing.isPending()) {
+            existing.updateRegistration(request.result(), request.contactMethod(),
+                    request.contactedAt(), request.anonymous());
+            return existing;
+        }
+        // 이미 확정인데 또 등록 시도 → 막기
+        throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+    }
+    private Registration createNew(User user, Posting posting, PostingStage stage,
+                                   RegistrationCreateRequest request) {
+        Registration registration = Registration.create(
+                user, posting, stage, request.result(),
+                request.contactMethod(), request.contactedAt(), request.anonymous());
+        return registrationRepository.save(registration);
+    }
+
+
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
-                registration.getId(), posting.getId(), registration.getStage(), user.getId()));
+                registration.getId(), posting.getId(), registration.getStage().getName(), user.getId()));
     }
 
     // (member, posting) 당 알람설정은 1개. 있으면 토글, 없으면 생성.
