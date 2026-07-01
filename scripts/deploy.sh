@@ -23,12 +23,19 @@ docker pull "$IMAGE"
 docker stop "haphap-$NEXT" 2>/dev/null || true
 docker rm   "haphap-$NEXT" 2>/dev/null || true
 
+if [ ! -f "$WORK_DIR/firebase-service-account.json" ]; then
+  echo "Firebase 서비스 계정 파일이 없습니다: $WORK_DIR/firebase-service-account.json"
+  exit 1
+fi
+
 docker run -d \
   --name "haphap-$NEXT" \
   --network haphap-net \
   -p "${NEXT_PORT}:8080" \
   --env-file "$WORK_DIR/.env" \
   -e REDIS_HOST=redis \
+  -e FIREBASE_CONFIG_PATH=/app/firebase-service-account.json \
+  -v "$WORK_DIR/firebase-service-account.json:/app/firebase-service-account.json:ro" \
   --restart unless-stopped \
   "$IMAGE"
 

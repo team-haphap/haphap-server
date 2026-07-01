@@ -54,9 +54,27 @@ public class Registration extends BaseEntity {
         this.anonymous = anonymous;
     }
 
+    public boolean isPending() {
+        return this.result == RegistrationResult.PENDING;
+    }
+
+    public boolean hasSameResult(RegistrationResult other) {
+        return this.result == other;
+    }
+
     public static Registration create(User user, Posting posting, String stage,
                                       RegistrationResult result, ContactMethod contactMethod,
                                       LocalDate contactedAt, boolean anonymous) {
         return new Registration(user, posting, stage, result, contactMethod, contactedAt, anonymous);
+    }
+
+
+    // 기존 등록을 새 값으로 갱신 (force 재요청 시)
+    public void updateRegistration(RegistrationResult result, ContactMethod contactMethod,
+                                   LocalDate contactedAt, boolean anonymous) {
+        this.result = result;
+        this.contactMethod = contactMethod;
+        this.contactedAt = contactedAt;
+        this.anonymous = anonymous;
     }
 }
