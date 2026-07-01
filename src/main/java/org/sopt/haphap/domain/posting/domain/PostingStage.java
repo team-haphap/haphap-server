@@ -38,4 +38,14 @@ public class PostingStage {
     public boolean belongsTo(Posting posting) {
         return this.posting.getId().equals(posting.getId());
     }
+
+    private PostingStage(String name, int orderIndex, Posting posting) {
+        this.name = name;
+        this.orderIndex = orderIndex;
+        this.posting = posting;
+    }
+
+    public static PostingStage create(String name, int orderIndex, Posting posting) {
+        return new PostingStage(name, orderIndex, posting);
+    }
 }
