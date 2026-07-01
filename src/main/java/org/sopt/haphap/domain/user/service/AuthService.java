@@ -73,11 +73,14 @@ public class AuthService {
     }
 
     public void logout(String accessToken) {
-        if (!jwtProvider.validateAccessToken(accessToken)) {
+        boolean expired = jwtProvider.isExpiredAccessToken(accessToken);
+        if (!expired && !jwtProvider.validateAccessToken(accessToken)) {
             throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
-        Long userId = jwtProvider.getUserId(accessToken);
-        tokenService.blacklistAccessToken(accessToken);
+        Long userId = jwtProvider.getUserIdIgnoringExpiration(accessToken);
+        if (!expired) {
+            tokenService.blacklistAccessToken(accessToken);
+        }
         tokenService.deleteRefreshToken(userId);
     }
 }

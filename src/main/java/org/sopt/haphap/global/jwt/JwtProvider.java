@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -77,5 +77,24 @@ public class JwtProvider {
     public long getExpiration(String token) {
         Date expiration = parseClaims(token).getExpiration();
         return expiration.getTime() - System.currentTimeMillis();
+    }
+
+    public boolean isExpiredAccessToken(String token) {
+        try {
+            parseClaims(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return "access".equals(e.getClaims().get("type", String.class));
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public Long getUserIdIgnoringExpiration(String token) {
+        try {
+            return Long.parseLong(parseClaims(token).getSubject());
+        } catch (ExpiredJwtException e) {
+            return Long.parseLong(e.getClaims().getSubject());
+        }
     }
 }
