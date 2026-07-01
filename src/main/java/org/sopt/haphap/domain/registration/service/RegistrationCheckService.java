@@ -1,6 +1,10 @@
 package org.sopt.haphap.domain.registration.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.domain.Posting;
+import org.sopt.haphap.domain.posting.domain.PostingStage;
+import org.sopt.haphap.domain.posting.repository.PostingRepository;
+import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.code.RegistrationSuccessCode;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.domain.Registration;
@@ -16,9 +20,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class RegistrationCheckService {
 
     private final RegistrationRepository registrationRepository;
+    private final PostingRepository postingRepository;
+    private final PostingStageRepository postingStageRepository;
 
     @Transactional(readOnly = true)
     public SuccessResultCode check(Long userId, Long postingId, Long stageId) {
+
+        // 공고 존재 검증
+        Posting posting = postingRepository.findById(postingId)
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
+
+        // 전형 존재 + 해당 공고 소속 검증
+        PostingStage stage = postingStageRepository.findById(stageId)
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.STAGE_NOT_FOUND));
+        if (!stage.belongsTo(posting)) {
+            throw new CustomException(RegistrationErrorCode.STAGE_NOT_IN_POSTING);
+        }
+
         return registrationRepository
                 .findByUserIdAndPostingIdAndStageId(userId, postingId, stageId)
                 .map(this::judgeExisting)
