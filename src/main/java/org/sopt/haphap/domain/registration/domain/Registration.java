@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.global.common.BaseEntity;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
@@ -19,8 +20,9 @@ public class Registration extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
-    private String stage;               // 서류, 코테, 1차면접 등등 (공고마다 다른 전형명)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stage_id", nullable = false)
+    private PostingStage stage;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -43,7 +45,7 @@ public class Registration extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Registration(User user, Posting posting, String stage, RegistrationResult result,
+    private Registration(User user, Posting posting, PostingStage stage, RegistrationResult result,
                          ContactMethod contactMethod, LocalDate contactedAt, boolean anonymous) {
         this.user = user;
         this.posting = posting;
@@ -62,7 +64,7 @@ public class Registration extends BaseEntity {
         return this.result == other;
     }
 
-    public static Registration create(User user, Posting posting, String stage,
+    public static Registration create(User user, Posting posting, PostingStage stage,
                                       RegistrationResult result, ContactMethod contactMethod,
                                       LocalDate contactedAt, boolean anonymous) {
         return new Registration(user, posting, stage, result, contactMethod, contactedAt, anonymous);
