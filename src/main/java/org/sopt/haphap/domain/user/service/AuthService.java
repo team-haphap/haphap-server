@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.user.service;
 
+import org.sopt.haphap.domain.user.dto.AgreementSubmitRequest;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
@@ -20,13 +21,15 @@ import java.util.stream.Collectors;
 public class AuthService {
 
     private final UserService userService;
+    private final AgreementService agreementService;
     private final JwtProvider jwtProvider;
     private final TokenService tokenService;
     private final Map<Provider, OAuthClient> oAuthClients;
 
-    public AuthService(UserService userService, JwtProvider jwtProvider,
+    public AuthService(UserService userService, AgreementService agreementService, JwtProvider jwtProvider,
                        TokenService tokenService, List<OAuthClient> oAuthClientList) {
         this.userService = userService;
+        this.agreementService = agreementService;
         this.jwtProvider = jwtProvider;
         this.tokenService = tokenService;
         this.oAuthClients = oAuthClientList.stream()
@@ -42,14 +45,44 @@ public class AuthService {
                 userInfo.email(), userInfo.birthDate()
         );
 
-        Long userId = result.user().getId();
-        String newRefreshToken = tokenService.issueRefreshToken(userId);
+        User user = result.user();
 
+        // 신규 유저이거나, row는 있지만 약관 동의를 끝내지 못한 유저는
+        // 정식 세션 대신 signupToken만 내려준다.. (뭔가 에러날 것 같아서 엄격(?)하게 해놨어요)
+
+        if (result.isNew() || !user.isSignupCompleted()) {
+            String signupToken = jwtProvider.createSignupToken(user.getId());
+            return new AuthResponse(null, null, signupToken, user.getAnonymousName(), true);
+        }
+
+        String newRefreshToken = tokenService.issueRefreshToken(user.getId());
+        return new AuthResponse(
+                jwtProvider.createAccessToken(user.getId()),
+                newRefreshToken,
+                null,
+                user.getAnonymousName(),
+                false
+        );
+    }
+
+    @Transactional
+    public AuthResponse completeSignup(String signupToken, AgreementSubmitRequest request) {
+        if (!jwtProvider.validateSignupToken(signupToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_SIGNUP_TOKEN);
+        }
+        Long userId = jwtProvider.getUserId(signupToken);
+        User user = userService.findById(userId);
+
+        agreementService.saveAgreements(user, request);
+        user.completeSignup();
+
+        String newRefreshToken = tokenService.issueRefreshToken(userId);
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
                 newRefreshToken,
-                result.user().getAnonymousName(),
-                result.isNew()
+                null,
+                user.getAnonymousName(),
+                false
         );
     }
 
@@ -67,6 +100,7 @@ public class AuthService {
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
                 newRefreshToken,
+                null,
                 user.getAnonymousName(),
                 false
         );

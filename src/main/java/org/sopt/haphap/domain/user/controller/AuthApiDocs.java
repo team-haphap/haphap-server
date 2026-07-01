@@ -9,6 +9,7 @@ import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.sopt.haphap.domain.user.dto.AgreementSubmitRequest;
 
 @Tag(name = "인증", description = "카카오 소셜 로그인 및 토큰 관리를 위한 API")
 public interface AuthApiDocs {
@@ -30,6 +31,14 @@ public interface AuthApiDocs {
                     """)
     ResponseEntity<SuccessResponse<AuthResponse>> reissue(@RequestHeader("Authorization") String authorization);
 
+    @Operation(summary = "약관 동의 및 가입 완료",
+            description = """
+                    신규 유저가 약관 동의를 제출하여 가입을 완료합니다.
+                    - Authorization 헤더에 Bearer {signupToken}을 넣어주세요 (카카오 로그인 응답의 signupToken 값).
+                    - 필수 약관(개인정보 수집·이용, 위치정보 이용약관, 만 14세 이상 확인) 중 하나라도 미동의면 400 에러가 반환됩니다.
+                    - 성공 시 정식 accessToken/refreshToken이 발급됩니다.
+                    """)
+    ResponseEntity<SuccessResponse<AuthResponse>> submitAgreements(@RequestHeader("Authorization") String authorization, @Valid @RequestBody AgreementSubmitRequest request);
     @Operation(summary = "로그아웃",
             description = """
                     액세스 토큰을 블랙리스트 처리하여 로그아웃합니다.

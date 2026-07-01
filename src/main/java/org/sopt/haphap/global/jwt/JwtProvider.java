@@ -20,6 +20,7 @@ public class JwtProvider {
 
     private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 60;           // 1시간
     private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 14; // 2주
+    private static final long SIGNUP_TOKEN_EXPIRY = 1000 * 60 * 30; // 30분
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -95,6 +96,25 @@ public class JwtProvider {
             return Long.parseLong(parseClaims(token).getSubject());
         } catch (ExpiredJwtException e) {
             return Long.parseLong(e.getClaims().getSubject());
+        }
+    }
+
+    public String createSignupToken(Long userId) {
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("type", "signup")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + SIGNUP_TOKEN_EXPIRY))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public boolean validateSignupToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            return "signup".equals(claims.get("type", String.class));
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
         }
     }
 }
