@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     Optional<Registration> findByUserIdAndPostingIdAndStageId(Long userId, Long postingId, Long stageId);
 
-    //2-3(공고, 전형)별 등록 수를 한 번에
+    //(공고, 전형)별 등록 수를 한 번에
     @Query("""
         SELECT r.posting.id AS postingId, r.stage.id AS stageId, COUNT(r) AS cnt
         FROM Registration r
@@ -25,7 +25,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<StageRegistrationCountProjection> countByPostingAndStage(
             @Param("postingIds") List<Long> postingIds);
 
-    // 2-3 (수정 후): 48시간 내 PASS/FAIL 결과가 있는 공고 id 추리기.
+    //48시간 내 PASS/FAIL 결과가 있는 공고 id 추리기.
     @Query("""
         SELECT DISTINCT r.posting.id
         FROM Registration r
@@ -37,21 +37,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("results") List<RegistrationResult> results,
             @Param("since") LocalDateTime since,
             @Param("categoryNames") List<String> categoryNames);
-
-
-    //48h 내에 PASS/FAIL 등록이 있는 (공고, 전형) 쌍 ->이걸로 "현재 진행 전형에 최근 활동이 있나"를 판정
-    @Query("""
-        SELECT DISTINCT r.posting.id AS postingId, r.stage.id AS stageId
-        FROM Registration r
-        WHERE r.result IN :results
-          AND r.updatedAt >= :since
-          AND r.posting.id IN :postingIds
-        """)
-    List<PostingStagePairProjection> findRecentlyActiveStages(
-            @Param("results") List<RegistrationResult> results,
-            @Param("since") LocalDateTime since,
-            @Param("postingIds") List<Long> postingIds);
-
 
     //인기 정렬
     @Query("""
