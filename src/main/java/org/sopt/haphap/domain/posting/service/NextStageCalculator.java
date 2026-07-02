@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NextStageCalculator {
 
-    private static final int PROGRESS_THRESHOLD = 5;
+    private static final int PROGRESS_THRESHOLD = 15;
 
     /**
      * stages: 한 공고의 전형들 (orderIndex 오름차순 정렬된 상태로 전달)
