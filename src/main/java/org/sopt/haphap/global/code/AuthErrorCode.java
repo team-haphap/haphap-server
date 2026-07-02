@@ -14,8 +14,6 @@ public enum AuthErrorCode implements ErrorResultCode {
     KAKAO_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 카카오 액세스 토큰입니다."),
     KAKAO_ACCOUNT_NOT_FOUND(HttpStatus.BAD_REQUEST, "카카오 계정 정보를 가져올 수 없습니다."),
     KAKAO_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "카카오 서버 응답이 원활하지 않습니다. 잠시 후 다시 시도해주세요."),
-    INVALID_SIGNUP_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 가입 토큰입니다."),
-    REQUIRED_AGREEMENT_NOT_AGREED(HttpStatus.BAD_REQUEST, "필수 약관에 모두 동의해야 합니다."),
     ;
 
     private final HttpStatus status;

@@ -53,7 +53,7 @@ public class KakaoOAuthClient implements OAuthClient {
 
         return new OAuthUserInfo(
                 String.valueOf(response.id()),
-                account.name(),
+                account.profile().nickname(),
                 account.email(),
                 parseBirthDate(
                         account.birthyear() != null ? account.birthyear() : "",

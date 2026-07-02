@@ -36,13 +36,5 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String providerId;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean signupCompleted = false;
-
-    public void completeSignup() {
-        this.signupCompleted = true;
-    }
 }
 
