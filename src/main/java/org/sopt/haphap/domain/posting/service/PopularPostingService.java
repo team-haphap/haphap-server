@@ -3,10 +3,7 @@ package org.sopt.haphap.domain.posting.service;
 import java.text.Collator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +14,7 @@ import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+import org.sopt.haphap.domain.registration.dto.PostingStagePairProjection;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,7 @@ public class PopularPostingService {
     private static final int RECENT_HOURS = 48;
     private static final List<RegistrationResult> COUNTED_RESULTS =
             List.of(RegistrationResult.PASS, RegistrationResult.FAIL);
+    private static final int MAX_POPULAR = 8;
 
     private final PostingRepository postingRepository;
     private final PostingStageRepository postingStageRepository;
@@ -43,21 +42,21 @@ public class PopularPostingService {
         LocalDateTime since = LocalDateTime.now().minusHours(RECENT_HOURS);
 
         // 1) 48h 내 PASS/FAIL 결과 있는 공고 id목록
-        List<Long> postingIds = registrationRepository
+        List<Long> candidateIds = registrationRepository
                 .findRecentlyActivePostingIds(COUNTED_RESULTS, since, filter);
-        if (postingIds.isEmpty()) {
+        if (candidateIds.isEmpty()) {
             return PopularPostingListResponse.from(List.of());
         }
 
         // 2) 배치 조회
         // 공고+회사+카테고리
         Map<Long, Posting> postingMap = postingRepository
-                .findAllWithCompanyAndCategoryByIds(postingIds).stream()
+                .findAllWithCompanyAndCategoryByIds(candidateIds).stream()
                 .collect(Collectors.toMap(Posting::getId, Function.identity()));
 
         // 공고별 전형 목록 (orderIndex 순 — 쿼리에서 정렬해둠)
         Map<Long, List<PostingStageFlatProjection>> stagesByPosting = postingStageRepository
-                .findFlatByPostingIds(postingIds).stream()
+                .findFlatByPostingIds(candidateIds).stream()
                 .collect(Collectors.groupingBy(PostingStageFlatProjection::getPostingId));
         stagesByPosting.values()
                 .forEach(list -> list.sort(Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex)));
@@ -65,13 +64,60 @@ public class PopularPostingService {
 
         // (공고, 전형)별 등록수 → 공고별 { stageId -> count }
         Map<Long, Map<Long, Long>> countsByPosting = registrationRepository
-                .countByPostingAndStage(postingIds).stream()
+                .countByPostingAndStage(candidateIds).stream()
                 .collect(Collectors.groupingBy(
                         StageRegistrationCountProjection::getPostingId,
                         Collectors.toMap(
                                 StageRegistrationCountProjection::getStageId,
                                 StageRegistrationCountProjection::getCnt)));
+        // 2-1) 48h 내 (공고,전형)별 등록수 → 정렬 기준 겸 필터 판정에 사용
+        Map<Long, Map<Long, Long>> recentCountsByPosting = registrationRepository
+                .countRecentActiveByPostingAndStage(COUNTED_RESULTS, since, candidateIds).stream()
+                .collect(Collectors.groupingBy(
+                        StageRegistrationCountProjection::getPostingId,
+                        Collectors.toMap(
+                                StageRegistrationCountProjection::getStageId,
+                                StageRegistrationCountProjection::getCnt)));
+        // 3) 현재 진행 전형에 48h 활동 있는 것만 남기고, 정렬키(현재진행전형의 48h 등록수) 계산
+        List<PopularScored> scored = candidateIds.stream()
+                .map(id -> {
+                    List<PostingStageFlatProjection> stages = stagesByPosting.getOrDefault(id, List.of());
+                    Map<Long, Long> counts = countsByPosting.getOrDefault(id, Map.of());
 
+                    PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
+                    if (current == null) return null;
+
+                    // 현재 진행 전형의 48h 등록수
+                    Map<Long, Long> recent = recentCountsByPosting.getOrDefault(id, Map.of());
+                    long recentCount = recent.getOrDefault(current.getStageId(), 0L);
+
+                    // 현재 진행 전형에 48h 활동 없으면 제외
+                    if (recentCount <= 0) return null;
+
+                    ScoredPosting base = buildScored(postingMap.get(id), stages, counts);
+                    return new PopularScored(base.response(), recentCount);
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        // 4) 등록수 많은 순 정렬 + 상위 8개
+        List<PopularPostingResponse> result = scored.stream()
+                .sorted(Comparator.comparingLong(PopularScored::recentCount).reversed())
+                .limit(MAX_POPULAR)   // = 8
+                .map(PopularScored::response)
+                .toList();
+
+        /*
+        // 2-1) 48h 내 활동이 있는 (공고,전형) 쌍 → 공고별 활동 전형 id 집합
+        Map<Long, Set<Long>> recentActiveStagesByPosting = registrationRepository
+                .findRecentlyActiveStages(COUNTED_RESULTS, since, candidateIds).stream()
+                .collect(Collectors.groupingBy(
+                        PostingStagePairProjection::getPostingId,
+                        Collectors.mapping(PostingStagePairProjection::getStageId, Collectors.toSet())));
+
+         */
+
+
+        /*
         // 3) 각 공고 → 응답 + 정렬키(nextStage 발표일) 계산
         List<ScoredPosting> scored = postingIds.stream()
                 .map(id -> buildScored(
@@ -87,6 +133,41 @@ public class PopularPostingService {
                 .map(ScoredPosting::response)
                 .toList();
 
+        return PopularPostingListResponse.from(result);
+
+         */
+        /*
+        // 3) 현재 진행 전형에 48h 활동이 있는 공고만 남기고 응답 조립
+        List<ScoredPosting> scored = candidateIds.stream()
+                .map(id -> {
+                    List<PostingStageFlatProjection> stages = stagesByPosting.getOrDefault(id, List.of());
+                    Map<Long, Long> counts = countsByPosting.getOrDefault(id, Map.of());
+
+                    // 현재 진행 전형
+                    PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
+                    if (current == null) return null;
+
+                    // 현재 진행 전형에 48h 활동이 있나?
+                    Set<Long> activeStages = recentActiveStagesByPosting.getOrDefault(id, Set.of());
+                    if (!activeStages.contains(current.getStageId())) {
+                        return null;  // 지난 전형에만 활동 → 제외
+                    }
+
+                    return buildScored(postingMap.get(id), stages, counts);
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        // 4) 정렬
+        Collator korean = Collator.getInstance(Locale.KOREAN);
+        List<PopularPostingResponse> result = scored.stream()
+                .sorted(sortComparator(korean))
+                .map(ScoredPosting::response)
+                .toList();
+
+        return PopularPostingListResponse.from(result);
+
+         */
         return PopularPostingListResponse.from(result);
     }
 
@@ -127,5 +208,6 @@ public class PopularPostingService {
 
     private record ScoredPosting(PopularPostingResponse response, String title, LocalDate announceDate) {
     }
+    private record PopularScored(PopularPostingResponse response, long recentCount) {}
 }
 
