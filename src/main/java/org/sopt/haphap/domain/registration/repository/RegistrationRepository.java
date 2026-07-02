@@ -1,11 +1,13 @@
 package org.sopt.haphap.domain.registration.repository;
 
 import org.sopt.haphap.domain.registration.domain.Registration;
+import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +23,17 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     List<StageRegistrationCountProjection> countByPostingAndStage(
             @Param("postingIds") List<Long> postingIds);
+
+    // 2-3 (수정 후): 48시간 내 PASS/FAIL 결과가 있는 공고 id 추리기.
+    @Query("""
+        SELECT DISTINCT r.posting.id
+        FROM Registration r
+        WHERE r.result IN :results
+          AND r.updatedAt >= :since
+          AND (:categoryNames IS NULL OR r.posting.category.name IN :categoryNames)
+        """)
+    List<Long> findRecentlyActivePostingIds(
+            @Param("results") List<RegistrationResult> results,
+            @Param("since") LocalDateTime since,
+            @Param("categoryNames") List<String> categoryNames);
 }
