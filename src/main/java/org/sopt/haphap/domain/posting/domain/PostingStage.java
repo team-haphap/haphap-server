@@ -40,11 +40,6 @@ public class PostingStage {
         return new PostingStage(name, orderIndex, null, posting);
     }
 
-    public static PostingStage create(String name, int orderIndex,
-                                      LocalDate expectedAnnouncementDate, Posting posting) {
-        return new PostingStage(name, orderIndex, expectedAnnouncementDate, posting);
-    }
-
     public boolean belongsTo(Posting posting) {
         return this.posting.getId().equals(posting.getId());
     }
