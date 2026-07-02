@@ -6,7 +6,6 @@ import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.dto.KakaoLoginRequest;
 import org.sopt.haphap.global.code.AuthSuccessCode;
 import org.sopt.haphap.global.dto.SuccessResponse;
-
 import org.sopt.haphap.domain.user.service.AuthService;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;

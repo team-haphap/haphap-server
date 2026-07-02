@@ -34,22 +34,18 @@ public class AuthService {
     }
 
     public AuthResponse kakaoLogin(String kakaoAccessToken) {
-
         OAuthUserInfo userInfo = oAuthClients.get(Provider.KAKAO).getUserInfo(kakaoAccessToken);
-
         UserService.FindOrCreateResult result = userService.findOrCreate(
                 Provider.KAKAO, userInfo.providerId(), userInfo.name(),
                 userInfo.email(), userInfo.birthDate()
         );
-
-        Long userId = result.user().getId();
-        String newRefreshToken = tokenService.issueRefreshToken(userId);
-
+        User user = result.user();
+        String newRefreshToken = tokenService.issueRefreshToken(user.getId());
         return new AuthResponse(
-                jwtProvider.createAccessToken(userId),
+                jwtProvider.createAccessToken(user.getId()),
                 newRefreshToken,
-                result.user().getAnonymousName(),
-                result.isNew()
+                user.getName(),
+                user.getAnonymousName()
         );
     }
 
@@ -67,17 +63,20 @@ public class AuthService {
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
                 newRefreshToken,
-                user.getAnonymousName(),
-                false
+                user.getName(),
+                user.getAnonymousName()
         );
     }
 
     public void logout(String accessToken) {
-        if (!jwtProvider.validateAccessToken(accessToken)) {
+        boolean expired = jwtProvider.isExpiredAccessToken(accessToken);
+        if (!expired && !jwtProvider.validateAccessToken(accessToken)) {
             throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
-        Long userId = jwtProvider.getUserId(accessToken);
-        tokenService.blacklistAccessToken(accessToken);
+        Long userId = jwtProvider.getUserIdIgnoringExpiration(accessToken);
+        if (!expired) {
+            tokenService.blacklistAccessToken(accessToken);
+        }
         tokenService.deleteRefreshToken(userId);
     }
 }

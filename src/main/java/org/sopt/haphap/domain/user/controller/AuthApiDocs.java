@@ -17,8 +17,6 @@ public interface AuthApiDocs {
             description = """
                     카카오 액세스 토큰으로 로그인합니다.
                     - 카카오에서 발급받은 액세스 토큰을 requestBody에 넣어주세요.
-                    - 신규 사용자의 경우 isNewUser: true가 반환됩니다.
-                    - 기존 사용자의 경우 isNewUser: false가 반환됩니다.
                     """)
     ResponseEntity<SuccessResponse<AuthResponse>> kakaoLogin(@Valid @RequestBody KakaoLoginRequest request);
 

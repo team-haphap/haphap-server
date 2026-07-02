@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
+
 public class User extends BaseEntity {
 
     @Id
@@ -33,7 +34,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Provider provider;
 
-    //providerId의 단독 unique 제거
     @Column(nullable = false)
     private String providerId;
 }
+

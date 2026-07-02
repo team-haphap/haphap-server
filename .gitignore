@@ -49,3 +49,5 @@ src/main/resources/application-local.yml
 # .gitignore
 firebase-service-account.json
 *-firebase-adminsdk-*.json
+
+.env

@@ -9,6 +9,10 @@ public record KakaoUserResponse(
             String name,
             String email,
             String birthyear,
-            String birthday
+            String birthday,
+            Profile profile
+    ) {}
+    public record Profile(
+            String nickname
     ) {}
 }

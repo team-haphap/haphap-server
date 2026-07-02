@@ -33,12 +33,14 @@ public class KakaoOAuthClient implements OAuthClient {
                 .retrieve()
                 .onStatus(status -> status.value() == 401,
                         r -> Mono.error(new CustomException(AuthErrorCode.KAKAO_INVALID_TOKEN)))
-                .onStatus(HttpStatusCode::isError,
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        r -> Mono.error(new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE)))
+                .onStatus(status -> status.is4xxClientError() && status.value() != 401,
                         r -> Mono.error(new CustomException(AuthErrorCode.KAKAO_INVALID_TOKEN)))
                 .bodyToMono(KakaoUserResponse.class)
                 .switchIfEmpty(Mono.error(new CustomException(AuthErrorCode.KAKAO_ACCOUNT_NOT_FOUND)))
                 .onErrorMap(ex -> !(ex instanceof CustomException),
-                        ex -> new CustomException(AuthErrorCode.KAKAO_INVALID_TOKEN))
+                        ex -> new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE))
                 .block();
 
         if (response == null) {
@@ -51,7 +53,7 @@ public class KakaoOAuthClient implements OAuthClient {
 
         return new OAuthUserInfo(
                 String.valueOf(response.id()),
-                account.name(),
+                account.profile().nickname(),
                 account.email(),
                 parseBirthDate(
                         account.birthyear() != null ? account.birthyear() : "",
