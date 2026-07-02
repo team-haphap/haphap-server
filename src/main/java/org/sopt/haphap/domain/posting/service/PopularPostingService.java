@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
@@ -65,6 +64,7 @@ public class PopularPostingService {
 
         return PopularPostingListResponse.from(result);
     }
+
     private PopularScored toPopularScored(Long id, PostingAggregate agg,
                                           Map<Long, Map<Long, Long>> recentCounts) {
         List<PostingStageFlatProjection> stages = agg.stages(id);
@@ -81,33 +81,6 @@ public class PopularPostingService {
         return new PopularScored(response, recentCount);
     }
 
-    private ScoredPosting buildScored(Posting posting,
-                                      List<PostingStageFlatProjection> stages,
-                                      Map<Long, Long> countByStageId) {
-        PostingStageFlatProjection nextStage = nextStageCalculator.calculate(stages, countByStageId);
-        Integer days = nextStageCalculator.daysUntil(nextStage);
-        LocalDate announceDate = (nextStage == null) ? null : nextStage.getExpectedAnnouncementDate();
-
-        PopularPostingResponse response = new PopularPostingResponse(
-                posting.getId(),
-                posting.getTitle(),
-                posting.getCompany().getName(),
-                posting.getCategory().getName(),
-                posting.getCompany().getDescription(),
-                nextStage == null ? null : nextStage.getName(),
-                days,
-                posting.getCompany().getImageUrl());
-
-        return new ScoredPosting(response, posting.getTitle(), announceDate);
-    }
-
-    private int sortRank(LocalDate date, LocalDate today) {
-        if (date == null) return 2;
-        return date.isBefore(today) ? 1 : 0;
-    }
-
-    private record ScoredPosting(PopularPostingResponse response, String title, LocalDate announceDate) {
-    }
     private record PopularScored(PopularPostingResponse response, long recentCount) {}
 }
 

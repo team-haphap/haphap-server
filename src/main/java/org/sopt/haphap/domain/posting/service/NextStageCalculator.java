@@ -25,7 +25,7 @@ public class NextStageCalculator {
         return idx;
     }
 
-    // 현재 진행 전형: 15 이상 중 마지막. 없으면 첫 전형(서류 받는 중).
+    // 현재 진행 전형: 15 이상 중 마지막. 없으면 첫 전형
     public PostingStageFlatProjection currentStage(List<PostingStageFlatProjection> stages,
                                                    Map<Long, Long> countByStageId) {
         if (stages.isEmpty()) return null;
