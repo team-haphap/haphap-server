@@ -3,15 +3,12 @@ package org.sopt.haphap.domain.posting.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
-import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
@@ -28,9 +25,9 @@ public class PopularPostingService {
             List.of(RegistrationResult.PASS, RegistrationResult.FAIL);
     private static final int MAX_POPULAR = 8;
 
-    private final PostingRepository postingRepository;
-    private final PostingStageRepository postingStageRepository;
     private final RegistrationRepository registrationRepository;
+    private final PostingAggregateLoader aggregateLoader;
+    private final PostingResponseAssembler assembler;
     private final NextStageCalculator nextStageCalculator;
 
     public PopularPostingListResponse getPopularPostings(List<String> categoryNames) {
@@ -45,66 +42,43 @@ public class PopularPostingService {
         if (candidateIds.isEmpty()) {
             return PopularPostingListResponse.from(List.of());
         }
+        // 2) 공통 배치 로딩 (공고·전형·누적등록수)
+        PostingAggregate agg = aggregateLoader.load(candidateIds);
 
-        // 2) 배치 조회
-        // 공고+회사+카테고리
-        Map<Long, Posting> postingMap = postingRepository
-                .findAllWithCompanyAndCategoryByIds(candidateIds).stream()
-                .collect(Collectors.toMap(Posting::getId, Function.identity()));
-
-        // 공고별 전형 목록 (orderIndex 순 — 쿼리에서 정렬해둠)
-        Map<Long, List<PostingStageFlatProjection>> stagesByPosting = postingStageRepository
-                .findFlatByPostingIds(candidateIds).stream()
-                .collect(Collectors.groupingBy(PostingStageFlatProjection::getPostingId));
-        stagesByPosting.values()
-                .forEach(list -> list.sort(Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex)));
-
-
-        // (공고, 전형)별 등록수 → 공고별 { stageId -> count }
-        Map<Long, Map<Long, Long>> countsByPosting = registrationRepository
-                .countByPostingAndStage(candidateIds).stream()
-                .collect(Collectors.groupingBy(
-                        StageRegistrationCountProjection::getPostingId,
-                        Collectors.toMap(
-                                StageRegistrationCountProjection::getStageId,
-                                StageRegistrationCountProjection::getCnt)));
-        // 2-1) 48h 내 (공고,전형)별 등록수 → 정렬 기준 겸 필터 판정에 사용
-        Map<Long, Map<Long, Long>> recentCountsByPosting = registrationRepository
+        // 3) 48h (공고,전형)별 등록수 — 필터 겸 정렬 기준
+        Map<Long, Map<Long, Long>> recentCounts = registrationRepository
                 .countRecentActiveByPostingAndStage(COUNTED_RESULTS, since, candidateIds).stream()
                 .collect(Collectors.groupingBy(
                         StageRegistrationCountProjection::getPostingId,
                         Collectors.toMap(
                                 StageRegistrationCountProjection::getStageId,
                                 StageRegistrationCountProjection::getCnt)));
-        // 3) 현재 진행 전형에 48h 활동 있는 것만 남기고, 정렬키(현재진행전형의 48h 등록수) 계산
-        List<PopularScored> scored = candidateIds.stream()
-                .map(id -> {
-                    List<PostingStageFlatProjection> stages = stagesByPosting.getOrDefault(id, List.of());
-                    Map<Long, Long> counts = countsByPosting.getOrDefault(id, Map.of());
 
-                    PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
-                    if (current == null) return null;
-
-                    // 현재 진행 전형의 48h 등록수
-                    Map<Long, Long> recent = recentCountsByPosting.getOrDefault(id, Map.of());
-                    long recentCount = recent.getOrDefault(current.getStageId(), 0L);
-
-                    // 현재 진행 전형에 48h 활동 없으면 제외
-                    if (recentCount <= 0) return null;
-
-                    ScoredPosting base = buildScored(postingMap.get(id), stages, counts);
-                    return new PopularScored(base.response(), recentCount);
-                })
+        // 4) 현재 진행 전형에 48h 활동 있는 것만 → 그 등록수로 내림차순 → 8개
+        List<PopularPostingResponse> result = candidateIds.stream()
+                .map(id -> toPopularScored(id, agg, recentCounts))
                 .filter(Objects::nonNull)
-                .toList();
-        // 4) 등록수 많은 순 정렬 + 상위 8개
-        List<PopularPostingResponse> result = scored.stream()
                 .sorted(Comparator.comparingLong(PopularScored::recentCount).reversed())
-                .limit(MAX_POPULAR)   // = 8
+                .limit(MAX_POPULAR)
                 .map(PopularScored::response)
                 .toList();
 
         return PopularPostingListResponse.from(result);
+    }
+    private PopularScored toPopularScored(Long id, PostingAggregate agg,
+                                          Map<Long, Map<Long, Long>> recentCounts) {
+        List<PostingStageFlatProjection> stages = agg.stages(id);
+        Map<Long, Long> counts = agg.counts(id);
+
+        PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
+        if (current == null) return null;
+
+        long recentCount = recentCounts.getOrDefault(id, Map.of())
+                .getOrDefault(current.getStageId(), 0L);
+        if (recentCount <= 0) return null;   // 현재 진행 전형에 48h 활동 없음 → 제외
+
+        PopularPostingResponse response = assembler.assemble(agg.posting(id), stages, counts).response();
+        return new PopularScored(response, recentCount);
     }
 
     private ScoredPosting buildScored(Posting posting,

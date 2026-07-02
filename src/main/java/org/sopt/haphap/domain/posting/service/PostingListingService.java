@@ -23,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostingListingService {
 
     private final PostingRepository postingRepository;
-    private final PostingStageRepository postingStageRepository;
-    private final RegistrationRepository registrationRepository;
     private final NextStageCalculator nextStageCalculator;
+    private final PostingAggregateLoader aggregateLoader;
+    private final PostingResponseAssembler assembler;
+
 
 
     public PopularPostingListResponse getAllPostings(List<String> categoryNames) {
@@ -37,30 +38,12 @@ public class PostingListingService {
             return PopularPostingListResponse.from(List.of());
         }
         List<Long> postingIds = postings.stream().map(Posting::getId).toList();
+        PostingAggregate agg = aggregateLoader.load(postingIds);
 
-        // 2) 전형 목록 + 전형별 누적 등록수 (nextStage 계산 재료)
-        Map<Long, List<PostingStageFlatProjection>> stagesByPosting = postingStageRepository
-                .findFlatByPostingIds(postingIds).stream()
-                .collect(Collectors.groupingBy(PostingStageFlatProjection::getPostingId));
-        stagesByPosting.values()
-                .forEach(list -> list.sort(Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex)));
-
-        Map<Long, Map<Long, Long>> countsByPosting = registrationRepository
-                .countByPostingAndStage(postingIds).stream()
-                .collect(Collectors.groupingBy(
-                        StageRegistrationCountProjection::getPostingId,
-                        Collectors.toMap(
-                                StageRegistrationCountProjection::getStageId,
-                                StageRegistrationCountProjection::getCnt)));
-
-        // 3) 각 공고 응답 + 발표일 계산 → 발표일 가까운 순 정렬
-        Collator korean = Collator.getInstance(Locale.KOREAN);
-        List<PopularPostingResponse> result = postings.stream()
-                .map(p -> toScored(p,
-                        stagesByPosting.getOrDefault(p.getId(), List.of()),
-                        countsByPosting.getOrDefault(p.getId(), Map.of())))
-                .sorted(announceDateComparator(korean))
-                .map(Scored::response)
+        List<PopularPostingResponse> result = postingIds.stream()
+                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id)))
+                .sorted(PostingSortComparators.byAnnounceDate())
+                .map(PostingResponseAssembler.Scored::response)
                 .toList();
 
         return PopularPostingListResponse.from(result);
