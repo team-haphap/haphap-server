@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
+import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +18,7 @@ public class NextStageCalculator {
      * countByStageId: 전형 id -> 등록 수
      * 반환: nextStage (없으면 null)
      */
-    public PostingStage calculate(List<PostingStage> stages, Map<Long, Long> countByStageId) {
+    public PostingStageFlatProjection calculate(List<PostingStageFlatProjection> stages, Map<Long, Long> countByStageId) {
         if (stages.isEmpty()) {
             return null;
         }
@@ -25,16 +26,14 @@ public class NextStageCalculator {
         // 5개 이상 쌓인 전형 중 orderIndex가 가장 큰 것의 "인덱스"를 찾는다.
         int lastProgressedIdx = -1;
         for (int i = 0; i < stages.size(); i++) {
-            long cnt = countByStageId.getOrDefault(stages.get(i).getId(), 0L);
+            long cnt = countByStageId.getOrDefault(stages.get(i).getStageId(), 0L);
             if (cnt >= PROGRESS_THRESHOLD) {
                 lastProgressedIdx = i;
             }
         }
 
         // 아무 전형도 5개 못 채움 → 첫 전형이 nextStage
-        if (lastProgressedIdx == -1) {
-            return stages.get(0);
-        }
+        if (lastProgressedIdx == -1) return stages.get(0);
 
         // 진행된 마지막 전형의 다음
         int nextIdx = lastProgressedIdx + 1;
@@ -46,7 +45,7 @@ public class NextStageCalculator {
         return stages.get(nextIdx);
     }
 
-    public Integer daysUntil(PostingStage nextStage) {
+    public Integer daysUntil(PostingStageFlatProjection nextStage) {
         if (nextStage == null || nextStage.getExpectedAnnouncementDate() == null) {
             return null;
         }
