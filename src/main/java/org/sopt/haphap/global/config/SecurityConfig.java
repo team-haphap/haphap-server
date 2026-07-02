@@ -32,14 +32,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/health",
-                                "/api/v1/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/api/v1/registrations",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/api/v1/auth/**",
+                                "/api/v1/registrations/**",
+                                "/api/v1/registrations",
+                                "/api/v1/postings/name",
+                                "/api/v1/postings/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
