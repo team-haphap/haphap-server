@@ -49,8 +49,4 @@ public class PostingStage {
         this.orderIndex = orderIndex;
         this.posting = posting;
     }
-
-    public static PostingStage create(String name, int orderIndex, Posting posting) {
-        return new PostingStage(name, orderIndex, posting);
-    }
 }
