@@ -20,9 +20,19 @@ public interface PostingApiDocs {
     @Operation(summary = "공고 별 전형 조회",description = "해당 공고의 전형을 반환합니다.")
     ResponseEntity<SuccessResponse<PostingStageListResponse>> getStages(@PathVariable Long postingId);
 
-    @Operation(summary = "홈 메인-최근 등록 공고 조회", description = "홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)")
+    @Operation(summary = "홈 메인-최근 등록 공고 조회",
+            description = """
+                홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                """
+            )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) List<String> category);
 
-    @Operation(summary = "공고 리스트 조회",description = "공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.")
+    @Operation(summary = "공고 리스트 조회",
+            description = """
+                공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                """
+            )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) List<String> category);
 }
