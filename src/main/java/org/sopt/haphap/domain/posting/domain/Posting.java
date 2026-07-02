@@ -9,7 +9,7 @@ import org.sopt.haphap.global.common.BaseEntity;
 
 @Getter
 @Entity
-@Table(name = "posting")
+@Table(name = "posting", indexes = @Index(name = "idx_posting_title", columnList = "title"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Posting extends BaseEntity {
 
@@ -17,7 +17,8 @@ public class Posting extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, length = 200,
+            columnDefinition = "varchar(200) COLLATE \"ko-KR-x-icu\"")
     private String title;
 
     private LocalDate deadline;
