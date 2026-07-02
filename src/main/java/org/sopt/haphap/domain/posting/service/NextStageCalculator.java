@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import org.sopt.haphap.domain.posting.domain.PostingStage;
+
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class NextStageCalculator {
 
     private static final int PROGRESS_THRESHOLD = 15;
@@ -27,10 +29,15 @@ public class NextStageCalculator {
         int lastProgressedIdx = -1;
         for (int i = 0; i < stages.size(); i++) {
             long cnt = countByStageId.getOrDefault(stages.get(i).getStageId(), 0L);
+            log.info("stageId={}, name={}, cnt={}",
+                    stages.get(i).getStageId(), stages.get(i).getName(), cnt);
             if (cnt >= PROGRESS_THRESHOLD) {
                 lastProgressedIdx = i;
             }
         }
+        log.info(">>> lastProgressedIdx={}, nextStage={}",
+                lastProgressedIdx,
+                (lastProgressedIdx + 1 < stages.size()) ? stages.get(lastProgressedIdx + 1).getName() : "null");
 
         // 아무 전형도 5개 못 채움 → 첫 전형이 nextStage
         if (lastProgressedIdx == -1) return stages.get(0);
