@@ -18,6 +18,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
@@ -30,23 +32,60 @@ public class RegistrationService {
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
         Posting posting = postingRepository.findById(request.postingId())
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
 
+        Optional<Registration> existing = registrationRepository
+                .findByUserIdAndPostingIdAndStage(userId, request.postingId(), request.stage());
+
+        if (existing.isPresent()) {
+            return handleExisting(existing.get(), request, posting, user);
+        }
+        return createNew(user, posting, request);
+
+    }
+    private RegistrationCreateResponse handleExisting(Registration existing,
+                                                      RegistrationCreateRequest request, Posting posting, User user) {
+
+        // 결과까지 완전히 동일
+        if (existing.hasSameResult(request.result())) {
+            throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+        }
+
+        // 기존이 대기 상태 → 변경 가능
+        if (existing.isPending()) {
+            if (!request.force()) {
+                // 아직 확인 안 받음 → 모달 띄우라고 신호만
+                return RegistrationCreateResponse.confirmRequired(existing.getId());
+            }
+            // force=true → 실제로 갱신
+            existing.updateRegistration(request.result(), request.contactMethod(),
+                    request.contactedAt(), request.anonymous());
+            applyAlramSetting(user, posting, request.alarmEnabled());
+            // 변경도 '새 전형 소식'이므로 구독자에게 알람
+            publishEvent(existing, posting, user);
+            return RegistrationCreateResponse.updated(existing.getId());
+        }
+
+        // 기존이 이미 확정(PASS/FAIL)인데 다른 결과가 들어온 경우
+        throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+    }
+    private RegistrationCreateResponse createNew(User user, Posting posting,
+                                                 RegistrationCreateRequest request) {
         Registration registration = Registration.create(
                 user, posting, request.stage(), request.result(),
                 request.contactMethod(), request.contactedAt(), request.anonymous());
         registrationRepository.save(registration);
-
         applyAlramSetting(user, posting, request.alarmEnabled());
-
-        // 등록이 커밋된 뒤 알람 모듈이 이 이벤트를 받아 처리.
+        publishEvent(registration, posting, user);
+        return RegistrationCreateResponse.created(registration.getId());
+    }
+    private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
                 registration.getId(), posting.getId(), registration.getStage(), user.getId()));
-
-        return RegistrationCreateResponse.from(registration.getId());
     }
 
     // (member, posting) 당 알람설정은 1개. 있으면 토글, 없으면 생성.
