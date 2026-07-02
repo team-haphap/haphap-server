@@ -9,6 +9,8 @@ import org.sopt.haphap.domain.registration.code.RegistrationSuccessCode;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.sopt.haphap.domain.user.entity.User;
+import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.global.code.SuccessResultCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
@@ -20,22 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class RegistrationCheckService {
 
     private final RegistrationRepository registrationRepository;
-    private final PostingRepository postingRepository;
-    private final PostingStageRepository postingStageRepository;
+    private final RegistrationTargetValidator registrationTargetValidator;
 
     @Transactional(readOnly = true)
     public SuccessResultCode check(Long userId, Long postingId, Long stageId) {
 
-        // 공고 존재 검증
-        Posting posting = postingRepository.findById(postingId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
-
-        // 전형 존재 + 해당 공고 소속 검증
-        PostingStage stage = postingStageRepository.findById(stageId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.STAGE_NOT_FOUND));
-        if (!stage.belongsTo(posting)) {
-            throw new CustomException(RegistrationErrorCode.STAGE_NOT_IN_POSTING);
-        }
+        registrationTargetValidator.validate(userId, postingId, stageId);
 
         return registrationRepository
                 .findByUserIdAndPostingIdAndStageId(userId, postingId, stageId)

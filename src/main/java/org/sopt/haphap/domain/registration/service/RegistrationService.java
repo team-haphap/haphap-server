@@ -26,36 +26,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RegistrationService {
 
-    private final UserRepository userRepository;
-    private final PostingRepository postingRepository;
-    private final PostingStageRepository postingStageRepository;
     private final RegistrationRepository registrationRepository;
     private final AlramSettingRepository alramSettingRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RegistrationTargetValidator registrationTargetValidator;
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
-        Posting posting = postingRepository.findById(request.postingId())
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
-        PostingStage stage = postingStageRepository.findById(request.stageId())
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.STAGE_NOT_FOUND));
+        RegistrationTargetValidator.RegistrationTarget target =
+                registrationTargetValidator.validate(userId, request.postingId(), request.stageId());
 
-        if (!stage.belongsTo(posting)) {
-            throw new CustomException(RegistrationErrorCode.STAGE_NOT_IN_POSTING);
-        }
 
         Optional<Registration> existing = registrationRepository
                 .findByUserIdAndPostingIdAndStageId(userId, request.postingId(), request.stageId());
 
         Registration registration = existing
                 .map(e -> updateExisting(e, request))       // 기존 있으면 갱신 or 막기
-                .orElseGet(() -> createNew(user, posting, stage, request));  // 없으면 신규
+                .orElseGet(() -> createNew(target.user(), target.posting(), target.stage(), request));  // 없으면 신규
 
-        applyAlramSetting(user, posting, request.alarmEnabled());
-        publishEvent(registration, posting, user);
+        applyAlramSetting(target.user(), target.posting(), request.alarmEnabled());
+        publishEvent(registration, target.posting(), target.user());
         return RegistrationCreateResponse.from(registration.getId());
 
     }
