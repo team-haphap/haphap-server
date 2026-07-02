@@ -11,6 +11,8 @@ public enum RegistrationErrorCode implements ErrorResultCode {
 
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
     POSTING_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 공고입니다."),
+    STAGE_NOT_FOUND(HttpStatus.NOT_FOUND,"존재하지 않는 전형입니다."),
+    STAGE_NOT_IN_POSTING(HttpStatus.BAD_REQUEST, "해당 공고의 전형 단계가 아닙니다."),
     DUPLICATE_REGISTRATION(HttpStatus.CONFLICT, "이미 입력한 전형입니다.");
 
     private final HttpStatus status;

@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/v1/auth/**",
+                                "/api/v1/registrations/**",
                                 "/api/v1/registrations",
                                 "/api/v1/postings/name",
                                 "/api/v1/postings/**"
