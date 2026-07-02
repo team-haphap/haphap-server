@@ -1,6 +1,5 @@
 package org.sopt.haphap.domain.posting.service;
 
-import java.text.Collator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -14,7 +13,6 @@ import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.PostingStagePairProjection;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
@@ -106,68 +104,6 @@ public class PopularPostingService {
                 .map(PopularScored::response)
                 .toList();
 
-        /*
-        // 2-1) 48h 내 활동이 있는 (공고,전형) 쌍 → 공고별 활동 전형 id 집합
-        Map<Long, Set<Long>> recentActiveStagesByPosting = registrationRepository
-                .findRecentlyActiveStages(COUNTED_RESULTS, since, candidateIds).stream()
-                .collect(Collectors.groupingBy(
-                        PostingStagePairProjection::getPostingId,
-                        Collectors.mapping(PostingStagePairProjection::getStageId, Collectors.toSet())));
-
-         */
-
-
-        /*
-        // 3) 각 공고 → 응답 + 정렬키(nextStage 발표일) 계산
-        List<ScoredPosting> scored = postingIds.stream()
-                .map(id -> buildScored(
-                        postingMap.get(id),
-                        stagesByPosting.getOrDefault(id, List.of()),
-                        countsByPosting.getOrDefault(id, Map.of())))
-                .toList();
-
-        // 4) 앱에서 최종 정렬: 발표일 가까운 순(null·과거 뒤), 같으면 공고명 가나다순
-        Collator korean = Collator.getInstance(Locale.KOREAN);
-        List<PopularPostingResponse> result = scored.stream()
-                .sorted(sortComparator(korean))
-                .map(ScoredPosting::response)
-                .toList();
-
-        return PopularPostingListResponse.from(result);
-
-         */
-        /*
-        // 3) 현재 진행 전형에 48h 활동이 있는 공고만 남기고 응답 조립
-        List<ScoredPosting> scored = candidateIds.stream()
-                .map(id -> {
-                    List<PostingStageFlatProjection> stages = stagesByPosting.getOrDefault(id, List.of());
-                    Map<Long, Long> counts = countsByPosting.getOrDefault(id, Map.of());
-
-                    // 현재 진행 전형
-                    PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
-                    if (current == null) return null;
-
-                    // 현재 진행 전형에 48h 활동이 있나?
-                    Set<Long> activeStages = recentActiveStagesByPosting.getOrDefault(id, Set.of());
-                    if (!activeStages.contains(current.getStageId())) {
-                        return null;  // 지난 전형에만 활동 → 제외
-                    }
-
-                    return buildScored(postingMap.get(id), stages, counts);
-                })
-                .filter(Objects::nonNull)
-                .toList();
-
-        // 4) 정렬
-        Collator korean = Collator.getInstance(Locale.KOREAN);
-        List<PopularPostingResponse> result = scored.stream()
-                .sorted(sortComparator(korean))
-                .map(ScoredPosting::response)
-                .toList();
-
-        return PopularPostingListResponse.from(result);
-
-         */
         return PopularPostingListResponse.from(result);
     }
 
@@ -189,16 +125,6 @@ public class PopularPostingService {
                 posting.getCompany().getImageUrl());
 
         return new ScoredPosting(response, posting.getTitle(), announceDate);
-    }
-
-    // 발표일: 미래 가까운 순 → 과거 → null 순으로 뒤로. 동일 발표일이면 공고명 가나다.
-    private Comparator<ScoredPosting> sortComparator(Collator korean) {
-        LocalDate today = LocalDate.now();
-        return Comparator
-                .comparing((ScoredPosting s) -> sortRank(s.announceDate(), today)) // 0=미래,1=과거,2=null
-                .thenComparing(ScoredPosting::announceDate,
-                        Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(ScoredPosting::title, korean);
     }
 
     private int sortRank(LocalDate date, LocalDate today) {
