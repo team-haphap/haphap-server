@@ -5,13 +5,11 @@ import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.PostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
 import org.sopt.haphap.domain.posting.service.PostingService;
+import org.sopt.haphap.domain.posting.service.PostingViewTracker;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostingController implements PostingApiDocs {
 
     private final PostingService postingService;
+    private final PostingViewTracker postingViewTracker;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -40,5 +39,11 @@ public class PostingController implements PostingApiDocs {
                 ApiResponse.success(PostingSuccessCode.POSTING_STAGE_LIST_FETCHED, response);
 
         return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @PatchMapping("/{postingId}/views")
+    public ResponseEntity<Void> recordView(@PathVariable Long postingId) {
+        postingViewTracker.recordView(postingId);
+        return ResponseEntity.noContent().build();
     }
 }
