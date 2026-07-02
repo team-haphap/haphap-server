@@ -16,4 +16,13 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
             ORDER BY s.orderIndex ASC
             """)
     List<PostingStageResponse> findStagesByPostingId(@Param("postingId") Long postingId);
+
+    //2-2 여러 공고의 전형을 한 번ㄴ에
+    @Query("""
+        SELECT s FROM PostingStage s
+        WHERE s.posting.id IN :postingIds
+        ORDER BY s.posting.id ASC, s.orderIndex ASC
+        """)
+    List<PostingStage> findAllByPostingIds(@Param("postingIds") List<Long> postingIds);
+
 }
