@@ -2,8 +2,8 @@ package org.sopt.haphap.domain.registration.repository;
 
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.PostingStagePairProjection;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,4 +51,13 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("results") List<RegistrationResult> results,
             @Param("since") LocalDateTime since,
             @Param("postingIds") List<Long> postingIds);
+
+    // 테스트용
+    @Query("""
+        SELECT r.posting.id AS postingId, r.stage.id AS stageId,
+               r.result AS result, COUNT(r) AS cnt
+        FROM Registration r
+        GROUP BY r.posting.id, r.stage.id, r.result
+        """)
+    List<StageResultAggProjection> aggregateAllForRebuild();
 }

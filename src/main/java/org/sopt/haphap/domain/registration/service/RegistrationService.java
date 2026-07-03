@@ -5,6 +5,9 @@ import org.sopt.haphap.domain.alram.domain.AlramSetting;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
+import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+import org.sopt.haphap.domain.registration.event.RegistrationResultChangedEvent;
+import org.sopt.haphap.domain.registration.event.StageResultCountedEvent;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.UserRepository;
@@ -42,7 +45,7 @@ public class RegistrationService {
                 .findByUserIdAndPostingIdAndStageId(userId, request.postingId(), request.stageId());
 
         Registration registration = existing
-                .map(e -> updateExisting(e, request))       // 기존 있으면 갱신 or 막기
+                .map(e -> updateExisting(e,target, request))       // 기존 있으면 갱신 or 막기
                 .orElseGet(() -> createNew(target.user(), target.posting(), target.stage(), request));  // 없으면 신규
 
         applyAlramSetting(target.user(), target.posting(), request.alarmEnabled());
@@ -51,11 +54,19 @@ public class RegistrationService {
 
     }
 
-    private Registration updateExisting(Registration existing, RegistrationCreateRequest request) {
+    private Registration updateExisting(Registration existing,
+                                        RegistrationTargetValidator.RegistrationTarget target,
+                                        RegistrationCreateRequest request) {
         // 대기 상태였으면 갱신 허용 (확인 API에서 CONFIRM 받고 온 케이스)
         if (existing.isPending()) {
             existing.updateRegistration(request.result(), request.contactMethod(),
                     request.contactedAt(), request.anonymous());
+            // PENDING → 확정으로 바뀐 경우만 집계 이동
+            if (request.result() != RegistrationResult.PENDING) {
+                eventPublisher.publishEvent(new RegistrationResultChangedEvent(
+                        target.posting().getId(), target.stage().getId(), request.result()));
+            }
+
             return existing;
         }
         // 이미 확정인데 또 등록 시도 → 막기
@@ -66,7 +77,12 @@ public class RegistrationService {
         Registration registration = Registration.create(
                 user, posting, stage, request.result(),
                 request.contactMethod(), request.contactedAt(), request.anonymous());
-        return registrationRepository.save(registration);
+        registrationRepository.save(registration);
+        // 집계 신규 이벤트만
+        eventPublisher.publishEvent(new StageResultCountedEvent(
+                posting.getId(), stage.getId(), request.result()));
+
+        return registration;
     }
 
 
