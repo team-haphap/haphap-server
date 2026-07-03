@@ -4,15 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.alram.domain.AlramSetting;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
-import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.event.RegistrationResultChangedEvent;
 import org.sopt.haphap.domain.registration.event.StageResultCountedEvent;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
-import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.dto.RegistrationCreateRequest;
@@ -92,7 +89,6 @@ public class RegistrationService {
     }
 
     // (member, posting) 당 알람설정은 1개. 있으면 토글, 없으면 생성.
-    // 이걸로 할지 아니면 분리??
     private void applyAlramSetting(User user, Posting posting, boolean enabled) {
         alramSettingRepository.findByUserIdAndPostingId(user.getId(), posting.getId())
                 .ifPresentOrElse(

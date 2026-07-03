@@ -12,7 +12,6 @@ import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +20,6 @@ public class PostingAggregateLoader {
 
     private final PostingRepository postingRepository;
     private final PostingStageRepository postingStageRepository;
-    private final RegistrationRepository registrationRepository;
     private final StageResultCountRepository stageResultCountRepository;
 
     /**
@@ -39,17 +37,6 @@ public class PostingAggregateLoader {
         stagesByPosting.values()
                 .forEach(list -> list.sort(
                         Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex)));
-
-        /*
-        Map<Long, Map<Long, Long>> countsByPosting = registrationRepository
-                .countByPostingAndStage(postingIds).stream()
-                .collect(Collectors.groupingBy(
-                        StageRegistrationCountProjection::getPostingId,
-                        Collectors.toMap(
-                                StageRegistrationCountProjection::getStageId,
-                                StageRegistrationCountProjection::getCnt)));
-
-         */
 
         Map<Long, Map<Long, Long>> countsByPosting = stageResultCountRepository
                 .findTotalsByPostingIds(postingIds).stream()
