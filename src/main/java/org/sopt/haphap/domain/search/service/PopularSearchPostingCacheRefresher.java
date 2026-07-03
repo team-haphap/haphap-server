@@ -80,15 +80,22 @@ public class PopularSearchPostingCacheRefresher {
     }
 
     private PopularSearchPostingResponse toResponse(Posting posting) {
+        LocalDate today = LocalDate.now();
+
         Integer dDay = (posting.getDeadline() == null)
                 ? null
                 : (int) ChronoUnit.DAYS.between(LocalDate.now(), posting.getDeadline());
+
+        String status = (posting.getDeadline() == null || !posting.getDeadline().isBefore(today))
+                ? "OPEN" : "CLOSED";
+
         return new PopularSearchPostingResponse(
                 posting.getId(),
                 posting.getCompany().getName(),
                 posting.getTitle(),
                 posting.getCategory().getName(),
-                dDay
+                dDay,
+                status
         );
     }
 }
