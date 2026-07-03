@@ -33,6 +33,7 @@ public class PopularSearchPostingCacheRefresher {
     private final PopularSearchPostingCacheRepository cacheRepository;
 
     @Scheduled(fixedRate = 10, timeUnit = TimeUnit.MINUTES)
+    //테스트용 @Scheduled(fixedRate = 10, timeUnit = TimeUnit.SECONDS)
     public void refresh() {
         // 블루그린 배포 중 두 인스턴스가 동시에 스케줄러를 돌릴 수 있어 짧은 분산락 -> 중복 실행 방지
         Boolean locked = redisTemplate.opsForValue()
