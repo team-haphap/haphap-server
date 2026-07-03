@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.Posting;
+import org.sopt.haphap.domain.posting.dto.PostingAutocompleteProjection;
 import org.sopt.haphap.domain.posting.dto.PostingSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,14 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             WHERE p.id IN :ids
             """)
     List<Posting> findAllByIdInWithCompanyAndCategory(@Param("ids") List<Long> ids);
+
+    @Query(value = """
+            SELECT p.id AS id, p.title AS title
+            FROM posting p
+            WHERE p.title ILIKE CONCAT('%', :keyword, '%')
+            ORDER BY similarity(p.title, :keyword) DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<PostingAutocompleteProjection> searchByTitleContaining(
+            @Param("keyword") String keyword, @Param("limit") int limit);
 }
