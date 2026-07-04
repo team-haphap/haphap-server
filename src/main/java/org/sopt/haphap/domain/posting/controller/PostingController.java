@@ -46,4 +46,10 @@ public class PostingController implements PostingApiDocs {
         postingViewTracker.recordView(postingId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{postingId}/card-clicks")
+    public ResponseEntity<Void> recordCardClick(@PathVariable Long postingId) {
+        postingViewTracker.recordCardClick(postingId);
+        return ResponseEntity.noContent().build();
+    }
 }
