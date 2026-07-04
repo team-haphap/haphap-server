@@ -2,10 +2,10 @@ package org.sopt.haphap.domain.posting.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
-import org.sopt.haphap.domain.posting.dto.TodayAnnouncementPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.response.TodayAnnouncementPostingListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

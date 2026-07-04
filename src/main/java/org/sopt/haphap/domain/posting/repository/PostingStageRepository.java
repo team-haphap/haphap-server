@@ -1,9 +1,9 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.PostingStage;
-import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
-import org.sopt.haphap.domain.posting.dto.PostingStageResponse;
-import org.sopt.haphap.domain.posting.dto.TodayAnnouncementProjection;
+import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.dto.response.PostingStageResponse;
+import org.sopt.haphap.domain.posting.dto.projection.TodayAnnouncementProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

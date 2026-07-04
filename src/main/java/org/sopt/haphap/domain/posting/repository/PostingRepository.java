@@ -1,7 +1,7 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.dto.PostingSummaryResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

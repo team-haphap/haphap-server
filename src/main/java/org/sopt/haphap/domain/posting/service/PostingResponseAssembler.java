@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.dto.PopularPostingResponse;
-import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
+import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.springframework.stereotype.Component;
 
 @Component

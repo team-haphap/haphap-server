@@ -2,7 +2,10 @@ package org.sopt.haphap.domain.posting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
-import org.sopt.haphap.domain.posting.dto.*;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.response.TodayAnnouncementPostingListResponse;
 import org.sopt.haphap.domain.posting.service.AnnouncementsService;
 import org.sopt.haphap.domain.posting.service.PopularPostingService;
 import org.sopt.haphap.domain.posting.service.PostingListingService;

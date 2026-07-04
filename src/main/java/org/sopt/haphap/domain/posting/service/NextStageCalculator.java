@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -2,10 +2,10 @@ package org.sopt.haphap.domain.posting.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingErrorCode;
-import org.sopt.haphap.domain.posting.dto.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingStageResponse;
-import org.sopt.haphap.domain.posting.dto.PostingSummaryResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingStageResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.global.exception.CustomException;

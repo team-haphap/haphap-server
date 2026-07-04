@@ -1,4 +1,6 @@
-package org.sopt.haphap.domain.posting.dto;
+package org.sopt.haphap.domain.posting.dto.response;
+
+import org.sopt.haphap.domain.posting.dto.projection.TodayAnnouncementProjection;
 
 public record TodayAnnouncementPostingResponse(
         Long id,
