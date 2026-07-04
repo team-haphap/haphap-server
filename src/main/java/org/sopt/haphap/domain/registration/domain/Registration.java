@@ -12,7 +12,14 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 
 @Getter
 @Entity
-@Table(name = "registration")
+@Table(name = "registration",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_registration_user_posting_stage",
+                columnNames = {"user_id", "posting_id", "stage_id"}),
+        indexes = {
+                @Index(name = "idx_reg_result_updated", columnList = "result, updated_at"),
+                @Index(name = "idx_reg_posting_stage", columnList = "posting_id, stage_id")
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Registration extends BaseEntity {
 

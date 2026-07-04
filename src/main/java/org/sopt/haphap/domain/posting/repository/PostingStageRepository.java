@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.PostingStage;
+import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.dto.PostingStageResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,15 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
             ORDER BY s.orderIndex ASC
             """)
     List<PostingStageResponse> findStagesByPostingId(@Param("postingId") Long postingId);
+
+    @Query("""
+        SELECT s.posting.id AS postingId, s.id AS stageId,
+               s.name AS name, s.orderIndex AS orderIndex,
+               s.expectedAnnouncementDate AS expectedAnnouncementDate
+        FROM PostingStage s
+        WHERE s.posting.id IN :postingIds
+        ORDER BY s.posting.id ASC, s.orderIndex ASC
+        """)
+    List<PostingStageFlatProjection> findFlatByPostingIds(@Param("postingIds") List<Long> postingIds);
+
 }

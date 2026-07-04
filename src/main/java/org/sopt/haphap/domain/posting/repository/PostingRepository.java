@@ -16,12 +16,20 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             """)
     List<PostingSummaryResponse> findAllOrderByTitleAsc();
 
-    //N+1 방지하려고 id 목록으로 회사/카테고리까지 fetch join 한 번에 하도록 했습니다.
+    //공고+회사+카테고리  fetch join으로 한 번에 (N+1 방지)
     @Query("""
-            SELECT p FROM Posting p
-            JOIN FETCH p.company
-            JOIN FETCH p.category
-            WHERE p.id IN :ids
-            """)
-    List<Posting> findAllByIdInWithCompanyAndCategory(@Param("ids") List<Long> ids);
+        SELECT p FROM Posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE p.id IN :ids
+        """)
+    List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+
+    @Query("""
+        SELECT p FROM Posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE (:categoryNames IS NULL OR p.category.name IN :categoryNames)
+        """)
+    List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
 }

@@ -2,11 +2,15 @@ package org.sopt.haphap.domain.posting.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Tag(name = "공고",description = "공고관련 API 입니다")
 public interface PostingApiDocs {
@@ -19,4 +23,19 @@ public interface PostingApiDocs {
     @Operation(summary = "공고 상세 조회 기록",
             description = "상세 페이지 진입 시 호출합니다. 인기 공고 집계에 사용되며 응답 본문은 없습니다.")
     ResponseEntity<Void> recordView(@PathVariable Long postingId);
+    @Operation(summary = "홈 메인-최근 등록 공고 조회",
+            description = """
+                홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                """
+            )
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) List<String> category);
+
+    @Operation(summary = "공고 리스트 조회",
+            description = """
+                공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                """
+            )
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) List<String> category);
 }
