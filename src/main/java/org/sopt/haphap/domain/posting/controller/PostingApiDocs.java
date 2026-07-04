@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.TodayAnnouncementPostingListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,4 +36,12 @@ public interface PostingApiDocs {
                 """
             )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) List<String> category);
+
+    @Operation(summary = "오늘 발표 예상 공고 조회",
+            description = """
+                오늘 발표 예상 전형이 있는 공고들을 조회합니다.
+                - score이 높은 순 3개 반환합니다.ㅣ
+                """
+    )
+    ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings();
 }

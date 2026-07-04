@@ -2,9 +2,8 @@ package org.sopt.haphap.domain.posting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
-import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.*;
+import org.sopt.haphap.domain.posting.service.AnnouncementsService;
 import org.sopt.haphap.domain.posting.service.PopularPostingService;
 import org.sopt.haphap.domain.posting.service.PostingListingService;
 import org.sopt.haphap.domain.posting.service.PostingService;
@@ -23,6 +22,7 @@ public class PostingController implements PostingApiDocs {
     private final PostingService postingService;
     private final PopularPostingService popularPostingService;
     private final PostingListingService postingListingService;
+    private final AnnouncementsService announcementsService;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -63,6 +63,16 @@ public class PostingController implements PostingApiDocs {
         PopularPostingListResponse response = postingListingService.getAllPostings(category);
         SuccessResponse<PopularPostingListResponse> body =
                 ApiResponse.success(PostingSuccessCode.POSTING_ALL_LIST_FETCHED, response);
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @GetMapping("/announcements")
+    public ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings() {
+        TodayAnnouncementPostingListResponse response = announcementsService.getTodayAnnouncementPostings();
+
+        SuccessResponse<TodayAnnouncementPostingListResponse> body =
+                ApiResponse.success(PostingSuccessCode.TODAY_ANNOUNCEMENT_POSTING_FETCHED, response);
+
         return ResponseEntity.status(body.status()).body(body);
     }
 }
