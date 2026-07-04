@@ -30,6 +30,7 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             SELECT p.id AS id, p.title AS title
             FROM posting p
             WHERE p.title ILIKE CONCAT('%', :keyword, '%')
+              AND (p.deadline IS NULL OR p.deadline >= CURRENT_DATE)
             ORDER BY similarity(p.title, :keyword) DESC
             LIMIT :limit
             """, nativeQuery = true)
