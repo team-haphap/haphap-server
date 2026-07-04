@@ -40,7 +40,7 @@ public interface PostingApiDocs {
     @Operation(summary = "오늘 발표 예상 공고 조회",
             description = """
                 오늘 발표 예상 전형이 있는 공고들을 조회합니다.
-                - score이 높은 순 3개 반환합니다.ㅣ
+                - score이 높은 순 3개 반환합니다.
                 """
     )
     ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings();
