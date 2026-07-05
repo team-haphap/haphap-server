@@ -1,16 +1,10 @@
 package org.sopt.haphap.domain.registration.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.domain.PostingStage;
-import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.code.RegistrationSuccessCode;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
-import org.sopt.haphap.domain.user.entity.User;
-import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.global.code.SuccessResultCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;

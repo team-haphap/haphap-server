@@ -2,14 +2,19 @@ package org.sopt.haphap.domain.posting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
+import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingListResponse;
 import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.service.PopularPostingService;
+import org.sopt.haphap.domain.posting.service.PostingListingService;
 import org.sopt.haphap.domain.posting.service.PostingService;
 import org.sopt.haphap.domain.posting.service.PostingViewTracker;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +23,8 @@ public class PostingController implements PostingApiDocs {
 
     private final PostingService postingService;
     private final PostingViewTracker postingViewTracker;
+    private final PopularPostingService popularPostingService;
+    private final PostingListingService postingListingService;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -45,6 +52,25 @@ public class PostingController implements PostingApiDocs {
     public ResponseEntity<Void> recordView(@PathVariable Long postingId) {
         postingViewTracker.recordView(postingId);
         return ResponseEntity.noContent().build();
+}
+    @GetMapping
+    public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
+            @RequestParam(required = false) List<String> category
+    ) {
+        PopularPostingListResponse response = popularPostingService.getPopularPostings(category);
+        SuccessResponse<PopularPostingListResponse> body =
+                ApiResponse.success(PostingSuccessCode.POPULAR_POSTINGS_FETCHED, response);
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(
+            @RequestParam(required = false) List<String> category
+    ) {
+        PopularPostingListResponse response = postingListingService.getAllPostings(category);
+        SuccessResponse<PopularPostingListResponse> body =
+                ApiResponse.success(PostingSuccessCode.POSTING_ALL_LIST_FETCHED, response);
+        return ResponseEntity.status(body.status()).body(body);
     }
 
     @PatchMapping("/{postingId}/card-clicks")

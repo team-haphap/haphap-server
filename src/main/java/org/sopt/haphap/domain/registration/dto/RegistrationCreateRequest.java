@@ -1,6 +1,5 @@
 package org.sopt.haphap.domain.registration.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.sopt.haphap.domain.registration.domain.ContactMethod;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;

@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-
 public class PopularSearchPostingQueryService {
 
     private static final int POPULAR_COUNT = 4;
