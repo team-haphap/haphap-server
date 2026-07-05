@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.Posting;
+import org.sopt.haphap.domain.posting.dto.PostingAutocompleteProjection;
 import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,14 +17,13 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             """)
     List<PostingSummaryResponse> findAllOrderByTitleAsc();
 
-    //공고+회사+카테고리  fetch join으로 한 번에 (N+1 방지)
     @Query("""
         SELECT p FROM Posting p
         JOIN FETCH p.company
         JOIN FETCH p.category
         WHERE p.id IN :ids
         """)
-    List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+  List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
 
     @Query("""
         SELECT p FROM Posting p
@@ -31,5 +31,16 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         JOIN FETCH p.category
         WHERE (:categoryNames IS NULL OR p.category.name IN :categoryNames)
         """)
-    List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
+  List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
+
+    @Query(value = """
+        SELECT p.id AS id, p.title AS title
+        FROM posting p
+        WHERE p.title ILIKE CONCAT('%', :keyword, '%')
+          AND (p.deadline IS NULL OR p.deadline >= CURRENT_DATE)
+        ORDER BY similarity(p.title, :keyword) DESC
+        LIMIT :limit
+        """, nativeQuery = true)
+  List<PostingAutocompleteProjection> searchByTitleContaining(
+        @Param("keyword") String keyword, @Param("limit") int limit);
 }

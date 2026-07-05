@@ -65,12 +65,16 @@ public class PopularSearchPostingQueryService {
                 ? null
                 : (int) ChronoUnit.DAYS.between(today, posting.getDeadline());
 
+        String status = (posting.getDeadline() == null || !posting.getDeadline().isBefore(today))
+                ? "OPEN" : "CLOSED";
+
         return new PopularSearchPostingResponse(
                 posting.getId(),
                 posting.getCompany().getName(),
                 posting.getTitle(),
                 posting.getCategory().getName(),
-                dDay
+                dDay,
+                status
         );
     }
 }

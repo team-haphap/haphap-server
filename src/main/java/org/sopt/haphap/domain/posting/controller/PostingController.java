@@ -76,6 +76,12 @@ public class PostingController implements PostingApiDocs {
         return ResponseEntity.status(body.status()).body(body);
     }
 
+    @PatchMapping("/{postingId}/card-clicks")
+    public ResponseEntity<Void> recordCardClick(@PathVariable Long postingId) {
+        postingViewTracker.recordCardClick(postingId);
+        return ResponseEntity.noContent().build();
+    }
+  
     @GetMapping("/announcements")
     public ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings() {
         TodayAnnouncementPostingListResponse response = announcementsService.getTodayAnnouncementPostings();
