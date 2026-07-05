@@ -3,7 +3,7 @@ package org.sopt.haphap.domain.posting.service;
 import java.util.List;
 import java.util.Map;
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.dto.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 
 public record PostingAggregate(
         Map<Long, Posting> postingMap,

@@ -2,9 +2,11 @@ package org.sopt.haphap.domain.posting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
-import org.sopt.haphap.domain.posting.dto.PopularPostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
+import org.sopt.haphap.domain.posting.dto.response.TodayAnnouncementPostingListResponse;
+import org.sopt.haphap.domain.posting.service.AnnouncementsService;
 import org.sopt.haphap.domain.posting.service.PopularPostingService;
 import org.sopt.haphap.domain.posting.service.PostingListingService;
 import org.sopt.haphap.domain.posting.service.PostingService;
@@ -25,6 +27,7 @@ public class PostingController implements PostingApiDocs {
     private final PostingViewTracker postingViewTracker;
     private final PopularPostingService popularPostingService;
     private final PostingListingService postingListingService;
+    private final AnnouncementsService announcementsService;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -77,5 +80,15 @@ public class PostingController implements PostingApiDocs {
     public ResponseEntity<Void> recordCardClick(@PathVariable Long postingId) {
         postingViewTracker.recordCardClick(postingId);
         return ResponseEntity.noContent().build();
+    }
+  
+    @GetMapping("/announcements")
+    public ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings() {
+        TodayAnnouncementPostingListResponse response = announcementsService.getTodayAnnouncementPostings();
+
+        SuccessResponse<TodayAnnouncementPostingListResponse> body =
+                ApiResponse.success(PostingSuccessCode.TODAY_ANNOUNCEMENT_POSTING_FETCHED, response);
+
+        return ResponseEntity.status(body.status()).body(body);
     }
 }
