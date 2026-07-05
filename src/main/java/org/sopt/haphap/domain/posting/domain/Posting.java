@@ -33,6 +33,9 @@ public class Posting extends BaseEntity {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    private String location;
+
+    private String position;
 
     private Posting(String title, LocalDate deadline, Category category, Company company) {
         this.title = title;
