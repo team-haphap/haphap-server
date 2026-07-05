@@ -25,32 +25,33 @@ public class PostingStage {
 
     private LocalDate expectedAnnouncementDate;
 
+    @Column(nullable = false)
+    private int expectedScore;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "posting_id", nullable = false)
     private Posting posting;
 
-    private PostingStage(String name, int orderIndex, LocalDate expectedAnnouncementDate, Posting posting) {
+    private PostingStage(String name, int orderIndex, LocalDate expectedAnnouncementDate,
+                         int expectedScore, Posting posting) {
         this.name = name;
         this.orderIndex = orderIndex;
         this.expectedAnnouncementDate = expectedAnnouncementDate;
+        this.expectedScore = expectedScore;
         this.posting = posting;
     }
 
     public static PostingStage create(String name, int orderIndex, Posting posting) {
-        return new PostingStage(name, orderIndex, null, posting);
+        return new PostingStage(name, orderIndex, null, 0,posting);
     }
+
     public static PostingStage create(String name, int orderIndex,
-                                      LocalDate expectedAnnouncementDate, Posting posting) {
-        return new PostingStage(name, orderIndex, expectedAnnouncementDate, posting);
+                                      LocalDate expectedAnnouncementDate,int expectedScore,
+                                      Posting posting) {
+        return new PostingStage(name, orderIndex, expectedAnnouncementDate,expectedScore, posting);
     }
 
     public boolean belongsTo(Posting posting) {
         return this.posting.getId().equals(posting.getId());
-    }
-
-    private PostingStage(String name, int orderIndex, Posting posting) {
-        this.name = name;
-        this.orderIndex = orderIndex;
-        this.posting = posting;
     }
 }

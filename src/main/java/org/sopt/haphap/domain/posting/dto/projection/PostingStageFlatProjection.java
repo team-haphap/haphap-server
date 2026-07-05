@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.dto;
+package org.sopt.haphap.domain.posting.dto.projection;
 
 import java.time.LocalDate;
 
