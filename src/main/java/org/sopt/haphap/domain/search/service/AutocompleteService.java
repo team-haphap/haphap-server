@@ -19,9 +19,7 @@ public class AutocompleteService {
     private static final int COMPANY_LIMIT = 10;
     private static final int JOB_LIMIT = 5;
 
-    // 자음 단독 입력 방어
-    private static final Pattern SINGLE_CONSONANT_ONLY = Pattern.compile("^[ㄱ-ㅎ]+$");
-
+    private static final Pattern INCOMPLETE_JAMO_ONLY = Pattern.compile("^[ㄱ-ㅣ]+$");
     private final CompanyRepository companyRepository;
     private final PostingRepository postingRepository;
     private final HighlightRangeCalculator highlightRangeCalculator;
@@ -44,9 +42,7 @@ public class AutocompleteService {
             return null;
         }
         String trimmed = rawKeyword.trim();
-        if (trimmed.isEmpty() || SINGLE_CONSONANT_ONLY.matcher(trimmed).matches()) {
-            return null;
-        }
+        if (trimmed.isEmpty() || INCOMPLETE_JAMO_ONLY.matcher(trimmed).matches()) return null;
         return trimmed;
     }
 
@@ -59,7 +55,6 @@ public class AutocompleteService {
     }
 
     private List<AutocompleteItemResponse> searchJobs(String keyword) {
-        // 지금은 similarity()로 관련도순만 적용했는데, 기능명세서 확인하고 필요한 것들 추가로 넣어놓겠습니다.
         return postingRepository.searchByTitleContaining(keyword, JOB_LIMIT).stream()
                 .map(p -> AutocompleteItemResponse.job(
                         p.getId(), p.getTitle(),
