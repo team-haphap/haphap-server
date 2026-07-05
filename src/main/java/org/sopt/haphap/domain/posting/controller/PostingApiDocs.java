@@ -20,6 +20,9 @@ public interface PostingApiDocs {
     @Operation(summary = "공고 별 전형 조회",description = "해당 공고의 전형을 반환합니다.")
     ResponseEntity<SuccessResponse<PostingStageListResponse>> getStages(@PathVariable Long postingId);
 
+    @Operation(summary = "공고 상세 조회 기록",
+            description = "상세 페이지 진입 시 호출합니다. 인기 공고 집계에 사용되며 응답 본문은 없습니다.")
+    ResponseEntity<Void> recordView(@PathVariable Long postingId);
     @Operation(summary = "홈 메인-최근 등록 공고 조회",
             description = """
                 홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)

@@ -8,6 +8,7 @@ import org.sopt.haphap.domain.posting.dto.PostingStageListResponse;
 import org.sopt.haphap.domain.posting.service.PopularPostingService;
 import org.sopt.haphap.domain.posting.service.PostingListingService;
 import org.sopt.haphap.domain.posting.service.PostingService;
+import org.sopt.haphap.domain.posting.service.PostingViewTracker;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 public class PostingController implements PostingApiDocs {
 
     private final PostingService postingService;
+    private final PostingViewTracker postingViewTracker;
     private final PopularPostingService popularPostingService;
     private final PostingListingService postingListingService;
 
@@ -46,6 +48,11 @@ public class PostingController implements PostingApiDocs {
         return ResponseEntity.status(body.status()).body(body);
     }
 
+    @PatchMapping("/{postingId}/views")
+    public ResponseEntity<Void> recordView(@PathVariable Long postingId) {
+        postingViewTracker.recordView(postingId);
+        return ResponseEntity.noContent().build();
+}
     @GetMapping
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
             @RequestParam(required = false) List<String> category
