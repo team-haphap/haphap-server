@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AutocompleteService {
 
-    private static final int COMPANY_LIMIT = 5;
+    private static final int COMPANY_LIMIT = 10;
     private static final int JOB_LIMIT = 5;
 
     // 자음 단독 입력 방어

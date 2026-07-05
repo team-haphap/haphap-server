@@ -49,7 +49,7 @@ public class PopularSearchPostingQueryService {
 
     private List<PopularSearchPostingResponse> buildResponses(List<Long> orderedIds) {
         Map<Long, Posting> postingMap = postingRepository
-                .findAllByIdInWithCompanyAndCategory(orderedIds).stream()
+                .findAllWithCompanyAndCategoryByIds(orderedIds).stream()
                 .collect(Collectors.toMap(Posting::getId, Function.identity()));
 
         return orderedIds.stream()

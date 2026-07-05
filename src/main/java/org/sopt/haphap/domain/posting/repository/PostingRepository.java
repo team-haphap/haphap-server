@@ -24,7 +24,7 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             JOIN FETCH p.category
             WHERE p.id IN :ids
             """)
-    List<Posting> findAllByIdInWithCompanyAndCategory(@Param("ids") List<Long> ids);
+    List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
 
     @Query(value = """
             SELECT p.id AS id, p.title AS title
