@@ -18,7 +18,6 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<PostingSummaryResponse> findAllOrderByTitleAsc();
 
     @Query("""
-    @Query("""
         SELECT p FROM Posting p
         JOIN FETCH p.company
         JOIN FETCH p.category
