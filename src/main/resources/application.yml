@@ -10,11 +10,28 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
+    open-in-view: false
 
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 jwt:
   secret: ${JWT_SECRET}
+
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    region: ap-northeast-2
+
+logging:
+  level:
+    root: INFO
+    org.hibernate: WARN
+    org.springframework.web: WARN

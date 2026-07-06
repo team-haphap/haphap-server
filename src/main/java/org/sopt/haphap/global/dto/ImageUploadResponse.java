@@ -1,4 +1,3 @@
 package org.sopt.haphap.global.dto;
 
-public class ImageUploadResponse {
-}
+public record ImageUploadResponse(String imageUrl) {}
