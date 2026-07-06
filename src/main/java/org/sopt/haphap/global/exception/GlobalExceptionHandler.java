@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RestControllerAdvice
@@ -100,8 +102,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<FailureResponse> handleException(Exception e) {
-        log.error("Unhandled exception: ", e);
+    public ResponseEntity<FailureResponse> handleException(Exception e, HttpServletRequest request) {
+        log.error("Unhandled exception - {} {}", request.getMethod(), request.getRequestURI(), e);
         return buildErrorResponse(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<FailureResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException e) {
+        log.warn("Max upload size exceeded: {}", e.getMessage());
+        return buildErrorResponse(GlobalErrorCode.FILE_TOO_LARGE);
     }
 }
