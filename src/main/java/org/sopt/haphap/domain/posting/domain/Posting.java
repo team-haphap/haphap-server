@@ -37,14 +37,16 @@ public class Posting extends BaseEntity {
 
     private String position;
 
-    private Posting(String title, LocalDate deadline, Category category, Company company) {
+    private Posting(String title, LocalDate deadline, String location, String position,Category category, Company company) {
         this.title = title;
         this.deadline = deadline;
+        this.location = location;
+        this.position = position;
         this.category = category;
         this.company = company;
     }
 
-    public static Posting create(String title, LocalDate deadline, Category category, Company company) {
-        return new Posting(title, deadline, category, company);
+    public static Posting create(String title, LocalDate deadline,  String location, String position,Category category, Company company) {
+        return new Posting(title, deadline,location,position, category, company);
     }
 }
