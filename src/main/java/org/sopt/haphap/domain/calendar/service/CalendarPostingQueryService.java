@@ -8,7 +8,9 @@ import org.sopt.haphap.domain.posting.dto.projection.PostingStageCalendarProject
 import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
-import org.sopt.haphap.domain.posting.service.PostingViewTracker;
+import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
+import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,7 @@ public class CalendarPostingQueryService {
 
     private final PostingStageRepository postingStageRepository;
     private final PostingRepository postingRepository;
-    private final PostingViewTracker postingViewTracker;
+    private final RegistrationRepository registrationRepository;
 
     public CalendarPostingListResponse getPostingsByDate(LocalDate date) {
         List<PostingStageCalendarProjection> stages =
@@ -49,11 +51,18 @@ public class CalendarPostingQueryService {
         Map<Long, String> titleByPostingId = postingRepository.findSummariesByIds(postingIds).stream()
                 .collect(Collectors.toMap(PostingSummaryResponse::id, PostingSummaryResponse::title));
 
-        Map<Long, Long> viewCountByPostingId = postingViewTracker.getViewCounts(postingIds);
+        List<Long> stageIds = stageByPostingId.values().stream()
+                .map(PostingStageCalendarProjection::getStageId)
+                .toList();
+
+        // 참여중 인원 = 그 전형에 상태를 등록하고 아직 결과 대기 중인 유저 수
+        Map<Long, Long> pendingCountByStageId = registrationRepository
+                .countByStageIdsAndResult(stageIds, RegistrationResult.PENDING).stream()
+                .collect(Collectors.toMap(StagePendingCountProjection::getStageId, StagePendingCountProjection::getCnt));
 
         List<CalendarPostingCardResponse> cards = postingIds.stream()
                 .sorted(byExpectedScoreThenTitle(stageByPostingId, titleByPostingId))
-                .map(id -> toCard(id, stageByPostingId.get(id), titleByPostingId, viewCountByPostingId))
+                .map(id -> toCard(id, stageByPostingId.get(id), titleByPostingId, pendingCountByStageId))
                 .toList();
 
         return CalendarPostingListResponse.of(date, cards);
@@ -66,17 +75,16 @@ public class CalendarPostingQueryService {
     private CalendarPostingCardResponse toCard(Long postingId,
                                                PostingStageCalendarProjection stage,
                                                Map<Long, String> titleByPostingId,
-                                               Map<Long, Long> viewCountByPostingId) {
+                                               Map<Long, Long> pendingCountByStageId) {
         return new CalendarPostingCardResponse(
                 postingId,
                 titleByPostingId.getOrDefault(postingId, ""),
                 stage.getStageName(),
                 AnnouncementLikelihood.from(stage.getExpectedScore()),
-                viewCountByPostingId.getOrDefault(postingId, 0L)
+                pendingCountByStageId.getOrDefault(stage.getStageId(), 0L)
         );
     }
 
-    // Collator는 스레드 안전하지 않아 공유 필드로 두지 않고 호출마다 로컬 생성 - (동시성 고려)
     private Comparator<Long> byExpectedScoreThenTitle(Map<Long, PostingStageCalendarProjection> stageByPostingId,
                                                       Map<Long, String> titleByPostingId) {
         Collator korean = Collator.getInstance(Locale.KOREAN);

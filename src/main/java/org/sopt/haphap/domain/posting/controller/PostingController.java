@@ -55,7 +55,8 @@ public class PostingController implements PostingApiDocs {
     public ResponseEntity<Void> recordView(@PathVariable Long postingId) {
         postingViewTracker.recordView(postingId);
         return ResponseEntity.noContent().build();
-}
+    }
+
     @GetMapping
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
             @RequestParam(required = false) List<String> category
