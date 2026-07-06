@@ -2,15 +2,8 @@ package org.sopt.haphap.domain.posting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
-import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
-import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
-import org.sopt.haphap.domain.posting.dto.response.TodayAnnouncementPostingListResponse;
-import org.sopt.haphap.domain.posting.service.AnnouncementsService;
-import org.sopt.haphap.domain.posting.service.PopularPostingService;
-import org.sopt.haphap.domain.posting.service.PostingListingService;
-import org.sopt.haphap.domain.posting.service.PostingService;
-import org.sopt.haphap.domain.posting.service.PostingViewTracker;
+import org.sopt.haphap.domain.posting.dto.response.*;
+import org.sopt.haphap.domain.posting.service.*;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +21,7 @@ public class PostingController implements PostingApiDocs {
     private final PopularPostingService popularPostingService;
     private final PostingListingService postingListingService;
     private final AnnouncementsService announcementsService;
+    private final PostingDetailService postingDetailService;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -82,6 +76,16 @@ public class PostingController implements PostingApiDocs {
 
         SuccessResponse<TodayAnnouncementPostingListResponse> body =
                 ApiResponse.success(PostingSuccessCode.TODAY_ANNOUNCEMENT_POSTING_FETCHED, response);
+
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @GetMapping("/{postingId}/detail")
+    public ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId) {
+        PostingDetailResponse response = postingDetailService.getDetail(postingId);
+
+        SuccessResponse<PostingDetailResponse> body =
+                ApiResponse.success(PostingSuccessCode.POSTING_DETAIL_FETCHED, response);
 
         return ResponseEntity.status(body.status()).body(body);
     }

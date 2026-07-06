@@ -2,10 +2,7 @@ package org.sopt.haphap.domain.posting.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
-import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
-import org.sopt.haphap.domain.posting.dto.response.TodayAnnouncementPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,4 +44,14 @@ public interface PostingApiDocs {
                 """
     )
     ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings();
+
+    @Operation(summary = "공고 상세 조회",
+            description = """
+                공고 상세 조회합니다. 
+                - 각 공고에 등록중이 회원 수를 표시합니다. (한 유저가 중복 등록한 경우 중복 제거)
+                - 프로필 이미지는 최신 등록 순으로 제시합니다. 
+                - 해당 공고에 실시간으로 등록한 전형을 제보합니다.(최대 30개 제시)
+                """
+    )
+    ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId);
 }
