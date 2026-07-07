@@ -6,5 +6,8 @@ public record OAuthUserInfo(
         String providerId,
         String name,
         String email,
-        LocalDate birthDate
+        LocalDate birthDate,
+        String gender,
+        String ageRange,
+        String phoneNumber
 ) {}

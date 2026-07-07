@@ -5,6 +5,7 @@ public record PopularSearchPostingResponse(
         String companyName,
         String title,
         String categoryName,
-        Integer dDay
+        Integer dDay,
+        String status
 ) {
 }

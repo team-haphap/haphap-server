@@ -1,7 +1,9 @@
 package org.sopt.haphap.domain.search.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
 import org.sopt.haphap.domain.search.dto.PopularSearchPostingListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -16,4 +18,14 @@ public interface SearchApiDocs {
                     아직 집계된 데이터가 없으면 빈 배열을 반환합니다.
                     """)
     ResponseEntity<SuccessResponse<PopularSearchPostingListResponse>> getPopularPostings();
+
+    @Operation(summary = "검색 자동완성",
+            description = """
+                    입력한 키워드로 기업명/공고명을 매칭해 자동완성 결과를 반환합니다.
+                    type: company(기업 바로가기) / job(관련 검색어)로 구분되며, 각 항목의
+                    highlightRanges는 매칭된 텍스트의 시작/끝 offset입니다.
+                    결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
+                    """)
+    ResponseEntity<SuccessResponse<AutocompleteResponse>> autocomplete(
+            @Parameter(description = "검색 키워드, 최소 1글자") String q);
 }

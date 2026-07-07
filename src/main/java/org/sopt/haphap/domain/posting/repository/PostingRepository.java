@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.Posting;
+import org.sopt.haphap.domain.posting.dto.PostingAutocompleteProjection;
 import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostingRepository extends JpaRepository<Posting, Long> {
+
     @Query("""
             SELECT new org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse(p.id, p.title)
             FROM Posting p
@@ -17,7 +19,6 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             """)
     List<PostingSummaryResponse> findAllOrderByTitleAsc();
 
-    //공고+회사+카테고리  fetch join으로 한 번에 (N+1 방지)
     @Query("""
             SELECT p FROM Posting p
             JOIN FETCH p.company
@@ -35,10 +36,29 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
 
     @Query("""
-        SELECT p FROM Posting p
-        JOIN FETCH p.company
-        JOIN FETCH p.category
-        WHERE p.id = :postingId
-        """)
+            SELECT p FROM Posting p
+            JOIN FETCH p.company
+            JOIN FETCH p.category
+            WHERE p.id = :postingId
+            """)
     Optional<Posting> findWithCompanyAndCategory(@Param("postingId") Long postingId);
+
+    @Query(value = """
+            SELECT p.id AS id, p.title AS title
+            FROM posting p
+            WHERE p.title ILIKE CONCAT('%', :keyword, '%')
+              AND (p.deadline IS NULL OR p.deadline >= CURRENT_DATE)
+            ORDER BY similarity(p.title, :keyword) DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<PostingAutocompleteProjection> searchByTitleContaining(
+            @Param("keyword") String keyword, @Param("limit") int limit);
+
+    // 캘린더 카드는 title만 필요 - 불필요한 fetch join 없이 최소 필드만 배치 조회하도록!
+    @Query("""
+            SELECT new org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse(p.id, p.title)
+            FROM Posting p
+            WHERE p.id IN :ids
+            """)
+    List<PostingSummaryResponse> findSummariesByIds(@Param("ids") List<Long> ids);
 }

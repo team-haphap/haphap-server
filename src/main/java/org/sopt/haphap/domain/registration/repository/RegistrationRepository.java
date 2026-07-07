@@ -4,6 +4,7 @@ import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.dto.RecentParticipantProjection;
 import org.sopt.haphap.domain.registration.dto.RegistrationFeedProjection;
+import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +65,17 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     List<StageResultAggProjection> aggregateAllForRebuild();
 
+    @Query("""
+    select r from Registration r
+    join fetch r.user
+    join fetch r.stage
+    join fetch r.posting p
+    join fetch p.company
+    join fetch p.category
+    where r.id = :id
+    """)
+    Optional<Registration> findByIdWithDetails(@Param("id") Long id);
+
     // distinct 유저 수 (registeredCount)
     @Query("""
         SELECT COUNT(DISTINCT r.user.id)
@@ -87,7 +99,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     // 실시간 제보 30개 (registrations)( updatedAt 최신순, 수정 포함.)
     @Query("""
-        SELECT s.name AS stage, u.anonymousName AS nickName, r.updatedAt AS feedCreatedAt
+        SELECT s.name AS stage, u.anonymousName AS nickName,r.result AS status, r.updatedAt AS feedCreatedAt
         FROM Registration r
         JOIN r.stage s
         JOIN r.user u
@@ -95,4 +107,16 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY r.updatedAt DESC
         """)
     List<RegistrationFeedProjection> findRecentFeeds(@Param("postingId") Long postingId, Pageable pageable);
+           
+    //캘린더에서 추가
+    @Query("""
+    SELECT r.stage.id AS stageId, COUNT(r) AS cnt
+    FROM Registration r
+    WHERE r.stage.id IN :stageIds
+      AND r.result = :result
+    GROUP BY r.stage.id
+    """)
+    List<StagePendingCountProjection> countByStageIdsAndResult(
+            @Param("stageIds") List<Long> stageIds,
+            @Param("result") RegistrationResult result);
 }

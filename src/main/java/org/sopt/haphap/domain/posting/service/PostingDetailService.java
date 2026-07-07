@@ -9,10 +9,8 @@ import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.dto.RecentParticipantProjection;
-import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.sopt.haphap.global.exception.CustomException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +30,8 @@ public class PostingDetailService {
     private final PostingRepository postingRepository;
     private final PostingStageRepository postingStageRepository;
     private final StageResultCountRepository stageResultCountRepository;
-    private final RegistrationRepository registrationRepository;
     private final NextStageCalculator nextStageCalculator;
+    private final RegistrationQueryService registrationQueryService;
 
     public PostingDetailResponse getDetail(Long postingId) {
         // 공고 + 회사 + 카테고리
@@ -42,37 +40,19 @@ public class PostingDetailService {
 
         // currentState 계산 (집계 테이블 재사용)
         String currentState = resolveCurrentState(postingId);
+        var summary = registrationQueryService.getParticipantSummary(postingId, PROFILE_LIMIT);
+        var feeds = registrationQueryService.getRecentFeeds(postingId, FEED_LIMIT);
 
-        // 요약
-        long registeredCount = registrationRepository.countDistinctUsersByPostingId(postingId);
-        List<String> profileImages = registrationRepository
-                .findRecentParticipants(postingId, PageRequest.of(0, PROFILE_LIMIT))
-                .stream()
-                .map(RecentParticipantProjection::getProfileImageUrl)
-                .toList();
-
-        long additional = Math.max(0, registeredCount - PROFILE_LIMIT);
-
-        PostingDetailResponse.SummaryResponse summary =
-                new PostingDetailResponse.SummaryResponse(registeredCount, profileImages, additional);
-
-        // 4) 실시간 제보 최근 30개
-        List<PostingDetailResponse.RegistrationFeedResponse> registrations = registrationRepository
-                .findRecentFeeds(postingId, PageRequest.of(0, FEED_LIMIT))
-                .stream()
-                .map(f -> new PostingDetailResponse.RegistrationFeedResponse(
-                        f.getStage(), f.getNickName(), f.getFeedCreatedAt()))
-                .toList();
+        long additional = Math.max(0, summary.registeredCount() - PROFILE_LIMIT);
 
         return new PostingDetailResponse(
-                posting.getCompany().getName(),
-                posting.getTitle(),
-                posting.getCategory().getName(),
-                posting.getLocation(),
-                posting.getPosition(),
-                currentState,
-                summary,
-                registrations);
+                posting.getCompany().getName(), posting.getTitle(), posting.getCategory().getName(),
+                posting.getLocation(), posting.getPosition(), currentState,
+                new PostingDetailResponse.SummaryResponse(
+                        summary.registeredCount(), summary.profileImages(), additional),
+                feeds.stream().map(f -> new PostingDetailResponse.RegistrationFeedResponse(
+                        f.stage(), f.nickName(),f.status(), f.feedCreatedAt())).toList());
+
     }
 
     private String resolveCurrentState(Long postingId) {
