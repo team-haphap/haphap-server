@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PostingRepository extends JpaRepository<Posting, Long> {
     @Query("""
@@ -18,20 +19,28 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<PostingSummaryResponse> findAllOrderByTitleAsc();
 
     @Query("""
-        SELECT p FROM Posting p
-        JOIN FETCH p.company
-        JOIN FETCH p.category
-        WHERE p.id IN :ids
-        """)
-  List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+            SELECT p FROM Posting p
+            JOIN FETCH p.company
+            JOIN FETCH p.category
+            WHERE p.id IN :ids
+            """)
+    List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+
+    @Query("""
+            SELECT p FROM Posting p
+            JOIN FETCH p.company
+            JOIN FETCH p.category
+            WHERE (:categoryNames IS NULL OR p.category.name IN :categoryNames)
+            """)
+    List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
 
     @Query("""
         SELECT p FROM Posting p
         JOIN FETCH p.company
         JOIN FETCH p.category
-        WHERE (:categoryNames IS NULL OR p.category.name IN :categoryNames)
+        WHERE p.id = :postingId
         """)
-  List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
+    Optional<Posting> findWithCompanyAndCategory(@Param("postingId") Long postingId);
 
     @Query(value = """
         SELECT p.id AS id, p.title AS title
@@ -43,4 +52,12 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         """, nativeQuery = true)
   List<PostingAutocompleteProjection> searchByTitleContaining(
         @Param("keyword") String keyword, @Param("limit") int limit);
+
+    // 캘린더 카드는 title만 필요 - 불필요한 fetch join 없이 최소 필드만 배치 조회하도록!
+    @Query("""
+        SELECT new org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse(p.id, p.title)
+        FROM Posting p
+        WHERE p.id IN :ids
+        """)
+    List<PostingSummaryResponse> findSummariesByIds(@Param("ids") List<Long> ids);
 }
