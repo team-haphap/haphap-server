@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum AlramSuccessCode implements SuccessResultCode {
-    DEVICE_TOKEN_REGISTERED(HttpStatus.OK, "디바이스 토큰이 등록되었습니다.");
+    DEVICE_TOKEN_REGISTERED(HttpStatus.OK, "디바이스 토큰이 등록되었습니다."),
+    ALRAM_REGISTERED(HttpStatus.OK,"알람이 설정되었습니다."),
+    ALRAM_DELETED(HttpStatus.OK,"알람이 취소되었습니다.");
 
     private final HttpStatus status;
     private final String message;
