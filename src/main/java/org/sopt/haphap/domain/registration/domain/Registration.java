@@ -67,6 +67,10 @@ public class Registration extends BaseEntity {
         return this.result == RegistrationResult.PENDING;
     }
 
+    public boolean isPass() {
+        return this.result == RegistrationResult.PASS;
+    }
+
     public boolean hasSameResult(RegistrationResult other) {
         return this.result == other;
     }

@@ -8,4 +8,6 @@ public interface PostingStageCalendarProjection {
     String getStageName();
     int getExpectedScore();
     LocalDate getExpectedAnnouncementDate();
+    String getTitle();
+    String getCompanyImageUrl();
 }

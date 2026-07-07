@@ -1,8 +1,7 @@
 package org.sopt.haphap.domain.registration.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.alram.domain.AlramSetting;
-import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
+import org.sopt.haphap.domain.alram.service.AlramSettingService;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.event.RegistrationResultChangedEvent;
@@ -27,9 +26,9 @@ import java.util.Optional;
 public class RegistrationService {
 
     private final RegistrationRepository registrationRepository;
-    private final AlramSettingRepository alramSettingRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final RegistrationTargetValidator registrationTargetValidator;
+    private final AlramSettingService alramSettingService;
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
@@ -45,9 +44,16 @@ public class RegistrationService {
                 .map(e -> updateExisting(e,target, request))       // 기존 있으면 갱신 or 막기
                 .orElseGet(() -> createNew(target.user(), target.posting(), target.stage(), request));  // 없으면 신규
 
-        applyAlramSetting(target.user(), target.posting(), request.alarmEnabled());
+        alramSettingService.apply(target.user(), target.posting(), request.alarmEnabled());
         publishEvent(registration, target.posting(), target.user());
-        return RegistrationCreateResponse.from(registration.getId());
+
+        // PASS일 때만 연관을 fetch join으로 당겨와 카드 정보 구성, 아니면 ID만
+        if (registration.isPass()) {
+            Registration detailed = registrationRepository.findByIdWithDetails(registration.getId())
+                    .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
+            return RegistrationCreateResponse.pass(detailed);
+        }
+        return RegistrationCreateResponse.idOnly(registration.getId());
 
     }
 
@@ -86,14 +92,5 @@ public class RegistrationService {
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
                 registration.getId(), posting.getId(), registration.getStage().getName(), user.getId()));
-    }
-
-    // (member, posting) 당 알람설정은 1개. 있으면 토글, 없으면 생성.
-    private void applyAlramSetting(User user, Posting posting, boolean enabled) {
-        alramSettingRepository.findByUserIdAndPostingId(user.getId(), posting.getId())
-                .ifPresentOrElse(
-                        setting -> setting.updateEnabled(enabled),
-                        () -> alramSettingRepository.save(AlramSetting.create(user, posting, enabled))
-                );
     }
 }

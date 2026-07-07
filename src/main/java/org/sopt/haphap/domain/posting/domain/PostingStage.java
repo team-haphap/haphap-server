@@ -32,6 +32,8 @@ public class PostingStage {
     @JoinColumn(name = "posting_id", nullable = false)
     private Posting posting;
 
+    private LocalDate announcedDate;
+
     private PostingStage(String name, int orderIndex, LocalDate expectedAnnouncementDate,
                          int expectedScore, Posting posting) {
         this.name = name;
@@ -53,5 +55,12 @@ public class PostingStage {
 
     public boolean belongsTo(Posting posting) {
         return this.posting.getId().equals(posting.getId());
+    }
+
+    // 15 돌파 시 호출할 메서드 (한 번만 기록되도록 방어)
+    public void markAnnouncedIfAbsent(LocalDate date) {
+        if (this.announcedDate == null) {
+            this.announcedDate = date;
+        }
     }
 }

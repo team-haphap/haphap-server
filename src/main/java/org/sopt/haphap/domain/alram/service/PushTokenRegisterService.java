@@ -6,7 +6,7 @@ import org.sopt.haphap.domain.alram.dto.PushTokenRegisterRequest;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.UserRepository;
-import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
+import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ public class PushTokenRegisterService {
     @Transactional
     public void register(Long userId, PushTokenRegisterRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
 
         // (유저, 이 기기)의 토큰이 이미 있으면 갱신, 없으면 새로 생성
         pushTokenRepository.findByUserIdAndDeviceId(userId, request.deviceId())
