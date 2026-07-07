@@ -20,6 +20,7 @@ public class AutocompleteService {
     private static final int JOB_LIMIT = 5;
 
     private static final Pattern INCOMPLETE_JAMO_ONLY = Pattern.compile("^[ㄱ-ㅣ]+$");
+
     private final CompanyRepository companyRepository;
     private final PostingRepository postingRepository;
     private final HighlightRangeCalculator highlightRangeCalculator;
