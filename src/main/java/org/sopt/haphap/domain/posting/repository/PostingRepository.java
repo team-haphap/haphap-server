@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostingRepository extends JpaRepository<Posting, Long> {
-
     @Query("""
             SELECT new org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse(p.id, p.title)
             FROM Posting p
@@ -61,6 +60,19 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             WHERE p.id IN :ids
             """)
     List<PostingSummaryResponse> findSummariesByIds(@Param("ids") List<Long> ids);
+
+    @Query("""
+            SELECT p.id FROM Posting p
+            JOIN p.company c
+            JOIN p.category cat
+            WHERE (:keyword IS NULL
+                    OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%'))
+                    OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')))
+              AND (:categories IS NULL OR cat.name IN :categories)
+            """)
+    List<Long> searchPostingIds(
+            @Param("keyword") String keyword,
+            @Param("categories") List<String> categories);
 
     @Query("SELECT p.id FROM Posting p WHERE p.deadline < CURRENT_DATE")
     List<Long> findClosedPostingIds();
