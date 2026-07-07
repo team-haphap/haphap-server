@@ -22,28 +22,20 @@ public class Banner extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
-    @Column(nullable = false, length = 200)
-    private String mainMessage;
-
-    @Column(nullable = false, length = 200)
-    private String subMessage;
-
     @Column(nullable = false)
     private Integer displayOrder;
 
     @Column(nullable = false)
     private boolean isActive;
 
-    private Banner(String imageUrl, String mainMessage, String subMessage, Integer displayOrder) {
+    private Banner(String imageUrl, Integer displayOrder) {
         this.imageUrl = imageUrl;
-        this.mainMessage = mainMessage;
-        this.subMessage = subMessage;
         this.displayOrder = displayOrder;
         this.isActive = true;
     }
 
-    public static Banner create(String imageUrl, String mainMessage, String subMessage, Integer displayOrder) {
-        return new Banner(imageUrl, mainMessage, subMessage, displayOrder);
+    public static Banner create(String imageUrl, Integer displayOrder) {
+        return new Banner(imageUrl, displayOrder);
     }
 
     public void activate() {
