@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/images")
-public class ImageController {
+public class ImageController implements ImageApiDocs{
 
     private final S3Uploader s3Uploader;
 
