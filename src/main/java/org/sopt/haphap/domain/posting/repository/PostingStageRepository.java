@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.dto.projection.PostingStageCalendarProjection;
 import org.sopt.haphap.domain.posting.dto.response.PostingStageResponse;
 import org.sopt.haphap.domain.posting.dto.projection.TodayAnnouncementProjection;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +45,14 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
         ORDER BY s.expectedScore DESC
         """)
     List<TodayAnnouncementProjection> findTodayAnnouncements(@Param("today") LocalDate today, Pageable pageable);
+
+    // 캘린더 날짜별 조회 전용. 공고 수와 무관하게 쿼리 1번
+    @Query("""
+        SELECT s.posting.id AS postingId, s.id AS stageId,
+               s.name AS stageName, s.expectedScore AS expectedScore,
+               s.expectedAnnouncementDate AS expectedAnnouncementDate
+        FROM PostingStage s
+        WHERE s.expectedAnnouncementDate = :date
+        """)
+    List<PostingStageCalendarProjection> findCalendarStagesByDate(@Param("date") LocalDate date);
 }
