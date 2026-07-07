@@ -7,6 +7,7 @@ import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/v1/postings/{postingId}/alrams")
@@ -26,7 +27,7 @@ public class AlramController implements AlramApiDocs {
     }
     @DeleteMapping
     public ResponseEntity<SuccessResponse<Void>> deleteAlrams(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId
     ) {
 

@@ -1,11 +1,13 @@
 package org.sopt.haphap.domain.alram.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Tag(name = "알람 등록",description = "공고별 알람을 on/off 합니다.")
 public interface AlramApiDocs {
@@ -26,7 +28,7 @@ public interface AlramApiDocs {
                     - 공고 아이디를 받아 해당 공고의 알람 설정을 off합니다. 
                     """)
     ResponseEntity<SuccessResponse<Void>> deleteAlrams(
-            @RequestHeader("X-User-Id") Long userId,
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId
     );
 }
