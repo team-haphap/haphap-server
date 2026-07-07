@@ -71,4 +71,15 @@ public interface PostingApiDocs {
                     """
     )
     ResponseEntity<SuccessResponse<PostingStageStatusListResponse>> getStagesStatus(@PathVariable Long postingId);
+
+    @Operation(summary= "공고 전형 별 집계 조회",
+            description = """
+                    공고 전형별 집계 조회합니다. 
+                    - 공고 전형 별 passCount,failCount,pendingCount를 제시합니다.
+                    """
+    )
+    ResponseEntity<SuccessResponse<PostingStageStatisticResponse>> getStagesStatistic(
+            @PathVariable Long postingId,
+            @PathVariable Long stageId
+    );
 }

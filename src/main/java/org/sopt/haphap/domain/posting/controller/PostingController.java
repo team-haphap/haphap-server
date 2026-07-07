@@ -23,6 +23,7 @@ public class PostingController implements PostingApiDocs {
     private final AnnouncementsService announcementsService;
     private final PostingDetailService postingDetailService;
     private final PostingStageStatusService postingStageStatusService;
+    private final PostingStageStatisticService postingStageStatisticService;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -103,7 +104,19 @@ public class PostingController implements PostingApiDocs {
         PostingStageStatusListResponse response = postingStageStatusService.getStagesStatus(postingId);
 
         SuccessResponse<PostingStageStatusListResponse> body =
-                ApiResponse.success(PostingSuccessCode.POSTING_DETAIL_FETCHED, response);
+                ApiResponse.success(PostingSuccessCode.POSTING_STAGE_STATUS_FETCHED, response);
+
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @GetMapping("/{postingId}/{stageId}/statistics")
+    public ResponseEntity<SuccessResponse<PostingStageStatisticResponse>> getStagesStatistic(
+            @PathVariable Long postingId,
+            @PathVariable Long stageId
+    ){
+        PostingStageStatisticResponse response = postingStageStatisticService.getPostingStageStatistic(postingId,stageId);
+        SuccessResponse<PostingStageStatisticResponse> body =
+                ApiResponse.success(PostingSuccessCode.POSTING_STAGE_STATISTIC_FETCHED, response);
 
         return ResponseEntity.status(body.status()).body(body);
     }
