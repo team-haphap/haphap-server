@@ -30,13 +30,18 @@ public class User extends BaseEntity {
 
     private LocalDate birthDate;
 
+    private String gender;
+
+    private String ageRange;
+
+    private String phoneNumber;
+
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Provider provider;
 
     @Column(nullable = false)
     private String providerId;
-
-    private String profileImageUrl;
 }
-

@@ -4,6 +4,7 @@ public record AuthResponse(
         String accessToken,
         String refreshToken,
         String name,
-        String anonymousName
+        String anonymousName,
+        String profileImageUrl
 ) {
 }

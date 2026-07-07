@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum AutocompleteType {
     COMPANY("company"),
-    JOB("job");
+    KEYWORD("keyword");
 
     private final String value;
 
