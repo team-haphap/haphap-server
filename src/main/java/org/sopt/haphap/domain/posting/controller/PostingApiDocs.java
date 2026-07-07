@@ -2,10 +2,7 @@ package org.sopt.haphap.domain.posting.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
-import org.sopt.haphap.domain.posting.dto.response.PostingListResponse;
-import org.sopt.haphap.domain.posting.dto.response.PostingStageListResponse;
-import org.sopt.haphap.domain.posting.dto.response.TodayAnnouncementPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,10 +12,10 @@ import java.util.List;
 
 @Tag(name = "공고",description = "공고관련 API 입니다")
 public interface PostingApiDocs {
-    @Operation(summary = "공고명 리스트 조회 " ,description = "전체 공고명을 가나다 순으로 반환합니다.")
+    @Operation(summary = "공고명 리스트 조회 ", description = "전체 공고명을 가나다 순으로 반환합니다.")
     ResponseEntity<SuccessResponse<PostingListResponse>> getPostings();
 
-    @Operation(summary = "공고 별 전형 조회",description = "해당 공고의 전형을 반환합니다.")
+    @Operation(summary = "공고 별 전형 조회", description = "해당 공고의 전형을 반환합니다.")
     ResponseEntity<SuccessResponse<PostingStageListResponse>> getStages(@PathVariable Long postingId);
 
     @Operation(summary = "공고 상세 조회 기록",
@@ -32,27 +29,57 @@ public interface PostingApiDocs {
                     응답 본문은 없습니다.
                     """)
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
+               
     @Operation(summary = "홈 메인-최근 등록 공고 조회",
             description = """
-                홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
-                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
-                """
-            )
+                    홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
+                    - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                    """
+    )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) List<String> category);
 
     @Operation(summary = "공고 리스트 조회",
             description = """
-                공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
-                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
-                """
-            )
+                    공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
+                    - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                    """
+    )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) List<String> category);
 
     @Operation(summary = "오늘 발표 예상 공고 조회",
             description = """
-                오늘 발표 예상 전형이 있는 공고들을 조회합니다.
-                - score이 높은 순 3개 반환합니다.
-                """
+                    오늘 발표 예상 전형이 있는 공고들을 조회합니다.
+                    - score이 높은 순 3개 반환합니다.
+                    """
     )
     ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings();
+
+    @Operation(summary = "공고 상세 조회",
+            description = """
+                    공고 상세 조회합니다. 
+                    - 각 공고에 등록중이 회원 수를 표시합니다. (한 유저가 중복 등록한 경우 중복 제거)
+                    - 프로필 이미지는 최신 등록 순으로 제시합니다. 
+                    - 해당 공고에 실시간으로 등록한 전형을 제보합니다.(최대 30개 제시)
+                    """
+    )
+    ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId);
+
+    @Operation(summary = "공고 전형 별 상태 조회",
+            description = """
+                    공고 전형별 상태를 조회합니다. 
+                    - currentStageId 는 현재 진행중인 상태입니다.(없으면 null)
+                    """
+    )
+    ResponseEntity<SuccessResponse<PostingStageStatusListResponse>> getStagesStatus(@PathVariable Long postingId);
+
+    @Operation(summary= "공고 전형 별 집계 조회",
+            description = """
+                    공고 전형별 집계 조회합니다. 
+                    - 공고 전형 별 passCount,failCount,pendingCount를 제시합니다.
+                    """
+    )
+    ResponseEntity<SuccessResponse<PostingStageStatisticResponse>> getStagesStatistic(
+            @PathVariable Long postingId,
+            @PathVariable Long stageId
+    );
 }

@@ -1,6 +1,7 @@
 package org.sopt.haphap.global.client;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.global.client.dto.KakaoUserResponse;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
@@ -10,15 +11,18 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import org.sopt.haphap.global.util.PhoneNumberMasker;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class KakaoOAuthClient implements OAuthClient {
 
     private final WebClient webClient;
+    private final PhoneNumberMasker phoneNumberMasker;
 
     @Override
     public Provider getProvider() {
@@ -40,7 +44,10 @@ public class KakaoOAuthClient implements OAuthClient {
                 .bodyToMono(KakaoUserResponse.class)
                 .switchIfEmpty(Mono.error(new CustomException(AuthErrorCode.KAKAO_ACCOUNT_NOT_FOUND)))
                 .onErrorMap(ex -> !(ex instanceof CustomException),
-                        ex -> new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE))
+                        ex -> {
+                            log.error("Kakao API 호출 실패", ex);
+                            return new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE);
+                        })
                 .block();
 
         if (response == null) {
@@ -53,12 +60,15 @@ public class KakaoOAuthClient implements OAuthClient {
 
         return new OAuthUserInfo(
                 String.valueOf(response.id()),
-                account.profile().nickname(),
+                account.name(),
                 account.email(),
                 parseBirthDate(
                         account.birthyear() != null ? account.birthyear() : "",
                         account.birthday() != null ? account.birthday() : ""
-                )
+                ),
+                account.gender(),
+                account.ageRange(),
+                phoneNumberMasker.mask(account.phoneNumber())
         );
     }
 
