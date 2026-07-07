@@ -3,7 +3,6 @@ package org.sopt.haphap.domain.user.service;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
 import org.sopt.haphap.domain.user.entity.User;
-import org.sopt.haphap.global.jwt.JwtProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -18,7 +18,7 @@ public class AlramController implements AlramApiDocs {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<Void>> setAlrams(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId
     ) {
         alramSettingService.setAlrams(userId,postingId);
