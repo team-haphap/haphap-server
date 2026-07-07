@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.UserRepository;
+import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.util.AnonymousNameGenerator;
+import org.sopt.haphap.global.util.ProfileImageAssigner;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,24 +21,35 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final AnonymousNameGenerator anonymousNameGenerator;
+    private final ProfileImageAssigner profileImageAssigner;
 
     // User + isNew를 함께 담는 record
     public record FindOrCreateResult(User user, boolean isNew) {}
 
     @Transactional
-    public FindOrCreateResult findOrCreate(Provider provider, String providerId, String name, String email, LocalDate birthDate) {
+    public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
         return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> new FindOrCreateResult(user, false))
+                .map(user -> {
+                    user.updateProfile(
+                            userInfo.name(), userInfo.email(), userInfo.birthDate(),
+                            userInfo.gender(), userInfo.ageRange(), userInfo.phoneNumber()
+                    );
+                    return new FindOrCreateResult(user, false);
+                })
                 .orElseGet(() -> {
                     try {
                         User newUser = userRepository.save(
                                 User.builder()
                                         .provider(provider)
                                         .providerId(providerId)
-                                        .name(name)
-                                        .email(email)
-                                        .birthDate(birthDate)
+                                        .name(userInfo.name())
+                                        .email(userInfo.email())
+                                        .birthDate(userInfo.birthDate())
+                                        .gender(userInfo.gender())
+                                        .ageRange(userInfo.ageRange())
+                                        .phoneNumber(userInfo.phoneNumber())
                                         .anonymousName(anonymousNameGenerator.generate())
+                                        .profileImageUrl(profileImageAssigner.assign())
                                         .build()
                         );
                         return new FindOrCreateResult(newUser, true);

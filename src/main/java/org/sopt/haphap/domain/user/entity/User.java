@@ -30,6 +30,14 @@ public class User extends BaseEntity {
 
     private LocalDate birthDate;
 
+    private String gender;
+
+    private String ageRange;
+
+    private String phoneNumber;
+
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Provider provider;
@@ -40,3 +48,14 @@ public class User extends BaseEntity {
     private String profileImageUrl;
 }
 
+    //재로그인-갱신하기
+    public void updateProfile(String name, String email, LocalDate birthDate,
+                              String gender, String ageRange, String phoneNumber) {
+        if (name != null) this.name = name;
+        if (email != null) this.email = email;
+        if (birthDate != null) this.birthDate = birthDate;
+        if (gender != null) this.gender = gender;
+        if (ageRange != null) this.ageRange = ageRange;
+        if (phoneNumber != null) this.phoneNumber = phoneNumber;
+    }
+}
