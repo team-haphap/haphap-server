@@ -13,7 +13,6 @@ public record AutocompleteItemResponse(
     }
 
     public static AutocompleteItemResponse job(Long id, String name, List<HighlightRange> ranges) {
-        return new AutocompleteItemResponse(AutocompleteType.JOB, name, ranges, id);
+        return new AutocompleteItemResponse(AutocompleteType.KEYWORD, name, ranges, id);
     }
 }
-

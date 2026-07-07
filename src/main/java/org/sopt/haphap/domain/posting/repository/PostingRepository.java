@@ -23,7 +23,7 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         JOIN FETCH p.category
         WHERE p.id IN :ids
         """)
-  List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+    List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
 
     @Query("""
         SELECT p FROM Posting p
@@ -31,7 +31,7 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         JOIN FETCH p.category
         WHERE (:categoryNames IS NULL OR p.category.name IN :categoryNames)
         """)
-  List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
+    List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
 
     @Query(value = """
         SELECT p.id AS id, p.title AS title
@@ -41,6 +41,6 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         ORDER BY similarity(p.title, :keyword) DESC
         LIMIT :limit
         """, nativeQuery = true)
-  List<PostingAutocompleteProjection> searchByTitleContaining(
-        @Param("keyword") String keyword, @Param("limit") int limit);
+    List<PostingAutocompleteProjection> searchByTitleContaining(
+            @Param("keyword") String keyword, @Param("limit") int limit);
 }
