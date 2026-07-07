@@ -17,4 +17,3 @@ public record AutocompleteItemResponse(
     }
 }
 
-//이 부분 회사 상세 화면 관련한 기능명세, 화면설계서 보고 업데이트해야 합니당
