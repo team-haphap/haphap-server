@@ -66,4 +66,10 @@ public class StageResultCount {
             case PENDING -> this.pendingCount += n;
         }
     }
+
+    public void reconcile(long passCount, long failCount, long pendingCount) {
+        this.passCount = passCount;
+        this.failCount = failCount;
+        this.pendingCount = pendingCount;
+    }
 }
