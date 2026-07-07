@@ -65,6 +65,17 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     List<StageResultAggProjection> aggregateAllForRebuild();
 
+    @Query("""
+    select r from Registration r
+    join fetch r.user
+    join fetch r.stage
+    join fetch r.posting p
+    join fetch p.company
+    join fetch p.category
+    where r.id = :id
+    """)
+    Optional<Registration> findByIdWithDetails(@Param("id") Long id);
+
     // distinct 유저 수 (registeredCount)
     @Query("""
         SELECT COUNT(DISTINCT r.user.id)
@@ -96,6 +107,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY r.updatedAt DESC
         """)
     List<RegistrationFeedProjection> findRecentFeeds(@Param("postingId") Long postingId, Pageable pageable);
+           
     //캘린더에서 추가
     @Query("""
     SELECT r.stage.id AS stageId, COUNT(r) AS cnt
