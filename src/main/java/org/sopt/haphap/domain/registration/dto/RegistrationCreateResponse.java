@@ -6,10 +6,16 @@ public record RegistrationCreateResponse(
         Long registrationId,
         PassCardResponse card    // PASS가 아니면 null
 ) {
-    public static RegistrationCreateResponse from(Registration registration) {
-        PassCardResponse card = registration.isPass()
-                ? PassCardResponse.from(registration)
-                : null;
-        return new RegistrationCreateResponse(registration.getId(), card);
+
+    // PASS: 연관이 fetch join으로 로딩된 registration을 받아 카드 구성
+    public static RegistrationCreateResponse pass(Registration registration) {
+        return new RegistrationCreateResponse(
+                registration.getId(),
+                PassCardResponse.from(registration));
+    }
+
+    // 그 외: ID만
+    public static RegistrationCreateResponse idOnly(Long registrationId) {
+        return new RegistrationCreateResponse(registrationId, null);
     }
 }

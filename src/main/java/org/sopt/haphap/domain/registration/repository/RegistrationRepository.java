@@ -60,4 +60,15 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         GROUP BY r.posting.id, r.stage.id, r.result
         """)
     List<StageResultAggProjection> aggregateAllForRebuild();
+
+    @Query("""
+    select r from Registration r
+    join fetch r.user
+    join fetch r.stage
+    join fetch r.posting p
+    join fetch p.company
+    join fetch p.category
+    where r.id = :id
+    """)
+    Optional<Registration> findByIdWithDetails(@Param("id") Long id);
 }
