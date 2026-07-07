@@ -97,7 +97,7 @@ public class PostingController implements PostingApiDocs {
         PostingStageStatusListResponse response = postingStageStatusService.getStagesStatus(postingId);
 
         SuccessResponse<PostingStageStatusListResponse> body =
-                ApiResponse.success(PostingSuccessCode.POSTING_DETAIL_FETCHED, response);
+                ApiResponse.success(PostingSuccessCode.POSTING_STAGE_STATUS_FETCHED, response);
 
         return ResponseEntity.status(body.status()).body(body);
     }
