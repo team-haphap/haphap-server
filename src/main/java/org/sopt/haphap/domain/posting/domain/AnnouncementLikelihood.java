@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.posting.domain;
 
 public enum AnnouncementLikelihood {
+    NONE,
     LOW,
     MEDIUM,
     HIGH;
