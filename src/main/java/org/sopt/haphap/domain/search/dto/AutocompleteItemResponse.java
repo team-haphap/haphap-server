@@ -6,14 +6,14 @@ public record AutocompleteItemResponse(
         AutocompleteType type,
         String name,
         List<HighlightRange> highlightRanges,
-        String url
+        Long postingId
 ) {
     public static AutocompleteItemResponse company(Long id, String name, List<HighlightRange> ranges) {
-        return new AutocompleteItemResponse(AutocompleteType.COMPANY, name, ranges, "/companies/" + id);
+        return new AutocompleteItemResponse(AutocompleteType.COMPANY, name, ranges, id);
     }
 
     public static AutocompleteItemResponse job(Long id, String name, List<HighlightRange> ranges) {
-        return new AutocompleteItemResponse(AutocompleteType.JOB, name, ranges, "/postings/" + id);
+        return new AutocompleteItemResponse(AutocompleteType.JOB, name, ranges, id);
     }
 }
 
