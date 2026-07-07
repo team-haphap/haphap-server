@@ -5,11 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.alram.code.AlramSuccessCode;
 import org.sopt.haphap.domain.alram.dto.PushTokenRegisterRequest;
 import org.sopt.haphap.domain.alram.service.PushTokenRegisterService;
-import org.sopt.haphap.domain.alram.service.PushTokenService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +22,7 @@ public class PushTokenController implements PushTokenApiDocs {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<Void>> register(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody PushTokenRegisterRequest request) {
 
         pushTokenRegisterService.register(userId, request);
