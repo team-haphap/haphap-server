@@ -69,4 +69,21 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     """)
     List<PostingStageCalendarProjection> findCalendarStagesByDateRange(
             @Param("start") LocalDate start, @Param("end") LocalDate end);
+    //announcedCount — 오늘 발표 감지된 전형이 있는 공고 수
+    @Query("""
+        SELECT COUNT(DISTINCT s.posting.id)
+        FROM PostingStage s
+        WHERE s.announcedDate = :today
+        """)
+    long countPostingsAnnouncedToday(@Param("today") LocalDate today);
+
+    // 전체 전형 (공고별 그룹핑용)
+    @Query("""
+        SELECT s.posting.id AS postingId, s.id AS stageId,
+               s.name AS name, s.orderIndex AS orderIndex,
+               s.expectedAnnouncementDate AS expectedAnnouncementDate
+        FROM PostingStage s
+        ORDER BY s.posting.id ASC, s.orderIndex ASC
+        """)
+    List<PostingStageFlatProjection> findAllStages();
 }
