@@ -6,8 +6,10 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
+import org.sopt.haphap.domain.posting.service.support.PostingSortComparators;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

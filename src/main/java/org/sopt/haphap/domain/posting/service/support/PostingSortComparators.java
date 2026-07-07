@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.service;
+package org.sopt.haphap.domain.posting.service.support;
 
 import java.text.Collator;
 import java.time.LocalDate;

@@ -11,7 +11,6 @@ import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.posting.service.PostingAggregate;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.springframework.stereotype.Component;
 

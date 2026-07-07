@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
-import org.sopt.haphap.domain.posting.service.NextStageCalculator;
+import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
 import org.springframework.stereotype.Component;
 
 @Component
