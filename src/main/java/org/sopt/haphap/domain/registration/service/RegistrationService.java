@@ -47,7 +47,14 @@ public class RegistrationService {
 
         applyAlramSetting(target.user(), target.posting(), request.alarmEnabled());
         publishEvent(registration, target.posting(), target.user());
-        return RegistrationCreateResponse.from(registration.getId());
+
+        // PASS일 때만 연관을 fetch join으로 당겨와 카드 정보 구성, 아니면 ID만
+        if (registration.isPass()) {
+            Registration detailed = registrationRepository.findByIdWithDetails(registration.getId())
+                    .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
+            return RegistrationCreateResponse.pass(detailed);
+        }
+        return RegistrationCreateResponse.idOnly(registration.getId());
 
     }
 

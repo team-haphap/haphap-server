@@ -13,6 +13,14 @@ public class PostingViewTracker {
     private final RedisTemplate<String, String> redisTemplate;
 
     public void recordView(Long postingId) {
+        increment(postingId);
+    }
+
+    public void recordCardClick(Long postingId) {
+        increment(postingId);
+    }
+
+    private void increment(Long postingId) {
         redisTemplate.opsForZSet().incrementScore(VIEW_COUNT_KEY, postingId.toString(), 1);
     }
 }
