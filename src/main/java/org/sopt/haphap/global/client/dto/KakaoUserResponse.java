@@ -10,6 +10,9 @@ public record KakaoUserResponse(
             String email,
             String birthyear,
             String birthday,
+            String gender,
+            @JsonProperty("age_range") String ageRange,
+            @JsonProperty("phone_number") String phoneNumber,
             Profile profile
     ) {}
     public record Profile(
