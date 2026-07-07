@@ -12,12 +12,10 @@ public class PostingViewTracker {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    // 상세페이지 진입
     public void recordView(Long postingId) {
         increment(postingId);
     }
 
-    // 추가한 거 - 카드 클릭
     public void recordCardClick(Long postingId) {
         increment(postingId);
     }
