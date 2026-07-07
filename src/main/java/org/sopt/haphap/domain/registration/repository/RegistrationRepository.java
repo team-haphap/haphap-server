@@ -119,4 +119,20 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<StagePendingCountProjection> countByStageIdsAndResult(
             @Param("stageIds") List<Long> stageIds,
             @Param("result") RegistrationResult result);
+
+    //cumulatedCount
+    @Query("""
+        SELECT
+          SUM(CASE WHEN r.createdAt >= :startOfDay AND r.createdAt < :startOfTomorrow
+                   THEN 1 ELSE 0 END)
+          +
+          SUM(CASE WHEN r.updatedAt >= :startOfDay AND r.updatedAt < :startOfTomorrow
+                        AND r.updatedAt <> r.createdAt
+                   THEN 1 ELSE 0 END)
+        FROM Registration r
+        WHERE (r.createdAt >= :startOfDay AND r.createdAt < :startOfTomorrow)
+           OR (r.updatedAt >= :startOfDay AND r.updatedAt < :startOfTomorrow)
+        """)
+    Long countTodayEvents(@Param("startOfDay") LocalDateTime startOfDay,
+                          @Param("startOfTomorrow") LocalDateTime startOfTomorrow);
 }

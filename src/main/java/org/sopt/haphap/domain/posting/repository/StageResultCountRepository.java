@@ -47,4 +47,19 @@ public interface StageResultCountRepository extends JpaRepository<StageResultCou
         WHERE c.postingId IN :postingIds
         """)
     List<StageRegistrationCountProjection> findTotalsByPostingIds(@Param("postingIds") List<Long> postingIds);
+
+    @Query("""
+        SELECT (c.passCount + c.failCount)
+        FROM StageResultCount c
+        WHERE c.postingId = :postingId AND c.stageId = :stageId
+        """)
+    Long findConfirmedCount(@Param("postingId") Long postingId, @Param("stageId") Long stageId);
+
+    // 전체 (posting,stage) 카운트 (PASS+FAIL)
+    @Query("""
+        SELECT c.postingId AS postingId, c.stageId AS stageId,
+               (c.passCount + c.failCount) AS cnt
+        FROM StageResultCount c
+        """)
+    List<StageRegistrationCountProjection> findAllTotals();
 }
