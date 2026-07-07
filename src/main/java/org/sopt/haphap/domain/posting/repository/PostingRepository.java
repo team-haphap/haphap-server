@@ -61,4 +61,7 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             WHERE p.id IN :ids
             """)
     List<PostingSummaryResponse> findSummariesByIds(@Param("ids") List<Long> ids);
+
+    @Query("SELECT p.id FROM Posting p WHERE p.deadline < CURRENT_DATE")
+    List<Long> findClosedPostingIds();
 }

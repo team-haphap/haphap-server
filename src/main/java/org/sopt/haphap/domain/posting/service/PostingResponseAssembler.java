@@ -30,9 +30,9 @@ public class PostingResponseAssembler {
                 nextStage == null ? null : nextStage.getName(),
                 days, posting.getCompany().getImageUrl());
 
-        return new Scored(response, posting.getTitle(), announceDate);
+        return new Scored(response, posting.getTitle(), announceDate, posting.getDeadline());
     }
 
     /** 응답 + 정렬키(발표일, 공고명)를 함께 */
-    public record Scored(PopularPostingResponse response, String title, LocalDate announceDate) {}
+    public record Scored(PopularPostingResponse response, String title, LocalDate announceDate, LocalDate deadline) {}
 }
