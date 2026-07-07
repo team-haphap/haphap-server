@@ -53,6 +53,7 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
                s.expectedAnnouncementDate AS expectedAnnouncementDate
         FROM PostingStage s
         WHERE s.expectedAnnouncementDate = :date
+        ORDER BY s.expectedScore DESC, s.id ASC
         """)
     List<PostingStageCalendarProjection> findCalendarStagesByDate(@Param("date") LocalDate date);
 

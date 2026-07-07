@@ -69,7 +69,10 @@ public class CalendarPostingQueryService {
     }
 
     private PostingStageCalendarProjection pickHigherScore(PostingStageCalendarProjection a, PostingStageCalendarProjection b) {
-        return a.getExpectedScore() >= b.getExpectedScore() ? a : b;
+        if (a.getExpectedScore() != b.getExpectedScore()) {
+            return a.getExpectedScore() > b.getExpectedScore() ? a : b;
+        }
+        return a.getStageId() <= b.getStageId() ? a : b;
     }
 
     private CalendarPostingCardResponse toCard(Long postingId,
