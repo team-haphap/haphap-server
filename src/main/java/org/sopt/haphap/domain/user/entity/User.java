@@ -44,16 +44,4 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String providerId;
-
-
-    //재로그인-갱신하기
-    public void updateProfile(String name, String email, LocalDate birthDate,
-                              String gender, String ageRange, String phoneNumber) {
-        if (name != null) this.name = name;
-        if (email != null) this.email = email;
-        if (birthDate != null) this.birthDate = birthDate;
-        if (gender != null) this.gender = gender;
-        if (ageRange != null) this.ageRange = ageRange;
-        if (phoneNumber != null) this.phoneNumber = phoneNumber;
-    }
 }
