@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.service;
+package org.sopt.haphap.domain.posting.aggregate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

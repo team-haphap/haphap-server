@@ -4,7 +4,7 @@ import java.text.Collator;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Locale;
-import org.sopt.haphap.domain.posting.service.PostingResponseAssembler.Scored;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler.Scored;
 
 public final class PostingSortComparators {
 

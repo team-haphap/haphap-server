@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.service;
+package org.sopt.haphap.domain.posting.service.support;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.service.NextStageCalculator;
 import org.springframework.stereotype.Component;
 
 @Component
