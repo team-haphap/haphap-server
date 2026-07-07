@@ -56,8 +56,8 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         JOIN p.company c
         JOIN p.category cat
         WHERE (:keyword IS NULL
-                OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%'))
+                OR LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')))
           AND (:categories IS NULL OR cat.name IN :categories)
           AND (:status IS NULL
                 OR (:status = 'open' AND (p.deadline IS NULL OR p.deadline >= CURRENT_DATE))
