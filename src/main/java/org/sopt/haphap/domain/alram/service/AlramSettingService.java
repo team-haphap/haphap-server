@@ -20,19 +20,16 @@ public class AlramSettingService {
     private final UserRepository userRepository;
     private final PostingRepository postingRepository;
 
-    // 종 버튼 켜기
     @Transactional
     public void setAlrams(Long userId, Long postingId) {
         applyByIds(userId, postingId, true);
     }
 
-    // 종 버튼 끄기
     @Transactional
     public void deleteAlrams(Long userId, Long postingId) {
         applyByIds(userId, postingId, false);
     }
 
-    // ID로 받아 조회 후 설정 (종 버튼용)
     private void applyByIds(Long userId, Long postingId, boolean enabled) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
