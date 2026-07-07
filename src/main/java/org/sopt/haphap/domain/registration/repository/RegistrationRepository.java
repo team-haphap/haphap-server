@@ -4,6 +4,7 @@ import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.dto.RecentParticipantProjection;
 import org.sopt.haphap.domain.registration.dto.RegistrationFeedProjection;
+import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
 import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
 import org.springframework.data.domain.Pageable;
@@ -95,4 +96,15 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY r.updatedAt DESC
         """)
     List<RegistrationFeedProjection> findRecentFeeds(@Param("postingId") Long postingId, Pageable pageable);
+    //캘린더에서 추가
+    @Query("""
+    SELECT r.stage.id AS stageId, COUNT(r) AS cnt
+    FROM Registration r
+    WHERE r.stage.id IN :stageIds
+      AND r.result = :result
+    GROUP BY r.stage.id
+    """)
+    List<StagePendingCountProjection> countByStageIdsAndResult(
+            @Param("stageIds") List<Long> stageIds,
+            @Param("result") RegistrationResult result);
 }
