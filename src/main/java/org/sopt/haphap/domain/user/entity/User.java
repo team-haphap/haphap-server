@@ -47,12 +47,13 @@ public class User extends BaseEntity {
 
     //재로그인-갱신하기
     public void updateProfile(String name, String email, LocalDate birthDate,
-                              String gender, String ageRange, String phoneNumber) {
+                          String gender, String ageRange, String phoneNumber, String profileImageUrl) {
         if (name != null) this.name = name;
         if (email != null) this.email = email;
         if (birthDate != null) this.birthDate = birthDate;
         if (gender != null) this.gender = gender;
         if (ageRange != null) this.ageRange = ageRange;
         if (phoneNumber != null) this.phoneNumber = phoneNumber;
+        if (profileImageUrl != null) this.profileImageUrl = profileImageUrl; 
     }
 }
