@@ -36,8 +36,7 @@ public class AuthService {
     public AuthResponse kakaoLogin(String kakaoAccessToken) {
         OAuthUserInfo userInfo = oAuthClients.get(Provider.KAKAO).getUserInfo(kakaoAccessToken);
         UserService.FindOrCreateResult result = userService.findOrCreate(
-                Provider.KAKAO, userInfo.providerId(), userInfo.name(),
-                userInfo.email(), userInfo.birthDate()
+                Provider.KAKAO, userInfo.providerId(), userInfo
         );
         User user = result.user();
         String newRefreshToken = tokenService.issueRefreshToken(user.getId());
@@ -45,7 +44,8 @@ public class AuthService {
                 jwtProvider.createAccessToken(user.getId()),
                 newRefreshToken,
                 user.getName(),
-                user.getAnonymousName()
+                user.getAnonymousName(),
+                user.getProfileImageUrl()
         );
     }
 
@@ -64,7 +64,8 @@ public class AuthService {
                 jwtProvider.createAccessToken(userId),
                 newRefreshToken,
                 user.getName(),
-                user.getAnonymousName()
+                user.getAnonymousName(),
+                user.getProfileImageUrl()
         );
     }
 
