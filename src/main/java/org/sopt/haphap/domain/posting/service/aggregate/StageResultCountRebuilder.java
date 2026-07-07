@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.aggregate;
+package org.sopt.haphap.domain.posting.service.aggregate;
 
 import java.util.HashMap;
 import java.util.Map;
