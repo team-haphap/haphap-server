@@ -5,8 +5,6 @@ import org.sopt.haphap.domain.calendar.dto.CalendarPostingCardResponse;
 import org.sopt.haphap.domain.calendar.dto.CalendarPostingListResponse;
 import org.sopt.haphap.domain.posting.domain.AnnouncementLikelihood;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageCalendarProjection;
-import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
-import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
@@ -29,7 +27,6 @@ import java.util.stream.Collectors;
 public class CalendarPostingQueryService {
 
     private final PostingStageRepository postingStageRepository;
-    private final PostingRepository postingRepository;
     private final RegistrationRepository registrationRepository;
 
     public CalendarPostingListResponse getPostingsByDate(LocalDate date) {
@@ -44,12 +41,9 @@ public class CalendarPostingQueryService {
                 .collect(Collectors.toMap(
                         PostingStageCalendarProjection::getPostingId,
                         Function.identity(),
-                        this::pickHigherScore));
+                        CalendarStageMerger::pickHigherScore));
 
         List<Long> postingIds = List.copyOf(stageByPostingId.keySet());
-
-        Map<Long, String> titleByPostingId = postingRepository.findSummariesByIds(postingIds).stream()
-                .collect(Collectors.toMap(PostingSummaryResponse::id, PostingSummaryResponse::title));
 
         List<Long> stageIds = stageByPostingId.values().stream()
                 .map(PostingStageCalendarProjection::getStageId)
@@ -61,35 +55,29 @@ public class CalendarPostingQueryService {
                 .collect(Collectors.toMap(StagePendingCountProjection::getStageId, StagePendingCountProjection::getCnt));
 
         List<CalendarPostingCardResponse> cards = postingIds.stream()
-                .sorted(byExpectedScoreThenTitle(stageByPostingId, titleByPostingId))
-                .map(id -> toCard(id, stageByPostingId.get(id), titleByPostingId, pendingCountByStageId))
+                .sorted(byExpectedScoreThenTitle(stageByPostingId))
+                .map(id -> toCard(stageByPostingId.get(id), pendingCountByStageId))
                 .toList();
 
         return CalendarPostingListResponse.of(date, cards);
     }
 
-    private PostingStageCalendarProjection pickHigherScore(PostingStageCalendarProjection a, PostingStageCalendarProjection b) {
-        return a.getExpectedScore() >= b.getExpectedScore() ? a : b;
-    }
-
-    private CalendarPostingCardResponse toCard(Long postingId,
-                                               PostingStageCalendarProjection stage,
-                                               Map<Long, String> titleByPostingId,
+    private CalendarPostingCardResponse toCard(PostingStageCalendarProjection stage,
                                                Map<Long, Long> pendingCountByStageId) {
-        return new CalendarPostingCardResponse(
-                postingId,
-                titleByPostingId.getOrDefault(postingId, ""),
+        return CalendarPostingCardResponse.of(
+                stage.getPostingId(),
+                stage.getTitle(),
                 stage.getStageName(),
                 AnnouncementLikelihood.from(stage.getExpectedScore()),
-                pendingCountByStageId.getOrDefault(stage.getStageId(), 0L)
+                pendingCountByStageId.getOrDefault(stage.getStageId(), 0L),
+                stage.getCompanyImageUrl()
         );
     }
 
-    private Comparator<Long> byExpectedScoreThenTitle(Map<Long, PostingStageCalendarProjection> stageByPostingId,
-                                                      Map<Long, String> titleByPostingId) {
+    private Comparator<Long> byExpectedScoreThenTitle(Map<Long, PostingStageCalendarProjection> stageByPostingId) {
         Collator korean = Collator.getInstance(Locale.KOREAN);
         return Comparator
                 .comparing((Long id) -> stageByPostingId.get(id).getExpectedScore(), Comparator.reverseOrder())
-                .thenComparing(id -> titleByPostingId.getOrDefault(id, ""), korean);
+                .thenComparing(id -> stageByPostingId.get(id).getTitle(), korean);
     }
 }
