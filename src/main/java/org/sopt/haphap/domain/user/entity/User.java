@@ -23,14 +23,20 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String anonymousName;
-    private String name;
-    private String email;
-    private LocalDate birthDate;
-    private String gender;
-    private String ageRange;
-    private String phoneNumber;
-    private String profileImageUrl;
 
+    private String name;
+
+    private String email;
+
+    private LocalDate birthDate;
+
+    private String gender;
+
+    private String ageRange;
+
+    private String phoneNumber;
+
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -50,4 +56,3 @@ public class User extends BaseEntity {
         if (phoneNumber != null) this.phoneNumber = phoneNumber;
     }
 }
-

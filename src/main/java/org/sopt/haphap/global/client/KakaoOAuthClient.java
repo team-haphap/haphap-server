@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import org.sopt.haphap.global.util.PhoneNumberMasker;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 public class KakaoOAuthClient implements OAuthClient {
 
     private final WebClient webClient;
+    private final PhoneNumberMasker phoneNumberMasker;
 
     @Override
     public Provider getProvider() {
@@ -66,7 +68,7 @@ public class KakaoOAuthClient implements OAuthClient {
                 ),
                 account.gender(),
                 account.ageRange(),
-                account.phoneNumber()
+                phoneNumberMasker.mask(account.phoneNumber())
         );
     }
 
