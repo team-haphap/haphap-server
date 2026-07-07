@@ -1,11 +1,15 @@
 package org.sopt.haphap.domain.search.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.search.code.SearchSuccessCode;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
-import org.sopt.haphap.domain.search.dto.PopularSearchPostingListResponse;
+import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
+import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.domain.search.service.AutocompleteService;
 import org.sopt.haphap.domain.search.service.PopularSearchPostingQueryService;
+import org.sopt.haphap.domain.search.service.PostingSearchQueryService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +25,13 @@ public class SearchController implements SearchApiDocs {
 
     private final PopularSearchPostingQueryService popularSearchPostingQueryService;
     private final AutocompleteService autocompleteService;
+    private final PostingSearchQueryService postingSearchQueryService;
 
     @GetMapping("/popular")
-    public ResponseEntity<SuccessResponse<PopularSearchPostingListResponse>> getPopularPostings() {
-        PopularSearchPostingListResponse response = popularSearchPostingQueryService.getPopularPostings();
+    public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings() {
+        PopularPostingListResponse response = popularSearchPostingQueryService.getPopularPostings();
 
-        SuccessResponse<PopularSearchPostingListResponse> body =
+        SuccessResponse<PopularPostingListResponse> body =
                 ApiResponse.success(SearchSuccessCode.POPULAR_POSTINGS_FETCHED, response);
 
         return ResponseEntity.status(body.status()).body(body);
@@ -39,6 +44,23 @@ public class SearchController implements SearchApiDocs {
         AutocompleteResponse response = autocompleteService.autocomplete(q);
         SuccessResponse<AutocompleteResponse> body =
                 ApiResponse.success(SearchSuccessCode.AUTOCOMPLETE_FETCHED, response);
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @GetMapping("/postings")
+    public ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) List<String> category,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        PostingSearchCondition condition = PostingSearchCondition.of(q, category, status, page, size);
+        SearchPostingListResponse response = postingSearchQueryService.search(condition);
+
+        SuccessResponse<SearchPostingListResponse> body =
+                ApiResponse.success(SearchSuccessCode.POSTING_SEARCH_FETCHED, response);
+
         return ResponseEntity.status(body.status()).body(body);
     }
 }

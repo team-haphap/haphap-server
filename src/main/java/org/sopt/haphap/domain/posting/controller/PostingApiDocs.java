@@ -2,9 +2,12 @@ package org.sopt.haphap.domain.posting.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.response.*;
+import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -71,4 +74,25 @@ public interface PostingApiDocs {
                     """
     )
     ResponseEntity<SuccessResponse<PostingStageStatusListResponse>> getStagesStatus(@PathVariable Long postingId);
+
+    @Operation(summary = "오늘 집계 조회",
+            description = """
+                    오늘의 집계를 조회합니다. 
+                    - cumulatedCount: 오늘 등록된 모든 합/불/대기중 결과 (변경 포함!)
+                    - onGoingCount: 마감되지 않은 공고들 모두
+                    - 오늘 발표되었다고 판단된 전형이 있는 모든 공고
+                    """
+    )
+    ResponseEntity<SuccessResponse<TodayStatisticResponse>> getTodayStatistics();
+               
+    @Operation(summary= "공고 전형 별 집계 조회",
+            description = """
+                    공고 전형별 집계 조회합니다. 
+                    - 공고 전형 별 passCount,failCount,pendingCount를 제시합니다.
+                    """
+    )
+    ResponseEntity<SuccessResponse<PostingStageStatisticResponse>> getStagesStatistic(
+            @PathVariable Long postingId,
+            @PathVariable Long stageId
+    );
 }

@@ -44,6 +44,7 @@ public class SecurityConfig {
                                 "/api/v1/postings/**",
                                 "/api/v1/search/**",
                                 "/api/v1/banners/**"
+                                "/api/v1/{postingId}/alrams"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

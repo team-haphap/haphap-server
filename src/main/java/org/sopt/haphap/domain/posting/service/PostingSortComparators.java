@@ -20,6 +20,13 @@ public final class PostingSortComparators {
                 .thenComparing(Scored::title, korean);
     }
 
+    public static Comparator<Scored> byDeadline() {
+        Collator korean = Collator.getInstance(Locale.KOREAN);
+        return Comparator
+                .comparing(Scored::deadline, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(Scored::title, korean);
+    }
+
     private static int rank(LocalDate date, LocalDate today) {
         if (date == null) return 2;
         return date.isBefore(today) ? 1 : 0;

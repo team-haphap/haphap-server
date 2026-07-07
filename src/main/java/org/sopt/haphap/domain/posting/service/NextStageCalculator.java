@@ -47,4 +47,8 @@ public class NextStageCalculator {
         if (nextStage == null || nextStage.getExpectedAnnouncementDate() == null) return null;
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), nextStage.getExpectedAnnouncementDate());
     }
+
+    public boolean isClosed(List<PostingStageFlatProjection> stages, Map<Long, Long> countByStageId) {
+        return calculate(stages, countByStageId) == null;  // nextStage 없음 = 마감
+    }
 }
