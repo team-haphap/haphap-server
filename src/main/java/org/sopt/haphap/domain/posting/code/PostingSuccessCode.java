@@ -16,7 +16,8 @@ public enum PostingSuccessCode implements SuccessResultCode {
     TODAY_ANNOUNCEMENT_POSTING_FETCHED(HttpStatus.OK,  "오늘 발표 예상 공고 조회에 성공했습니다."),
     POSTING_DETAIL_FETCHED(HttpStatus.OK,"공고 상세 조회에 성공했습니다."),
     POSTING_STAGE_STATUS_FETCHED(HttpStatus.OK,"공고 전형 상태 조회에 성공했습니다."),
-    TODAY_STATISTIC_FETCHED(HttpStatus.OK,"오늘 집계 결과 조회에 성공했습니다.");
+    TODAY_STATISTIC_FETCHED(HttpStatus.OK,"오늘 집계 결과 조회에 성공했습니다."),
+    POSTING_STAGE_STATISTIC_FETCHED(HttpStatus.OK,"공고 전형별 집계 조회에 성공했습니다.");
 
     private final HttpStatus status;
     private final String message;

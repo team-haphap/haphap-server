@@ -1,13 +1,14 @@
 package org.sopt.haphap.domain.registration.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.code.PostingErrorCode;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
-import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.UserRepository;
+import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,14 +24,14 @@ public class RegistrationTargetValidator {
     @Transactional(readOnly = true)
     public RegistrationTarget validate(Long userId, Long postingId, Long stageId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
         Posting posting = postingRepository.findById(postingId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.POSTING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(PostingErrorCode.POSTING_NOT_FOUND));
         PostingStage stage = postingStageRepository.findById(stageId)
-                .orElseThrow(() -> new CustomException(RegistrationErrorCode.STAGE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(PostingErrorCode.STAGE_NOT_FOUND));
 
         if (!stage.belongsTo(posting)) {
-            throw new CustomException(RegistrationErrorCode.STAGE_NOT_IN_POSTING);
+            throw new CustomException(PostingErrorCode.STAGE_NOT_IN_POSTING);
         }
 
         return new RegistrationTarget(user, posting, stage);

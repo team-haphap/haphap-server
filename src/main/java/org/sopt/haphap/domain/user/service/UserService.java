@@ -13,8 +13,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -29,13 +27,7 @@ public class UserService {
     @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
         return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> {
-                    user.updateProfile(
-                            userInfo.name(), userInfo.email(), userInfo.birthDate(),
-                            userInfo.gender(), userInfo.ageRange(), userInfo.phoneNumber()
-                    );
-                    return new FindOrCreateResult(user, false);
-                })
+                .map(user -> new FindOrCreateResult(user, false))
                 .orElseGet(() -> {
                     try {
                         User newUser = userRepository.save(
