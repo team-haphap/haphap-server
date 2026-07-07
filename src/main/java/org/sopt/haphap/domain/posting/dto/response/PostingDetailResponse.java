@@ -1,5 +1,7 @@
 package org.sopt.haphap.domain.posting.dto.response;
 
+import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public record PostingDetailResponse(
     public record RegistrationFeedResponse(
             String stage,
             String nickName,
+            RegistrationResult registrationResult,
             LocalDateTime feedCreatedAt
     ) {}
 }
