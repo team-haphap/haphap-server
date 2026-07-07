@@ -22,6 +22,7 @@ public class PostingController implements PostingApiDocs {
     private final PostingListingService postingListingService;
     private final AnnouncementsService announcementsService;
     private final PostingDetailService postingDetailService;
+    private final PostingStageStatusService postingStageStatusService;
 
     @GetMapping("/name")
     public ResponseEntity<SuccessResponse<PostingListResponse>> getPostings() {
@@ -96,4 +97,15 @@ public class PostingController implements PostingApiDocs {
 
         return ResponseEntity.status(body.status()).body(body);
     }
+
+    @GetMapping("/{postingId}/statistics")
+    public ResponseEntity<SuccessResponse<PostingStageStatusListResponse>> getStagesStatus(@PathVariable Long postingId) {
+        PostingStageStatusListResponse response = postingStageStatusService.getStagesStatus(postingId);
+
+        SuccessResponse<PostingStageStatusListResponse> body =
+                ApiResponse.success(PostingSuccessCode.POSTING_DETAIL_FETCHED, response);
+
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
 }
