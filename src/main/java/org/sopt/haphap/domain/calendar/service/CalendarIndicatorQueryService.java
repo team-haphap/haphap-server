@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,25 +27,23 @@ public class CalendarIndicatorQueryService {
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
 
-        // 그 달 전체 stage를 쿼리 1번으로 처리
         List<PostingStageCalendarProjection> stages =
                 postingStageRepository.findCalendarStagesByDateRange(start, end);
 
-        // 날짜별 최고 점수만 메모리에서 집계 (여러 공고 있으면 가장 높은 값 기준)
-        Map<LocalDate, Integer> maxScoreByDate = stages.stream()
+        Map<LocalDate, PostingStageCalendarProjection> stageByDate = stages.stream()
                 .collect(Collectors.toMap(
                         PostingStageCalendarProjection::getExpectedAnnouncementDate,
-                        PostingStageCalendarProjection::getExpectedScore,
-                        Math::max));
+                        Function.identity(),
+                        CalendarStageMerger::pickHigherScore));
 
         List<CalendarDateIndicatorResponse> dates = start.datesUntil(end.plusDays(1))
-                .map(date -> CalendarDateIndicatorResponse.of(date, toLikelihood(maxScoreByDate.get(date))))
+                .map(date -> CalendarDateIndicatorResponse.of(date, toLikelihood(stageByDate.get(date))))
                 .toList();
 
         return CalendarIndicatorListResponse.of(dates);
     }
 
-    private AnnouncementLikelihood toLikelihood(Integer maxScore) {
-        return maxScore == null ? AnnouncementLikelihood.NONE : AnnouncementLikelihood.from(maxScore);
+    private AnnouncementLikelihood toLikelihood(PostingStageCalendarProjection stage) {
+        return stage == null ? AnnouncementLikelihood.NONE : AnnouncementLikelihood.from(stage.getExpectedScore());
     }
 }
