@@ -37,7 +37,8 @@ public class TodayStatisticService {
     private long cumulatedCount() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime startOfTomorrow = startOfDay.plusDays(1);
-        return registrationRepository.countTodayUpdated(startOfDay, startOfTomorrow);
+        Long count = registrationRepository.countTodayEvents(startOfDay, startOfTomorrow);
+        return count == null ? 0L : count;
     }
 
     // 2. 진행 중(마감 안 된) 공고 수 = nextStage가 null이 아닌 공고
