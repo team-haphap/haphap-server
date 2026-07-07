@@ -3,21 +3,12 @@ package org.sopt.haphap.domain.posting.service;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingErrorCode;
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.dto.response.PostingDetailResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
-import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +19,8 @@ public class PostingDetailService {
     private static final int FEED_LIMIT = 30;
 
     private final PostingRepository postingRepository;
-    private final PostingStageRepository postingStageRepository;
-    private final StageResultCountRepository stageResultCountRepository;
-    private final NextStageCalculator nextStageCalculator;
     private final RegistrationQueryService registrationQueryService;
+    private final CurrentStageResolver currentStageResolver;
 
     public PostingDetailResponse getDetail(Long postingId) {
         // 공고 + 회사 + 카테고리
@@ -39,7 +28,7 @@ public class PostingDetailService {
                 .orElseThrow(() -> new CustomException(PostingErrorCode.POSTING_NOT_FOUND));
 
         // currentState 계산 (집계 테이블 재사용)
-        String currentState = resolveCurrentState(postingId);
+        String currentState = currentStageResolver.resolveCurrentState(postingId);
         var summary = registrationQueryService.getParticipantSummary(postingId, PROFILE_LIMIT);
         var feeds = registrationQueryService.getRecentFeeds(postingId, FEED_LIMIT);
 
@@ -53,20 +42,5 @@ public class PostingDetailService {
                 feeds.stream().map(f -> new PostingDetailResponse.RegistrationFeedResponse(
                         f.stage(), f.nickName(),f.status(), f.feedCreatedAt())).toList());
 
-    }
-
-    private String resolveCurrentState(Long postingId) {
-        List<PostingStageFlatProjection> stages = postingStageRepository
-                .findFlatByPostingIds(List.of(postingId));
-        stages.sort(Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex));
-
-        Map<Long, Long> counts = stageResultCountRepository
-                .findTotalsByPostingIds(List.of(postingId)).stream()
-                .collect(Collectors.toMap(
-                        StageRegistrationCountProjection::getStageId,
-                        StageRegistrationCountProjection::getCnt));
-
-        var current = nextStageCalculator.currentStage(stages, counts);
-        return current == null ? null : current.getName();
     }
 }
