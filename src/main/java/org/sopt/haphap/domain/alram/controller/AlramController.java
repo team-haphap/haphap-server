@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/{postingId}/alrams")
+@RequestMapping("/api/v1/postings/{postingId}/alrams")
 @RequiredArgsConstructor
 public class AlramController implements AlramApiDocs {
 
