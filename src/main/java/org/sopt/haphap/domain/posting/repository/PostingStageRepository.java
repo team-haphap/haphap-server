@@ -50,10 +50,12 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     @Query("""
         SELECT s.posting.id AS postingId, s.id AS stageId,
                s.name AS stageName, s.expectedScore AS expectedScore,
-               s.expectedAnnouncementDate AS expectedAnnouncementDate
+               s.expectedAnnouncementDate AS expectedAnnouncementDate,
+               p.title AS title, c.imageUrl AS companyImageUrl
         FROM PostingStage s
+        JOIN s.posting p
+        JOIN p.company c
         WHERE s.expectedAnnouncementDate = :date
-        ORDER BY s.expectedScore DESC, s.id ASC
         """)
     List<PostingStageCalendarProjection> findCalendarStagesByDate(@Param("date") LocalDate date);
 
