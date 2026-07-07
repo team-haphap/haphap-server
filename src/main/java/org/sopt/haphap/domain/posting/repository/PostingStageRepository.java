@@ -55,4 +55,15 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
         WHERE s.expectedAnnouncementDate = :date
         """)
     List<PostingStageCalendarProjection> findCalendarStagesByDate(@Param("date") LocalDate date);
+
+    // 월별 인디케이터 조회 전용
+    @Query("""
+    SELECT s.posting.id AS postingId, s.id AS stageId,
+           s.name AS stageName, s.expectedScore AS expectedScore,
+           s.expectedAnnouncementDate AS expectedAnnouncementDate
+    FROM PostingStage s
+    WHERE s.expectedAnnouncementDate BETWEEN :start AND :end
+    """)
+    List<PostingStageCalendarProjection> findCalendarStagesByDateRange(
+            @Param("start") LocalDate start, @Param("end") LocalDate end);
 }
