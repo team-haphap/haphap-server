@@ -41,8 +41,6 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
         WHERE p.id = :postingId
         """)
     Optional<Posting> findWithCompanyAndCategory(@Param("postingId") Long postingId);
-}
-  List<Posting> findAllWithCompanyAndCategory(@Param("categoryNames") List<String> categoryNames);
 
     @Query(value = """
         SELECT p.id AS id, p.title AS title
