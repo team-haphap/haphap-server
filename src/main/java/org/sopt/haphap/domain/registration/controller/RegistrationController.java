@@ -11,6 +11,7 @@ import org.sopt.haphap.domain.registration.dto.RegistrationCreateRequest;
 import org.sopt.haphap.domain.registration.dto.RegistrationCreateResponse;
 import org.sopt.haphap.domain.registration.service.RegistrationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +24,7 @@ public class RegistrationController implements RegistrationApiDocs {
 
     @PostMapping
     public ResponseEntity<SuccessResponse<RegistrationCreateResponse>> createRegistration(
-            @RequestHeader("X-User-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody RegistrationCreateRequest request
     ) {
         RegistrationCreateResponse response = registrationService.createRegistration(userId, request);
@@ -34,7 +35,7 @@ public class RegistrationController implements RegistrationApiDocs {
 
     @GetMapping("/{postingId}/{stageId}")
     public ResponseEntity<SuccessResponse<Void>> check(
-            @RequestHeader("X-Member-Id") Long userId,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId,
             @PathVariable Long stageId) {
 
