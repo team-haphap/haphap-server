@@ -39,7 +39,6 @@ public class PostingStageStatusService {
         // 전형 목록 (orderIndex 순)
         List<PostingStageFlatProjection> stages =
                 postingStageRepository.findFlatByPostingIds(List.of(postingId));
-        stages.sort(Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex));
 
         if (stages.isEmpty()) {
             return PostingStageStatusListResponse.of(List.of(), null);
