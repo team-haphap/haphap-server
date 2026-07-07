@@ -15,10 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AutocompleteService {
 
-    private static final int JOB_LIMIT = 10;// 추후 관련 검색어..
     private static final int SHORTCUT_LIMIT = 5;
+    private static final int JOB_LIMIT = 10; // 추후 관련 검색어..
 
     private static final Pattern INCOMPLETE_JAMO_ONLY = Pattern.compile("^[ㄱ-ㅣ]+$");
+
     private final PostingRepository postingRepository;
     private final HighlightRangeCalculator highlightRangeCalculator;
 
