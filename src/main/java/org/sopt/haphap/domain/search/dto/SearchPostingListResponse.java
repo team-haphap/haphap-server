@@ -1,7 +1,7 @@
 package org.sopt.haphap.domain.search.dto;
 
 import java.util.List;
-import org.sopt.haphap.domain.posting.dto.PopularPostingResponse;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 
 public record SearchPostingListResponse(
         List<PopularPostingResponse> postings,

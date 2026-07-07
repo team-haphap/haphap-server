@@ -3,7 +3,7 @@ package org.sopt.haphap.domain.search.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.dto.PopularPostingResponse;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.service.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.PostingAggregateLoader;
@@ -25,14 +25,13 @@ public class PostingSearchQueryService {
     private final PostingResponseAssembler assembler;
 
     public SearchPostingListResponse search(PostingSearchCondition condition) {
-        List<Posting> matched = postingRepository.searchPostings(
+        List<Long> postingIds = postingRepository.searchPostingIds(
                 condition.keyword(), condition.categories(), condition.status());
 
-        if (matched.isEmpty()) {
+        if (postingIds.isEmpty()) {
             return SearchPostingListResponse.of(List.of(), condition.page(), condition.size(), false);
         }
 
-        List<Long> postingIds = matched.stream().map(Posting::getId).toList();
         PostingAggregate agg = aggregateLoader.load(postingIds);
 
         List<Scored> sorted = postingIds.stream()
