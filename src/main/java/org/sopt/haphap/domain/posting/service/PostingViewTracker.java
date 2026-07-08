@@ -28,7 +28,7 @@ public class PostingViewTracker {
     private void increment(Long postingId) {
         try {
             redisTemplate.opsForZSet().incrementScore(VIEW_COUNT_KEY, postingId.toString(), 1);
-            log.info("조회수 집계 성공 - postingId={}", postingId);   // 임시
+            log.debug("조회수 집계 성공 - postingId={}", postingId);
         } catch (Exception e) {
             log.warn("조회수 집계 실패 - postingId={}, error={}", postingId, e.getMessage());
         }
