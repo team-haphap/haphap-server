@@ -15,7 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @Tag(name = "상태 등록",description = "사용자의 합/불/대기 상태 등록을 위한 API ")
 public interface RegistrationApiDocs {
 
-    @Operation(summary = "상태 등록" ,
+    @Operation(summary = "합불 현황 등록" ,
             description = """
                 공고 . 전형 별 사용자의 상태를 등록하고 알람 여부를 설정합니다.
                 - PENDING 상태 인 경우 contactMethod와 contactAt필드를 null로 해주세요
@@ -24,7 +24,7 @@ public interface RegistrationApiDocs {
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @Valid @RequestBody RegistrationCreateRequest request);
 
-    @Operation(summary = "등록 유효성 검증" ,
+    @Operation(summary = "해당 공고 동일 전형 등록 여부 조회(등록 유효성 검증)" ,
             description = """
                 해당 공고의 동일 전형에 이미 등록하였는지 여부를 검증합니다. .
                 - '아직 몰라요' 외의 다른 데이터가 있는 경우 409 에러로 처리합니다. 

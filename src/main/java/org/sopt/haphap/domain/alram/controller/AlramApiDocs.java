@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @Tag(name = "알람 등록",description = "공고별 알람을 on/off 합니다.")
 public interface AlramApiDocs {
 
-    @Operation(summary = "알람 등록",
+    @Operation(summary = "알림 받기 등록",
             description = """
                     알람을 등록합니다. 
                     - 공고 아이디를 받아 해당 공고의 알람 설정을 on합니다. 
@@ -21,7 +21,7 @@ public interface AlramApiDocs {
             @PathVariable Long postingId
     );
 
-    @Operation(summary = "알람 삭제",
+    @Operation(summary = "알람 받기 취소",
             description = """
                     알람을 삭제합니다. 
                     - 공고 아이디를 받아 해당 공고의 알람 설정을 off합니다. 
