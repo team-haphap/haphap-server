@@ -53,14 +53,6 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<PostingAutocompleteProjection> searchByTitleContaining(
             @Param("keyword") String keyword, @Param("limit") int limit);
 
-    // 캘린더 카드는 title만 필요 - 불필요한 fetch join 없이 최소 필드만 배치 조회하도록!
-    @Query("""
-            SELECT new org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse(p.id, p.title)
-            FROM Posting p
-            WHERE p.id IN :ids
-            """)
-    List<PostingSummaryResponse> findSummariesByIds(@Param("ids") List<Long> ids);
-
     @Query("""
             SELECT p.id FROM Posting p
             JOIN p.company c
