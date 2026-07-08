@@ -19,6 +19,10 @@ public class StageResultCount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @Column(name = "posting_id", nullable = false)
     private Long postingId;
 
