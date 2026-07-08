@@ -13,7 +13,9 @@ import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ViewCountCleanupScheduler {
@@ -48,8 +50,10 @@ public class ViewCountCleanupScheduler {
                 .toList();
 
         if (closedIds.isEmpty()) {
+            log.info("마감 공고 없음");
             return;
         }
         redisTemplate.opsForZSet().remove(PostingViewTracker.VIEW_COUNT_KEY, closedIds.toArray());
+        log.info("마감 공고 {}건 제거: {}", closedIds.size(), closedIds);
     }
 }
