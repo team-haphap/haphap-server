@@ -103,7 +103,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     SELECT r.stage.id AS stageId, COUNT(r) AS cnt
     FROM Registration r
     WHERE r.stage.id IN :stageIds
-      AND r.result IN :result
+      AND r.result IN :results
     GROUP BY r.stage.id
     """)
     List<StagePendingCountProjection> countByStageIdsAndResult(
