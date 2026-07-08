@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<FailureResponse> handleValidationException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().isEmpty()
                 ? GlobalErrorCode.INVALID_INPUT_VALUE.getMessage()
-                : e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+                : e.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
         log.warn("Validation failed: {}", message);
         return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE, message);
     }
@@ -61,13 +61,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<FailureResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
         log.warn("Unreadable message: {}", e.getMessage());
-        return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE);
+        return buildErrorResponse(GlobalErrorCode.MESSAGE_NOT_READABLE);   // INVALID_INPUT_VALUE → 변경
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<FailureResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         log.warn("Type mismatch: param={}, value={}", e.getName(), e.getValue());
-        return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE);
+        return buildErrorResponse(GlobalErrorCode.METHOD_ARGUMENT_TYPE_MISMATCH);   // INVALID_INPUT_VALUE → 변경
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
