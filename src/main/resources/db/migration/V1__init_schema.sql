@@ -20,7 +20,7 @@ CREATE TABLE users (
                        gender            VARCHAR(255),
                        phone_number      VARCHAR(255),
                        CONSTRAINT ukcbysvpk95086ud4n4g6mkspai UNIQUE (provider, provider_id),
-                       CONSTRAINT users_provider_check CHECK ((provider)::text = 'KAKAO'::text)
+                       CHECK ((provider)::text = 'KAKAO'::text OR (provider)::text = 'LOCAL'::text)
     );
 
 -- ---------------------------------------------------------------------
