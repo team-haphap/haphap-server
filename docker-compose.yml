@@ -33,6 +33,22 @@ services:
     networks:
       - haphap-net
 
+  grafana:
+    image: grafana/grafana:11.3.1
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - haphap-net
+    depends_on:
+      - prometheus
+
 networks:
   haphap-net:
     name: haphap-net
@@ -40,3 +56,4 @@ networks:
 
 volumes:
   prometheus-data:
+  grafana-data:
