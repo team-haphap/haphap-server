@@ -55,6 +55,12 @@ public class SecurityConfig {
                             FailureResponse body = FailureResponse.of(GlobalErrorCode.UNAUTHORIZED);
                             response.getWriter().write(objectMapper.writeValueAsString(body));
                         })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            FailureResponse body = FailureResponse.of(GlobalErrorCode.FORBIDDEN);
+                            response.getWriter().write(objectMapper.writeValueAsString(body));
+                        })
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
