@@ -63,8 +63,7 @@ public class PostingSearchQueryService {
 
     private SearchPostingResponse toSearchResponse(Scored scored) {
         PopularPostingResponse r = scored.response();
-        String status = (r.nextStage() == null) ? "closed" : "open";
         return new SearchPostingResponse(
-                r.id(), r.companyName(), r.title(), r.category(), r.daysUntilNextStage(), status);
+                r.id(), r.companyName(), r.title(), r.category(), r.daysUntilNextStage());
     }
 }
