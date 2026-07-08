@@ -23,7 +23,6 @@ public class ViewCountCleanupScheduler {
     private final StageResultCountRepository stageResultCountRepository;
     private final NextStageCalculator nextStageCalculator;
 
-    // 매시 정각: 인기 공고 집계용 카운터 전체 0으로 리셋
     @Scheduled(cron = "0 0 0 * * *")
     public void removeClosedPostings() {
         Map<Long, List<PostingStageFlatProjection>> stagesByPosting = postingStageRepository
