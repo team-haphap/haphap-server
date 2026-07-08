@@ -4,12 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.response.*;
-import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
 
@@ -23,6 +23,7 @@ public interface PostingApiDocs {
 
     @Operation(summary = "공고 상세 조회 기록",
             description = "상세 페이지 진입 시 호출합니다. 인기 공고 집계에 사용되며 응답 본문은 없습니다.")
+    @ApiResponse(responseCode = "204", description = "기록 성공, 응답 본문 없음")
     ResponseEntity<Void> recordView(@PathVariable Long postingId);
 
     @Operation(summary = "공고 카드 클릭 기록",
@@ -31,8 +32,9 @@ public interface PostingApiDocs {
                     상세 페이지 진입 기록과 합산되어 인기 공고 집계(카드 클릭률 + 상세페이지 진입자 수)에 사용되며,
                     응답 본문은 없습니다.
                     """)
+    @ApiResponse(responseCode = "204", description = "기록 성공, 응답 본문 없음")
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
-               
+
     @Operation(summary = "홈 메인-최근 등록 공고 조회",
             description = """
                     홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
@@ -84,7 +86,7 @@ public interface PostingApiDocs {
                     """
     )
     ResponseEntity<SuccessResponse<TodayStatisticResponse>> getTodayStatistics();
-               
+
     @Operation(summary= "공고 전형 별 집계 조회",
             description = """
                     공고 전형별 집계 조회합니다. 

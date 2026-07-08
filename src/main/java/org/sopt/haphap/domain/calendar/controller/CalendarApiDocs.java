@@ -25,7 +25,7 @@ public interface CalendarApiDocs {
     );
     @Operation(summary = "월별 캘린더 인디케이터 조회",
             description = """
-                    특정 연월의 모든 날짜에 대해 발표 가능성 인디케이터 등급(NONE/LOW/MEDIUM/HIGH)을 반환합니다.
+                   특정 연월의 모든 날짜에 대해 발표 가능성 인디케이터 등급(NONE/VERY_LOW/LOW/MEDIUM/HIGH/VERY_HIGH)을 반환합니다.
                     동일 날짜에 공고가 여러 개면 가장 높은 등급을 그 날짜의 등급으로 표시합니다.
                     """)
     ResponseEntity<SuccessResponse<CalendarIndicatorListResponse>> getIndicators(
