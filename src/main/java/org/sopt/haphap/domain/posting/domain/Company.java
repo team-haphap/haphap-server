@@ -26,16 +26,19 @@ public class Company extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String logoImageUrl;
+
     private String imageUrl;
 
-    private Company(String name, String description, String imageUrl) {
+    private Company(String name, String description,String logoImageUrl, String imageUrl) {
         this.name = name;
         this.description = description;
+        this.logoImageUrl = logoImageUrl;
         this.imageUrl = imageUrl;
     }
 
-    public static Company create(String name, String description, String imageUrl) {
-        return new Company(name, description, imageUrl);
+    public static Company create(String name, String description,String logoImageUrl, String imageUrl) {
+        return new Company(name, description, logoImageUrl, imageUrl);
     }
 
     private Company(String name) {
