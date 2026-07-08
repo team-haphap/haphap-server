@@ -19,7 +19,24 @@ services:
     networks:
       - haphap-net
 
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks:
+      - haphap-net
+
 networks:
   haphap-net:
     name: haphap-net
     driver: bridge
+
+volumes:
+  prometheus-data:
