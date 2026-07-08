@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -40,13 +42,15 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/api/v1/auth/**",
                                 "/api/v1/search/**",
-                                "/api/v1/banners/**"
+                                "/api/v1/banners/**",
+                                "/api/v1/admin/auth/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/postings/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/v1/postings/*/views",
                                 "/api/v1/postings/*/card-clicks"
                         ).permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -59,5 +63,9 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
