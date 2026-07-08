@@ -52,7 +52,7 @@ public interface SearchApiDocs {
     @ApiResponse(responseCode = "200", description = "검색 결과",
             content = @Content(examples = @ExampleObject(value = """
                     { "postings": [
-                        {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","dDay":3,"status":"open"}
+                        {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","dDay":3}
                       ], "page": 0, "size": 20, "hasNext": true }
                     """)))
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
