@@ -6,6 +6,7 @@ import org.sopt.haphap.domain.posting.domain.StageResultCount;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,8 @@ public class StageResultCountReconciler {
             doReconcile();
         } catch (ObjectOptimisticLockingFailureException e) {
             log.warn("집계 보정 중 낙관적 락 충돌 발생. 다음 배치에서 재보정합니다.", e);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("집계 보정 중 유니크 충돌(동시 생성). 다음 배치에서 재보정합니다.", e);
         }
     }
 
