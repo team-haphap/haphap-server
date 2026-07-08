@@ -14,10 +14,8 @@ public record RegistrationCreateRequest(
         @NotNull(message = "전형 단계는 필수입니다.")
         Long stageId,
 
-        @NotNull(message = "연락 날짜는 필수입니다.")
         LocalDate contactedAt,
 
-        @NotNull(message = "연락 수단은 필수입니다.")
         ContactMethod contactMethod,
 
         @NotNull(message = "전형 결과는 필수입니다.")

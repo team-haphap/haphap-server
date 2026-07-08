@@ -32,6 +32,7 @@ public class RegistrationService {
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
+        validateResultConsistency(request);
 
         RegistrationTargetValidator.RegistrationTarget target =
                 registrationTargetValidator.validate(userId, request.postingId(), request.stageId());
@@ -95,5 +96,21 @@ public class RegistrationService {
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
                 registration.getId(), posting.getId(), registration.getStage().getName(), user.getId()));
+    }
+
+    private void validateResultConsistency(RegistrationCreateRequest request) {
+        boolean isPending = request.result() == RegistrationResult.PENDING;
+
+        if (isPending) {
+            // PENDING이면 연락 정보(수단·날짜)가 없어야 함.
+            if (request.contactMethod() != null || request.contactedAt() != null) {
+                throw new CustomException(RegistrationErrorCode.PENDING_MUST_NOT_HAVE_CONTACT);
+            }
+        } else {
+            // 확정이면 연락 정보가 있어야 함
+            if (request.contactMethod() == null || request.contactedAt() == null) {
+                throw new CustomException(RegistrationErrorCode.CONFIRMED_MUST_HAVE_CONTACT);
+            }
+        }
     }
 }
