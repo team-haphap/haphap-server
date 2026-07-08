@@ -25,20 +25,30 @@ public class JwtProvider {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createAccessToken(Long userId) {
+    public String createAccessToken(Long id) {
+        return createAccessToken(id, Role.USER);
+    }
+
+    public String createAccessToken(Long id, Role role) {
         return Jwts.builder()
-                .subject(String.valueOf(userId))
+                .subject(String.valueOf(id))
                 .claim("type", "access")
+                .claim("role", role.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String createRefreshToken(Long userId) {
+    public String createRefreshToken(Long id) {
+        return createRefreshToken(id, Role.USER);
+    }
+
+    public String createRefreshToken(Long id, Role role) {
         return Jwts.builder()
-                .subject(String.valueOf(userId))
+                .subject(String.valueOf(id))
                 .claim("type", "refresh")
+                .claim("role", role.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
                 .signWith(getSigningKey())
@@ -55,6 +65,11 @@ public class JwtProvider {
 
     public Long getUserId(String token) {
         return Long.parseLong(parseClaims(token).getSubject());
+    }
+
+    public Role getRole(String token) {
+        String role = parseClaims(token).get("role", String.class);
+        return role != null ? Role.valueOf(role) : Role.USER;
     }
 
     public boolean validateAccessToken(String token) {

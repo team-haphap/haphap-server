@@ -15,21 +15,25 @@ public class RefreshTokenStore {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void save(Long userId, String token) {
+    public void save(Long id, Role role, String token) {
         redisTemplate.opsForValue().set(
-                KEY_PREFIX + userId, token, REFRESH_TOKEN_EXPIRY, TimeUnit.MILLISECONDS
+                key(id, role), token, REFRESH_TOKEN_EXPIRY, TimeUnit.MILLISECONDS
         );
     }
 
-    public String get(Long userId) {
-        return redisTemplate.opsForValue().get(KEY_PREFIX + userId);
+    public String get(Long id, Role role) {
+        return redisTemplate.opsForValue().get(key(id, role));
     }
 
-    public void delete(Long userId) {
-        redisTemplate.delete(KEY_PREFIX + userId);
+    public void delete(Long id, Role role) {
+        redisTemplate.delete(key(id, role));
     }
 
-    public boolean isValid(Long userId, String token) {
-        return Objects.equals(get(userId), token);
+    public boolean isValid(Long id, Role role, String token) {
+        return Objects.equals(get(id, role), token);
+    }
+
+    private String key(Long id, Role role) {
+        return KEY_PREFIX + role.name() + ":" + id;
     }
 }
