@@ -11,7 +11,8 @@ import java.util.concurrent.TimeUnit;
 public class RefreshTokenStore {
 
     private static final String KEY_PREFIX = "refresh:";
-    private static final long REFRESH_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 14;
+    //TODO. 토큰을 바꾸어요
+    private static final long REFRESH_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 90;
 
     private final RedisTemplate<String, String> redisTemplate;
 
