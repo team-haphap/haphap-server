@@ -15,21 +15,20 @@ public class TokenService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
-    public String issueRefreshToken(Long userId) {
-        String refreshToken = jwtProvider.createRefreshToken(userId);
-        refreshTokenStore.save(userId, refreshToken);
+    public String issueRefreshToken(Long id, Role role) {
+        String refreshToken = jwtProvider.createRefreshToken(id, role);
+        refreshTokenStore.save(id, role, refreshToken);
         return refreshToken;
     }
-    public boolean isValid(Long userId, String refreshToken) {
-        return refreshTokenStore.isValid(userId, refreshToken);
+    public boolean isValid(Long id, Role role, String refreshToken) {
+        return refreshTokenStore.isValid(id, role, refreshToken);
     }
-
-    public void deleteRefreshToken(Long userId) {
-        refreshTokenStore.delete(userId);
+    public void deleteRefreshToken(Long id, Role role) {
+        refreshTokenStore.delete(id, role);
     }
 
     public void blacklistAccessToken(String accessToken) {
-        long expiry = jwtProvider.getExpiration(accessToken); // 남은 만료 시간 (ms)
+        long expiry = jwtProvider.getExpiration(accessToken); // 남은 만료 시간
         if (expiry > 0) {
             redisTemplate.opsForValue().set(
                     BLACKLIST_PREFIX + accessToken,

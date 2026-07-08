@@ -6,11 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import org.sopt.haphap.global.jwt.Role;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,11 +28,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request);
 
-        //refresh 토큰도 access 토큰 자리에서 사용할 수 있도록 하였습니다
         if (StringUtils.hasText(token) && jwtProvider.validateAccessToken(token) && !tokenService.isBlacklisted(token)) {
-            Long userId = jwtProvider.getUserId(token);
+            Long id = jwtProvider.getUserId(token);
+            Role role = jwtProvider.getRole(token);
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(userId, null, List.of());
+                    new UsernamePasswordAuthenticationToken(id, null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 

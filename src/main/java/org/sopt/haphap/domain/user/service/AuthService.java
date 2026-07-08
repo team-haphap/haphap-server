@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.user.service;
 
+import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
@@ -11,24 +12,25 @@ import org.sopt.haphap.global.jwt.TokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.sopt.haphap.global.code.AuthErrorCode;
+import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 import java.util.Map;
+import org.sopt.haphap.global.jwt.Role;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final TokenService tokenService;
-    private final Map<Provider, OAuthClient> oAuthClients;
+    private final List<OAuthClient> oAuthClientList;
 
-    public AuthService(UserService userService, JwtProvider jwtProvider,
-                       TokenService tokenService, List<OAuthClient> oAuthClientList) {
-        this.userService = userService;
-        this.jwtProvider = jwtProvider;
-        this.tokenService = tokenService;
+    private Map<Provider, OAuthClient> oAuthClients;
+    @PostConstruct
+    private void initOAuthClients() {
         this.oAuthClients = oAuthClientList.stream()
                 .collect(Collectors.toMap(OAuthClient::getProvider, c -> c));
     }
@@ -39,7 +41,7 @@ public class AuthService {
                 Provider.KAKAO, userInfo.providerId(), userInfo
         );
         User user = result.user();
-        String newRefreshToken = tokenService.issueRefreshToken(user.getId());
+        String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
         return new AuthResponse(
                 jwtProvider.createAccessToken(user.getId()),
                 newRefreshToken,
@@ -55,11 +57,11 @@ public class AuthService {
             throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
         Long userId = jwtProvider.getUserId(refreshToken);
-        if (!tokenService.isValid(userId, refreshToken)) {
+        if (!tokenService.isValid(userId, Role.USER, refreshToken)) {
             throw new CustomException(AuthErrorCode.REFRESH_TOKEN_MISMATCH);
         }
         User user = userService.findById(userId);
-        String newRefreshToken = tokenService.issueRefreshToken(userId);
+        String newRefreshToken = tokenService.issueRefreshToken(userId, Role.USER);
         return new AuthResponse(
                 jwtProvider.createAccessToken(userId),
                 newRefreshToken,
@@ -78,6 +80,6 @@ public class AuthService {
         if (!expired) {
             tokenService.blacklistAccessToken(accessToken);
         }
-        tokenService.deleteRefreshToken(userId);
+        tokenService.deleteRefreshToken(userId, Role.USER);
     }
 }

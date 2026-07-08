@@ -32,6 +32,7 @@ public class RegistrationService {
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
+        validateResultConsistency(request);
 
         RegistrationTargetValidator.RegistrationTarget target =
                 registrationTargetValidator.validate(userId, request.postingId(), request.stageId());
@@ -60,20 +61,23 @@ public class RegistrationService {
     private Registration updateExisting(Registration existing,
                                         RegistrationTargetValidator.RegistrationTarget target,
                                         RegistrationCreateRequest request) {
-        // 대기 상태였으면 갱신 허용 (확인 API에서 CONFIRM 받고 온 케이스)
-        if (existing.isPending()) {
-            existing.updateRegistration(request.result(), request.contactMethod(),
-                    request.contactedAt(), request.anonymous());
-            // PENDING → 확정으로 바뀐 경우만 집계 이동
-            if (request.result() != RegistrationResult.PENDING) {
-                eventPublisher.publishEvent(new RegistrationResultChangedEvent(
-                        target.posting().getId(), target.stage().getId(), request.result()));
-            }
-
-            return existing;
-        }
         // 이미 확정인데 또 등록 시도 → 막기
-        throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+        if (!existing.isPending()) {
+            throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+        }
+
+        // PENDING 상태에서 다시 PENDING으로는 갱신 불가 (PASS/FAIL 확정만 허용)
+        if (request.result() == RegistrationResult.PENDING) {
+            throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+        }
+
+        // 여기까지 왔으면 PENDING → PASS/FAIL 확정
+        existing.updateRegistration(request.result(), request.contactMethod(),
+                request.contactedAt(), request.anonymous());
+        eventPublisher.publishEvent(new RegistrationResultChangedEvent(
+                target.posting().getId(), target.stage().getId(), request.result()));
+
+        return existing;
     }
     private Registration createNew(User user, Posting posting, PostingStage stage,
                                    RegistrationCreateRequest request) {
@@ -92,5 +96,21 @@ public class RegistrationService {
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
                 registration.getId(), posting.getId(), registration.getStage().getName(), user.getId()));
+    }
+
+    private void validateResultConsistency(RegistrationCreateRequest request) {
+        boolean isPending = request.result() == RegistrationResult.PENDING;
+
+        if (isPending) {
+            // PENDING이면 연락 정보(수단·날짜)가 없어야 함.
+            if (request.contactMethod() != null || request.contactedAt() != null) {
+                throw new CustomException(RegistrationErrorCode.PENDING_MUST_NOT_HAVE_CONTACT);
+            }
+        } else {
+            // 확정이면 연락 정보가 있어야 함
+            if (request.contactMethod() == null || request.contactedAt() == null) {
+                throw new CustomException(RegistrationErrorCode.CONFIRMED_MUST_HAVE_CONTACT);
+            }
+        }
     }
 }

@@ -14,6 +14,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.sopt.haphap.domain.posting.service.PopularPostingCacheRefresher;
+import org.sopt.haphap.domain.posting.service.PostingAggregate;
+import org.sopt.haphap.domain.posting.service.PostingAggregateLoader;
+import org.sopt.haphap.domain.posting.service.PostingResponseAssembler;
+import org.sopt.haphap.domain.posting.service.PostingResponseAssembler.Scored;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,8 +49,8 @@ public class PopularSearchPostingQueryService {
     }
 
     private List<Long> fetchTopPostingIds() {
-        Set<String> ids = redisTemplate.opsForZSet()
-                .reverseRange(PostingViewTracker.VIEW_COUNT_KEY, 0, POPULAR_COUNT - 1);
+        List<String> ids = redisTemplate.opsForList()
+                .range(PopularPostingCacheRefresher.POPULAR_CACHE_KEY, 0, -1);
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
