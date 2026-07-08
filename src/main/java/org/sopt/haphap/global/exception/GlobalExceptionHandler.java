@@ -17,6 +17,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 
 @Slf4j
 @RestControllerAdvice
@@ -45,7 +47,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<FailureResponse> handleValidationException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().isEmpty()
                 ? GlobalErrorCode.INVALID_INPUT_VALUE.getMessage()
-                : e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+                : e.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
         log.warn("Validation failed: {}", message);
         return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE, message);
     }
@@ -59,13 +61,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<FailureResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
         log.warn("Unreadable message: {}", e.getMessage());
-        return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE);
+        return buildErrorResponse(GlobalErrorCode.MESSAGE_NOT_READABLE);   // INVALID_INPUT_VALUE → 변경
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<FailureResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         log.warn("Type mismatch: param={}, value={}", e.getName(), e.getValue());
-        return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE);
+        return buildErrorResponse(GlobalErrorCode.METHOD_ARGUMENT_TYPE_MISMATCH);   // INVALID_INPUT_VALUE → 변경
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -84,6 +86,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<FailureResponse> handleMissingCookie(MissingRequestCookieException e) {
         log.warn("Missing cookie: {}", e.getCookieName());
         return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<FailureResponse> handleMissingHeader(MissingRequestHeaderException e) {
+        log.warn("Missing header: {}", e.getHeaderName());
+        return buildErrorResponse(GlobalErrorCode.MISSING_REQUEST_HEADER);
+    }
+
+    // === 데이터 무결성 ===
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<FailureResponse> handleDataIntegrity(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation: {}", e.getMessage());
+        return buildErrorResponse(GlobalErrorCode.DATA_INTEGRITY_VIOLATION);
     }
 
     // === 라우팅 / 메서드 ===
