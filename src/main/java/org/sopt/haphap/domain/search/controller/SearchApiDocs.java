@@ -49,8 +49,7 @@ public interface SearchApiDocs {
     @Operation(summary = "검색 결과 공고 목록 조회",
             description = """
                 검색어 확정 후 결과 화면에 노출할 공고 목록을 반환합니다.
-                q는 공고명 포함된 경우 매칭되며, category로 복수 카테고리 필터링,
-                status(open/closed)로 모집 상태 필터링이 가능합니다.
+                q는 공고명 포함된 경우 매칭되며, category로 복수 카테고리 필터링이 가능합니다.
                 정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
                 """)
     @ApiResponse(responseCode = "200", description = "검색 결과",
@@ -62,7 +61,6 @@ public interface SearchApiDocs {
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @Parameter(description = "검색 키워드") String q,
             @Parameter(description = "카테고리 필터 (복수 선택 가능)") List<String> category,
-            @Parameter(description = "모집 상태 필터: open 또는 closed") String status,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
             @Parameter(description = "페이지 크기, 기본 20, 최대 50") Integer size);
 }

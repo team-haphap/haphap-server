@@ -36,7 +36,6 @@ public class PostingSearchQueryService {
 
         List<Scored> sorted = postingIds.stream()
                 .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id)))
-                .filter(s -> matchesStatus(s, condition.status()))
                 .sorted(PostingSortComparators.byDeadline())
                 .toList();
 
@@ -51,14 +50,6 @@ public class PostingSearchQueryService {
                 .toList();
 
         return SearchPostingListResponse.of(pageContent, condition.page(), condition.size(), hasNext);
-    }
-
-    private boolean matchesStatus(Scored scored, String status) {
-        if (status == null) {
-            return true;
-        }
-        boolean isOpen = scored.response().nextStage() != null;
-        return status.equals("open") == isOpen;
     }
 
     private SearchPostingResponse toSearchResponse(Scored scored) {
