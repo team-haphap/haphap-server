@@ -51,11 +51,10 @@ public class SearchController implements SearchApiDocs {
     public ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) List<String> category,
-            @RequestParam(required = false) String status,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-        PostingSearchCondition condition = PostingSearchCondition.of(q, category, status, page, size);
+        PostingSearchCondition condition = PostingSearchCondition.of(q, category, page, size);
         SearchPostingListResponse response = postingSearchQueryService.search(condition);
 
         SuccessResponse<SearchPostingListResponse> body =
