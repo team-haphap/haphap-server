@@ -18,6 +18,7 @@ public interface RegistrationApiDocs {
     @Operation(summary = "상태 등록" ,
             description = """
                 공고 . 전형 별 사용자의 상태를 등록하고 알람 여부를 설정합니다.
+                - PENDING 상태 인 경우 contactMethod와 contactAt필드를 null로 해주세요
                 """)
     ResponseEntity<SuccessResponse<RegistrationCreateResponse>> createRegistration(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
