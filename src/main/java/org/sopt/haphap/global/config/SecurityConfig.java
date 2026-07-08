@@ -8,6 +8,7 @@ import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -38,13 +39,13 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/v1/auth/**",
-                                "/api/v1/registrations/**",
-                                "/api/v1/registrations",
-                                "/api/v1/postings/name",
-                                "/api/v1/postings/**",
                                 "/api/v1/search/**",
-                                "/api/v1/banners/**",
-                                "/api/v1/{postingId}/alrams"
+                                "/api/v1/banners/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/postings/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/v1/postings/*/views",
+                                "/api/v1/postings/*/card-clicks"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -53,6 +54,12 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json;charset=UTF-8");
                             FailureResponse body = FailureResponse.of(GlobalErrorCode.UNAUTHORIZED);
+                            response.getWriter().write(objectMapper.writeValueAsString(body));
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            FailureResponse body = FailureResponse.of(GlobalErrorCode.FORBIDDEN);
                             response.getWriter().write(objectMapper.writeValueAsString(body));
                         })
                 )
