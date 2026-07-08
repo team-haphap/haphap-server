@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 @Tag(name = "파이어베이스 토큰 등록",description = "파이어베이스 토큰 등록을 위한 API ")
 public interface PushTokenApiDocs {
-    @Operation(summary = "토큰 등록",
+    @Operation(summary = "FCM 디바이스 토큰 등록/갱신",
             description = """
                     기기의 토큰을 등록합니다. .
                     - 디바이스 아이디, FCM토큰, 디바이스 타입을 requestbody에 넣어주세요. 

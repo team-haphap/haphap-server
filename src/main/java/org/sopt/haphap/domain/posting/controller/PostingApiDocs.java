@@ -15,7 +15,7 @@ import java.util.List;
 
 @Tag(name = "공고",description = "공고관련 API 입니다")
 public interface PostingApiDocs {
-    @Operation(summary = "공고명 리스트 조회 ", description = "전체 공고명을 가나다 순으로 반환합니다.")
+    @Operation(summary = "공고 리스트 이름 조회", description = "전체 공고명을 가나다 순으로 반환합니다.")
     ResponseEntity<SuccessResponse<PostingListResponse>> getPostings();
 
     @Operation(summary = "공고 별 전형 조회", description = "해당 공고의 전형을 반환합니다.")
@@ -33,7 +33,7 @@ public interface PostingApiDocs {
                     """)
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
                
-    @Operation(summary = "홈 메인-최근 등록 공고 조회",
+    @Operation(summary = "홈 메인-최근 등록 공고 조회(카테고리 별 공고조회)",
             description = """
                     홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
                     - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
@@ -41,7 +41,7 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) List<String> category);
 
-    @Operation(summary = "공고 리스트 조회",
+    @Operation(summary = "카테고리별 공고 전체 조회",
             description = """
                     공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
                     - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
@@ -49,7 +49,7 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) List<String> category);
 
-    @Operation(summary = "오늘 발표 예상 공고 조회",
+    @Operation(summary = "오늘 발표 예상 공고조회",
             description = """
                     오늘 발표 예상 전형이 있는 공고들을 조회합니다.
                     - score이 높은 순 3개 반환합니다.
@@ -67,7 +67,7 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId);
 
-    @Operation(summary = "공고 전형 별 상태 조회",
+    @Operation(summary = "공고 상세 - 공고 전형별 상태 조회",
             description = """
                     공고 전형별 상태를 조회합니다. 
                     - currentStageId 는 현재 진행중인 상태입니다.(없으면 null)
@@ -85,7 +85,7 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<TodayStatisticResponse>> getTodayStatistics();
                
-    @Operation(summary= "공고 전형 별 집계 조회",
+    @Operation(summary= "공고 상세 - 공고 전형별 집계 조회",
             description = """
                     공고 전형별 집계 조회합니다. 
                     - 공고 전형 별 passCount,failCount,pendingCount를 제시합니다.
