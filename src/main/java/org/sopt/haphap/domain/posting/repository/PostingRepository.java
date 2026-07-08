@@ -73,7 +73,4 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<Long> searchPostingIds(
             @Param("keyword") String keyword,
             @Param("categories") List<String> categories);
-
-    @Query("SELECT p.id FROM Posting p WHERE p.deadline < CURRENT_DATE")
-    List<Long> findClosedPostingIds();
 }
