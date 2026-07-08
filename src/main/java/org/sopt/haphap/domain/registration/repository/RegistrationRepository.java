@@ -19,16 +19,6 @@ import java.util.Optional;
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     Optional<Registration> findByUserIdAndPostingIdAndStageId(Long userId, Long postingId, Long stageId);
 
-    //(공고, 전형)별 등록 수를 한 번에
-    @Query("""
-        SELECT r.posting.id AS postingId, r.stage.id AS stageId, COUNT(r) AS cnt
-        FROM Registration r
-        WHERE r.posting.id IN :postingIds
-        GROUP BY r.posting.id, r.stage.id
-        """)
-    List<StageRegistrationCountProjection> countByPostingAndStage(
-            @Param("postingIds") List<Long> postingIds);
-
     //48시간 내 PASS/FAIL 결과가 있는 공고 id 추리기.
     @Query("""
         SELECT DISTINCT r.posting.id
@@ -113,12 +103,12 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     SELECT r.stage.id AS stageId, COUNT(r) AS cnt
     FROM Registration r
     WHERE r.stage.id IN :stageIds
-      AND r.result = :result
+      AND r.result IN :result
     GROUP BY r.stage.id
     """)
     List<StagePendingCountProjection> countByStageIdsAndResult(
             @Param("stageIds") List<Long> stageIds,
-            @Param("result") RegistrationResult result);
+            @Param("results") List<RegistrationResult> results);
 
     //cumulatedCount
     @Query("""
