@@ -1,6 +1,5 @@
 package org.sopt.haphap.domain.search.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.search.code.SearchSuccessCode;
@@ -50,7 +49,7 @@ public class SearchController implements SearchApiDocs {
     @GetMapping("/postings")
     public ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @RequestParam(required = false) String q,
-            @RequestParam(required = false) List<String> category,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
