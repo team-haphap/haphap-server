@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.domain.StageResultCount;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
+import org.sopt.haphap.domain.registration.projection.StageResultAggProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;

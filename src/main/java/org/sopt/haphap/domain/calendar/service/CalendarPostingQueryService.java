@@ -7,7 +7,7 @@ import org.sopt.haphap.domain.posting.domain.AnnouncementLikelihood;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageCalendarProjection;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
+import org.sopt.haphap.domain.registration.projection.StagePendingCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
