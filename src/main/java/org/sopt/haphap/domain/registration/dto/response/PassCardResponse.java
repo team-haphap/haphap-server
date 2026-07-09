@@ -7,7 +7,7 @@ import org.sopt.haphap.domain.registration.domain.Registration;
 public record PassCardResponse(
         String userName,
         String companyName,
-        String companyLogoImageUrl,
+        String companyCardLogoImageUrl,
         String title,
         String stageName,
         String categoryName,
