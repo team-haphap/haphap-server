@@ -19,7 +19,7 @@ public record PassCardResponse(
         return new PassCardResponse(
                 registration.getUser().getName(),
                 posting.getCompany().getName(),
-                posting.getCompany().getLogoImageUrl(),
+                posting.getCompany().getCardLogoImageUrl(),
                 posting.getTitle(),
                 registration.getStage().getName(),
                 category.getName(),
