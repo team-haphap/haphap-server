@@ -30,15 +30,18 @@ public class Company extends BaseEntity {
 
     private String imageUrl;
 
-    private Company(String name, String description,String logoImageUrl, String imageUrl) {
+    private String cardLogoImageUrl; //합격카드 로고이미지용
+
+    private Company(String name, String description,String logoImageUrl, String imageUrl,String cardLogoImageUrl) {
         this.name = name;
         this.description = description;
         this.logoImageUrl = logoImageUrl;
         this.imageUrl = imageUrl;
+        this.cardLogoImageUrl = cardLogoImageUrl;
     }
 
-    public static Company create(String name, String description,String logoImageUrl, String imageUrl) {
-        return new Company(name, description, logoImageUrl, imageUrl);
+    public static Company create(String name, String description,String logoImageUrl, String imageUrl,String cardLogoImageUrl) {
+        return new Company(name, description, logoImageUrl, imageUrl,cardLogoImageUrl);
     }
 
     private Company(String name) {

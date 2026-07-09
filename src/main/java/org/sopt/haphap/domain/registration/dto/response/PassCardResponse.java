@@ -7,7 +7,7 @@ import org.sopt.haphap.domain.registration.domain.Registration;
 public record PassCardResponse(
         String userName,
         String companyName,
-        String companyLogoImageUrl,
+        String companyCardLogoImageUrl,
         String title,
         String stageName,
         String categoryName,
@@ -19,7 +19,7 @@ public record PassCardResponse(
         return new PassCardResponse(
                 registration.getUser().getName(),
                 posting.getCompany().getName(),
-                posting.getCompany().getLogoImageUrl(),
+                posting.getCompany().getCardLogoImageUrl(),
                 posting.getTitle(),
                 registration.getStage().getName(),
                 category.getName(),
