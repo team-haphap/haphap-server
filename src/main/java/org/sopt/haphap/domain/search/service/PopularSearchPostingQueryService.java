@@ -4,14 +4,14 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
-import org.sopt.haphap.domain.posting.service.PopularPostingCacheRefresher;
-import org.sopt.haphap.domain.posting.service.PostingAggregate;
-import org.sopt.haphap.domain.posting.service.PostingAggregateLoader;
-import org.sopt.haphap.domain.posting.service.PostingResponseAssembler;
-import org.sopt.haphap.domain.posting.service.PostingResponseAssembler.Scored;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler.Scored;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.sopt.haphap.domain.posting.service.PopularPostingCacheRefresher;
 
 @Service
 @RequiredArgsConstructor

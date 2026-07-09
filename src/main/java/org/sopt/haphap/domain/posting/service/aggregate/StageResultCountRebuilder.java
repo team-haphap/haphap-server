@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.service;
+package org.sopt.haphap.domain.posting.service.aggregate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class StageResultCountRebuilder {
     private final RegistrationRepository registrationRepository;
     private final StageResultCountRepository stageResultCountRepository;
 
-    /** 원본(Registration)에서 모두 재집계해 StageResultCount를 재구성. 초기화·정합성 보정 공용. */
+    /** 원본(Registration)에서 모두 재집계해 StageResultCount를 재구성.. */
     @Transactional
     public void rebuildAll() {
         stageResultCountRepository.deleteAllInBatch();

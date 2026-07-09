@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.service;
+package org.sopt.haphap.domain.posting.service.calculator;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
