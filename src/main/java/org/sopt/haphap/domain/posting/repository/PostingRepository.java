@@ -58,9 +58,9 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     JOIN p.category cat
     WHERE (:keyword IS NULL
             OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')))
-      AND (:category IS NULL OR cat.name = :category)
+      AND (:categories IS NULL OR cat.name IN = :categories)
     """)
     List<Long> searchPostingIds(
             @Param("keyword") String keyword,
-            @Param("category") String category);
+            @Param("categories") List<String> categories);
 }

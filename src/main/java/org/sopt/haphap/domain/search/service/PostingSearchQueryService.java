@@ -29,10 +29,11 @@ public class PostingSearchQueryService {
     private final CategoryRepository categoryRepository;
 
     public SearchPostingListResponse search(PostingSearchCondition condition) {
-        validateCategory(condition.category());
+        validateKeyword(condition.keyword());
+        validateCategories(condition.categories());
 
         List<Long> postingIds = postingRepository.searchPostingIds(
-                condition.keyword(), condition.category());
+                condition.keyword(), condition.categories());
 
         if (postingIds.isEmpty()) {
             return SearchPostingListResponse.of(List.of(), condition.page(), condition.size(), false);
@@ -58,8 +59,18 @@ public class PostingSearchQueryService {
         return SearchPostingListResponse.of(pageContent, condition.page(), condition.size(), hasNext);
     }
 
-    private void validateCategory(String category) {
-        if (category != null && !categoryRepository.existsByName(category)) {
+    private void validateKeyword(String keyword) {
+        // PostingSearchCondition.of()가 이미 blank → null로 정규화해줌
+        if (keyword == null) {
+            throw new CustomException(SearchErrorCode.KEYWORD_REQUIRED);
+        }
+    }
+
+    private void validateCategories(List<String> categories) {
+        if (categories == null || categories.isEmpty()) return;
+        List<String> distinct = categories.stream().distinct().toList();
+        long existingCount = categoryRepository.countByNameIn(distinct);
+        if (existingCount != distinct.size()) {
             throw new CustomException(SearchErrorCode.CATEGORY_NOT_FOUND);
         }
     }

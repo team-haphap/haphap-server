@@ -60,7 +60,7 @@ public interface SearchApiDocs {
                 """)))
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @Parameter(description = "검색 키워드") String q,
-            @Parameter(description = "카테고리 필터 (단일값, 실제 존재하는 카테고리명과 일치해야 함). 전체 조회 시 파라미터 생략") String category,
+            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: DEV,PM). 전체 조회 시 파라미터 생략") String category,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
             @Parameter(description = "페이지 크기, 기본 20, 최대 50") Integer size);
 }
