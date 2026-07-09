@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TABLE related_search_keyword (
     id BIGSERIAL PRIMARY KEY,
     keyword VARCHAR(100) NOT NULL UNIQUE,
