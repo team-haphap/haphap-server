@@ -1,9 +1,12 @@
 package org.sopt.haphap.domain.posting.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.response.*;
+import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +21,15 @@ public interface PostingApiDocs {
     @Operation(summary = "공고 리스트 이름 조회", description = "전체 공고명을 가나다 순으로 반환합니다.")
     ResponseEntity<SuccessResponse<PostingListResponse>> getPostings();
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "공고 별 전형 조회", description = "해당 공고의 전형을 반환합니다.")
     ResponseEntity<SuccessResponse<PostingStageListResponse>> getStages(@PathVariable Long postingId);
 
@@ -59,6 +71,15 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings();
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "공고 상세 조회",
             description = """
                     공고 상세 조회합니다. 
@@ -69,6 +90,15 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId);
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "공고 상세 - 공고 전형별 상태 조회",
             description = """
                     공고 전형별 상태를 조회합니다. 
@@ -86,7 +116,26 @@ public interface PostingApiDocs {
                     """
     )
     ResponseEntity<SuccessResponse<TodayStatisticResponse>> getTodayStatistics();
-               
+
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+        - STAGE_NOT_FOUND : 존재하지 않는 전형입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = """
+        - STAGE_NOT_IN_POSTING : 해당 공고의 전형 단계가 아닙니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary= "공고 상세 - 공고 전형별 집계 조회",
             description = """
                     공고 전형별 집계 조회합니다. 
