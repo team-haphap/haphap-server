@@ -25,6 +25,14 @@ public interface RegistrationApiDocs {
             description = """
         - PENDING_MUST_NOT_HAVE_CONTACT : 대기 상태에서는 연락 정보를 보낼 수 없습니다.
         - CONFIRMED_MUST_HAVE_CONTACT : 합격/불합격 결과에는 연락 정보가 필요합니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "409",
+            description = """
         - DUPLICATE_REGISTRATION : 이미 입력한 전형입니다.
         """,
             content = @Content(
@@ -41,11 +49,27 @@ public interface RegistrationApiDocs {
             @Valid @RequestBody RegistrationCreateRequest request);
 
     @ApiResponse(
-            responseCode = "400",
+            responseCode = "404",
             description = """
         - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
         - STAGE_NOT_FOUND : 존재하지 않는 전형입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = """
         - STAGE_NOT_IN_POSTING : 해당 공고의 전형 단계가 아닙니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "409",
+            description = """
         - DUPLICATE_REGISTRATION : 이미 입력한 전형입니다.
         """,
             content = @Content(

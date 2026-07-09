@@ -15,8 +15,16 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @Tag(name = "알람 등록",description = "공고별 알람을 on/off 합니다.")
 public interface AlramApiDocs {
 
-    @ApiResponse(responseCode = "400",description = "존재하지 않는 공고입니다.",
-            content = @Content(schema = @Schema(implementation = FailureResponse.class)))
+
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "알림 받기 등록",
             description = """
                     알람을 등록합니다. 
@@ -27,8 +35,15 @@ public interface AlramApiDocs {
             @PathVariable Long postingId
     );
 
-    @ApiResponse(responseCode = "400",description = "존재하지 않는 공고입니다.",
-            content = @Content(schema = @Schema(implementation = FailureResponse.class)))
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "알람 받기 취소",
             description = """
                     알람을 삭제합니다. 
