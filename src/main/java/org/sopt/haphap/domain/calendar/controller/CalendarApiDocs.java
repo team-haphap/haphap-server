@@ -8,8 +8,6 @@ import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDate;
-
 @Tag(name = "캘린더", description = "캘린더 관련 API 입니다")
 public interface CalendarApiDocs {
 
