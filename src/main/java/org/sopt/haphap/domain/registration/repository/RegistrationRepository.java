@@ -2,11 +2,11 @@ package org.sopt.haphap.domain.registration.repository;
 
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.RecentParticipantProjection;
-import org.sopt.haphap.domain.registration.dto.RegistrationFeedProjection;
-import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
+import org.sopt.haphap.domain.registration.projection.RecentParticipantProjection;
+import org.sopt.haphap.domain.registration.projection.RegistrationFeedProjection;
+import org.sopt.haphap.domain.registration.projection.StagePendingCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageResultAggProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

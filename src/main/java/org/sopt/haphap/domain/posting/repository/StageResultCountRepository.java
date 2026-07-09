@@ -1,7 +1,7 @@
 package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.StageResultCount;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -5,7 +5,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.StageResultCount;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
+import org.sopt.haphap.domain.registration.projection.StageResultAggProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

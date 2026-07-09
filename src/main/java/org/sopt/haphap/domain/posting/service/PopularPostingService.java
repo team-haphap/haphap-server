@@ -12,7 +12,7 @@ import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

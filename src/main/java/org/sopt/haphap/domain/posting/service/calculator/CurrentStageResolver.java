@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;

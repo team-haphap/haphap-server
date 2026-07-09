@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.ParticipantSummary;
 import org.sopt.haphap.domain.posting.dto.RegistrationFeed;
-import org.sopt.haphap.domain.registration.dto.RecentParticipantProjection;
+import org.sopt.haphap.domain.registration.projection.RecentParticipantProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

@@ -10,7 +10,7 @@ import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.posting.service.PostingViewTracker;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;

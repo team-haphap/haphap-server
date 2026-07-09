@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.registration.dto;
+package org.sopt.haphap.domain.registration.projection;
 
 public interface StageRegistrationCountProjection {
     Long getPostingId();
