@@ -10,7 +10,6 @@ import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.sopt.haphap.global.exception.CustomException;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,9 +29,10 @@ public class CalendarController implements CalendarApiDocs {
 
     @GetMapping("/postings")
     public ResponseEntity<SuccessResponse<CalendarPostingListResponse>> getPostingsByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam String date
     ) {
-        CalendarPostingListResponse response = calendarPostingQueryService.getPostingsByDate(date);
+        LocalDate parsedDate = parseDate(date);
+        CalendarPostingListResponse response = calendarPostingQueryService.getPostingsByDate(parsedDate);
 
         SuccessResponse<CalendarPostingListResponse> body =
                 ApiResponse.success(CalendarSuccessCode.CALENDAR_POSTINGS_FETCHED, response);
@@ -56,6 +56,14 @@ public class CalendarController implements CalendarApiDocs {
     private YearMonth parseYearMonth(String date) {
         try {
             return YearMonth.parse(date);
+        } catch (DateTimeParseException e) {
+            throw new CustomException(GlobalErrorCode.INVALID_INPUT_VALUE);
+        }
+    }
+
+    private LocalDate parseDate(String date) {
+        try {
+            return LocalDate.parse(date);
         } catch (DateTimeParseException e) {
             throw new CustomException(GlobalErrorCode.INVALID_INPUT_VALUE);
         }
