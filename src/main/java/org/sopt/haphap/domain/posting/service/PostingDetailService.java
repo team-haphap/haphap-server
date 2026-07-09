@@ -5,6 +5,7 @@ import org.sopt.haphap.domain.posting.code.PostingErrorCode;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PostingDetailResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
+import org.sopt.haphap.domain.posting.service.calculator.CurrentStageResolver;
 import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
