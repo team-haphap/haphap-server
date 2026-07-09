@@ -18,7 +18,7 @@ import org.sopt.haphap.domain.alram.notification.NotificationSender;
 import org.sopt.haphap.domain.alram.repository.AlramRepository;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
-import org.sopt.haphap.domain.posting.service.CurrentStageResolver;
+import org.sopt.haphap.domain.posting.service.calculator.CurrentStageResolver;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
