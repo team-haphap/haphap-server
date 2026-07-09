@@ -5,6 +5,7 @@ import org.sopt.haphap.domain.registration.domain.ContactMethod;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record RegistrationCreateRequest(
 
@@ -14,7 +15,7 @@ public record RegistrationCreateRequest(
         @NotNull(message = "전형 단계는 필수입니다.")
         Long stageId,
 
-        LocalDate contactedAt,
+        LocalDateTime contactedAt,
 
         ContactMethod contactMethod,
 
