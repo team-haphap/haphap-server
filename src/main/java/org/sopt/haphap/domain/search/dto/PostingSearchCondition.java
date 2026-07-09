@@ -1,10 +1,8 @@
 package org.sopt.haphap.domain.search.dto;
 
-import java.util.List;
-
 public record PostingSearchCondition(
         String keyword,
-        List<String> categories,
+        String category,
         int page,
         int size
 ) {
@@ -12,11 +10,12 @@ public record PostingSearchCondition(
     private static final int MAX_SIZE = 50;
 
     public static PostingSearchCondition of(
-            String q, List<String> categories, Integer page, Integer size
+            String q, String category, Integer page, Integer size
     ) {
         int normalizedPage = (page == null || page < 0) ? 0 : page;
         int normalizedSize = (size == null || size <= 0) ? DEFAULT_SIZE : Math.min(size, MAX_SIZE);
         String normalizedKeyword = (q == null || q.isBlank()) ? null : q.trim();
-        return new PostingSearchCondition(normalizedKeyword, categories, normalizedPage, normalizedSize);
+        String normalizedCategory = (category == null || category.isBlank()) ? null : category.trim();
+        return new PostingSearchCondition(normalizedKeyword, category, normalizedPage, normalizedSize);
     }
 }
