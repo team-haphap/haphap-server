@@ -28,6 +28,7 @@ public class CalendarIndicatorQueryService {
     private static final YearMonth MAX = YearMonth.of(2030, 12);
 
     public CalendarIndicatorListResponse getIndicators(YearMonth yearMonth) {
+        validateRange(yearMonth);
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
 
