@@ -73,7 +73,7 @@ public class CalendarPostingQueryService {
                 stage.getStageName(),
                 AnnouncementLikelihood.from(stage.getExpectedScore()),
                 participantCountByPostingId.getOrDefault(stage.getPostingId(), 0L),
-                stage.getCompanyImageUrl()
+                stage.getLogoImageUrl()
         );
     }
 
