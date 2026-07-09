@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.search.dto.AutocompleteItemResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
+import org.sopt.haphap.domain.search.repository.RelatedSearchKeywordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class AutocompleteService {
 
     private static final int SHORTCUT_LIMIT = 5;
-    private static final int JOB_LIMIT = 10; // 추후 관련 검색어..
-
+    private static final int JOB_LIMIT = 10;
     private static final Pattern INCOMPLETE_JAMO_ONLY = Pattern.compile("^[ㄱ-ㅣ]+$");
 
     private final PostingRepository postingRepository;
     private final HighlightRangeCalculator highlightRangeCalculator;
+    private final RelatedSearchKeywordRepository relatedSearchKeywordRepository;
 
     public AutocompleteResponse autocomplete(String rawKeyword) {
         String keyword = normalize(rawKeyword);
@@ -55,12 +56,11 @@ public class AutocompleteService {
     }
 
     // 관련 검색어: 클릭 시 목록으로 이동, 특정 공고로 안 감 → postingId 항상 null
-    // TODO: 사전 저장된 관련 검색어 테이블로 교체 예정. 지금은 임시로 공고명 매칭 재사용.
     private List<AutocompleteItemResponse> searchJobs(String keyword) {
-        return postingRepository.searchByTitleContaining(keyword, JOB_LIMIT).stream()
-                .map(p -> AutocompleteItemResponse.job(
-                        null, p.getTitle(),
-                        highlightRangeCalculator.calculate(p.getTitle(), keyword)))
+        return relatedSearchKeywordRepository.searchByKeywordContaining(keyword, JOB_LIMIT).stream()
+                .map(k -> AutocompleteItemResponse.job(
+                        null, k.getKeyword(),
+                        highlightRangeCalculator.calculate(k.getKeyword(), keyword)))
                 .toList();
     }
 }
