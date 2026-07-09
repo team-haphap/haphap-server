@@ -2,11 +2,7 @@ package org.sopt.haphap.domain.registration.repository;
 
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.projection.RecentParticipantProjection;
-import org.sopt.haphap.domain.registration.projection.RegistrationFeedProjection;
-import org.sopt.haphap.domain.registration.projection.StagePendingCountProjection;
-import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.projection.StageResultAggProjection;
+import org.sopt.haphap.domain.registration.projection.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -97,18 +93,16 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY r.updatedAt DESC
         """)
     List<RegistrationFeedProjection> findRecentFeeds(@Param("postingId") Long postingId, Pageable pageable);
-           
-    //캘린더에서 추가
+
+    // 캘린더 참여인원: 공고의 모든 전형 통틀어 상태 등록한 유저 수 (result 무관, 중복 제거)
     @Query("""
-    SELECT r.stage.id AS stageId, COUNT(r) AS cnt
+    SELECT r.posting.id AS postingId, COUNT(DISTINCT r.user.id) AS cnt
     FROM Registration r
-    WHERE r.stage.id IN :stageIds
-      AND r.result IN :results
-    GROUP BY r.stage.id
+    WHERE r.posting.id IN :postingIds
+    GROUP BY r.posting.id
     """)
-    List<StagePendingCountProjection> countByStageIdsAndResult(
-            @Param("stageIds") List<Long> stageIds,
-            @Param("results") List<RegistrationResult> results);
+    List<PostingParticipantCountProjection> countDistinctUsersByPostingIds(
+            @Param("postingIds") List<Long> postingIds);
 
     //cumulatedCount
     @Query("""
