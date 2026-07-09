@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.registration.dto;
+package org.sopt.haphap.domain.registration.dto.response;
 
 import org.sopt.haphap.domain.posting.domain.Category;
 import org.sopt.haphap.domain.posting.domain.Posting;

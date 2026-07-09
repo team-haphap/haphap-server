@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.posting.service;
+package org.sopt.haphap.domain.posting.service.calculator;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
