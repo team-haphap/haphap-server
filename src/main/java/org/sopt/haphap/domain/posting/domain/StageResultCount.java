@@ -21,7 +21,7 @@ public class StageResultCount {
 
     @Version
     @Column(nullable = false)
-    private Long version;
+    private long version;
 
     @Column(name = "posting_id", nullable = false)
     private Long postingId;
