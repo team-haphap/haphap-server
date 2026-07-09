@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.domain.calendar.dto.CalendarIndicatorListResponse;
 import org.sopt.haphap.domain.calendar.dto.CalendarPostingListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -21,7 +20,7 @@ public interface CalendarApiDocs {
                     해당 날짜에 발표 예정 공고가 없으면 빈 배열을 반환합니다.
                     """)
     ResponseEntity<SuccessResponse<CalendarPostingListResponse>> getPostingsByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam String date
     );
     @Operation(summary = "월별 캘린더 인디케이터 조회",
             description = """
