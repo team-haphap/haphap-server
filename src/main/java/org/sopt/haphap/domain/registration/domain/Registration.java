@@ -2,6 +2,8 @@ package org.sopt.haphap.domain.registration.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +41,7 @@ public class Registration extends BaseEntity {
     @Column(length = 20)
     private ContactMethod contactMethod;
 
-    private LocalDate contactedAt;
+    private LocalDateTime contactedAt;
 
     @Column(nullable = false)
     private boolean anonymous;
@@ -53,7 +55,7 @@ public class Registration extends BaseEntity {
     private User user;
 
     private Registration(User user, Posting posting, PostingStage stage, RegistrationResult result,
-                         ContactMethod contactMethod, LocalDate contactedAt, boolean anonymous) {
+                         ContactMethod contactMethod, LocalDateTime contactedAt, boolean anonymous) {
         this.user = user;
         this.posting = posting;
         this.stage = stage;
@@ -77,14 +79,14 @@ public class Registration extends BaseEntity {
 
     public static Registration create(User user, Posting posting, PostingStage stage,
                                       RegistrationResult result, ContactMethod contactMethod,
-                                      LocalDate contactedAt, boolean anonymous) {
+                                      LocalDateTime contactedAt, boolean anonymous) {
         return new Registration(user, posting, stage, result, contactMethod, contactedAt, anonymous);
     }
 
 
     // 기존 등록을 새 값으로 갱신 (force 재요청 시)
     public void updateRegistration(RegistrationResult result, ContactMethod contactMethod,
-                                   LocalDate contactedAt, boolean anonymous) {
+                                   LocalDateTime contactedAt, boolean anonymous) {
         this.result = result;
         this.contactMethod = contactMethod;
         this.contactedAt = contactedAt;
