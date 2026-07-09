@@ -12,8 +12,6 @@ import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
-
 @Tag(name = "검색", description = "검색 관련 API 입니다")
 public interface SearchApiDocs {
 
@@ -48,19 +46,21 @@ public interface SearchApiDocs {
 
     @Operation(summary = "검색 결과 공고 목록 조회",
             description = """
-                검색어 확정 후 결과 화면에 노출할 공고 목록을 반환합니다.
-                q는 공고명 포함된 경우 매칭되며, category로 복수 카테고리 필터링이 가능합니다.
-                정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
-                """)
+            검색어 확정 후 결과 화면에 노출할 공고 목록을 반환합니다.
+            q는 공고명 포함된 경우 매칭되며, category는 단일 카테고리 필터입니다
+            (기존 `/api/v1/postings` 카테고리 파라미터와 동일하게, '전체' 선택 시 파라미터를 아예 붙이지 마세요).
+            존재하지 않는 category 값이면 에러를 반환합니다.
+            정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
+            """)
     @ApiResponse(responseCode = "200", description = "검색 결과",
             content = @Content(examples = @ExampleObject(value = """
-                    { "postings": [
-                        {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","dDay":3}
-                      ], "page": 0, "size": 20, "hasNext": true }
-                    """)))
+                { "postings": [
+                    {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":3}
+                  ], "page": 0, "size": 20, "hasNext": true }
+                """)))
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @Parameter(description = "검색 키워드") String q,
-            @Parameter(description = "카테고리 필터 (복수 선택 가능)") List<String> category,
+            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: DEV,PM). 전체 조회 시 파라미터 생략") String category,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
             @Parameter(description = "페이지 크기, 기본 20, 최대 50") Integer size);
 }
