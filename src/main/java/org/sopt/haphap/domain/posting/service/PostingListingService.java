@@ -6,10 +6,7 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
-import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
-import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
-import org.sopt.haphap.domain.posting.service.support.PostingSortComparators;
+import org.sopt.haphap.domain.posting.service.support.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +19,9 @@ public class PostingListingService {
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
 
-    public PopularPostingListResponse getAllPostings(List<String> categoryNames) {
+    public PopularPostingListResponse getAllPostings(String category) {
+
+        List<String> categoryNames = CategoryParser.parse(category);
         List<String> filter = (categoryNames == null || categoryNames.isEmpty()) ? null : categoryNames;
 
         // 1) 카테고리로 전체 공고 (회사·카테고리 fetch join)

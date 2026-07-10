@@ -8,6 +8,7 @@ import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
+import org.sopt.haphap.domain.posting.service.support.CategoryParser;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
@@ -32,7 +33,8 @@ public class PopularPostingService {
     private final PostingResponseAssembler assembler;
     private final NextStageCalculator nextStageCalculator;
 
-    public PopularPostingListResponse getPopularPostings(List<String> categoryNames) {
+    public PopularPostingListResponse getPopularPostings(String category) {
+        List<String> categoryNames = CategoryParser.parse(category);
         // "전체"이거나 비어있으면 null로 정규화 → 필터 미적용
         List<String> filter = (categoryNames == null || categoryNames.isEmpty())
                 ? null : categoryNames;
