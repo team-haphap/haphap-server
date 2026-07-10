@@ -6,13 +6,20 @@ CREATE TABLE profile_image (
 );
 
 INSERT INTO profile_image (image_url, created_at, updated_at) VALUES
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now()),
-('', now(), now());
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/5d37a975-9b55-4033-8b14-c63ce30de1db-img_1.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6dc58d49-3849-4bf0-999d-1e890bedd9d0-img_2.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/71401700-2017-4457-b298-a664da59dc50-img_3.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/679bb4c2-8d51-4b6d-9f32-4b658eb7922b-img_4.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/b2884404-c166-431b-bbdb-a4c976a072f9-img_5.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a487346f-53b6-4668-814d-897da455ded4-img_6.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6e6e6bb8-a2b4-4d0b-8ad9-f92ce01f5fb4-img_7.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/dffb023e-8fc3-4b51-ba66-64b7e7058494-img_8.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a4f26e5b-af33-446d-90ae-9d031dfad31c-img_9.pdf', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/d89f1451-9eee-4804-8abe-7bbfc82c1a91-img_10.pdf', now(), now());
+
+INSERT INTO banner (image_url, display_order, is_active, created_at, updated_at) VALUES
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7f6b3412-4691-411b-81eb-b6b8856818a2-img_card_banner.pdf', 1, true, now(), now());
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/ecc92117-8479-45da-a164-05525cde7cba-img_card_banner-1.pdf', 2, true, now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/495b46d9-8541-4c4d-8eee-2a2adc0870c2-img_card_banner-2.pdf', 3, true, now(), now());
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7e7209ca-e01d-457b-a4fb-1d09da35fcf5-img_card_banner-3.pdf', 4, true, now(), now());
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/3b9936bc-7ffe-4641-9dba-ad2360ba60da-img_card_banner-4.pdf', 5, true, now(), now());
