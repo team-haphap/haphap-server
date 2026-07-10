@@ -54,4 +54,4 @@ firebase-service-account.json
 *.yaml
 .postman/
 postman
-user.yml
+users.yml
