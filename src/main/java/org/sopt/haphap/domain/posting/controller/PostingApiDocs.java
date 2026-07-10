@@ -53,7 +53,7 @@ public interface PostingApiDocs {
                     - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
                     """
     )
-    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) List<String> category);
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) String category);
 
     @Operation(summary = "카테고리별 공고 전체 조회",
             description = """
@@ -61,7 +61,7 @@ public interface PostingApiDocs {
                     - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
                     """
     )
-    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) List<String> category);
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) String category);
 
     @Operation(summary = "오늘 발표 예상 공고조회",
             description = """
