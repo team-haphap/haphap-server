@@ -11,7 +11,8 @@ public record PostingDetailResponse(
         String category,
         String location,
         String position,
-        String currentState,          // 현재 진행 전형 (없으면 null)
+        String currentState,
+        String companyImageUrl,// 현재 진행 전형 (없으면 null)
         SummaryResponse summary,
         List<RegistrationFeedResponse> registrations
 ) {
