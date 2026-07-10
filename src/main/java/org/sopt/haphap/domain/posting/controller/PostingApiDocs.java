@@ -4,12 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -46,7 +44,16 @@ public interface PostingApiDocs {
                     """)
     @ApiResponse(responseCode = "204", description = "기록 성공, 응답 본문 없음")
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
-               
+
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - CATEGORY_NOT_FOUND : 존재하지 않는 카테고리입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "홈 메인-최근 등록 공고 조회(카테고리 별 공고조회)",
             description = """
                     홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
@@ -56,6 +63,15 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) String category);
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - CATEGORY_NOT_FOUND : 존재하지 않는 카테고리입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @Operation(summary = "카테고리별 공고 전체 조회",
             description = """
                     공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
