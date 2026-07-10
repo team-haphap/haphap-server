@@ -51,6 +51,7 @@ public interface PostingApiDocs {
             description = """
                     홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
                     - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                    - 카테고리를 , 기준으로 보내주세요!
                     """
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) String category);
@@ -59,6 +60,7 @@ public interface PostingApiDocs {
             description = """
                     공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
                     - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                    - 카테고리를 , 기준으로 보내주세요!
                     """
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) String category);
