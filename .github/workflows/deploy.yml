@@ -57,6 +57,7 @@ jobs:
             RDS_USERNAME=${{ secrets.RDS_USERNAME }}
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             ENVEOF
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json
             chmod 600 firebase-service-account.json
