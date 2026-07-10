@@ -22,11 +22,23 @@ public class Category extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(length = 500)
+    private String cardImageUrl;
+
     private Category(String name) {
         this.name = name;
     }
 
     public static Category create(String name) {
-        return new Category(name);
+        return new Category(name,null);
+    }
+
+    private Category(String name, String cardImageUrl) {
+        this.name = name;
+        this.cardImageUrl = cardImageUrl;
+    }
+
+    public static Category create(String name, String cardImageUrl) {
+        return new Category(name, cardImageUrl);
     }
 }

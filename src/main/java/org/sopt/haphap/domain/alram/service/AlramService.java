@@ -18,6 +18,7 @@ import org.sopt.haphap.domain.alram.notification.NotificationSender;
 import org.sopt.haphap.domain.alram.repository.AlramRepository;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
+import org.sopt.haphap.domain.posting.service.calculator.CurrentStageResolver;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
@@ -36,10 +37,29 @@ public class AlramService {
     private final AlramRepository alramRepository;
     private final PushTokenRepository pushTokenRepository;
     private final NotificationSender notificationSender;
+    private final CurrentStageResolver currentStageResolver;
 
     // 트랜잭션 안: 구독자 조회 + 알람 내역 저장 + 발송 대상(토큰) 수집까지
     @Transactional
     public AlramDispatch prepareAlrams(RegistrationCreatedEvent event) {
+
+        String currentStage = currentStageResolver.resolveCurrentState(event.postingId());
+
+        if (currentStage == null) {
+            return AlramDispatch.empty();
+        }
+
+        if (!currentStage.equals(event.stage())) {
+            log.debug(
+                    "현재 진행 전형이 아니므로 알람 미발송 - postingId={}, stage={}, currentStage={}",
+                    event.postingId(),
+                    event.stage(),
+                    currentStage
+            );
+
+            return AlramDispatch.empty();
+        }
+
         List<AlramSetting> subscribers = alramSettingRepository
                 .findActiveSubscribers(event.postingId(), event.registrantUserId());
 

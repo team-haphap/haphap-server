@@ -7,8 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +25,7 @@ public class PopularPostingService {
     private static final int RECENT_HOURS = 48;
     private static final List<RegistrationResult> COUNTED_RESULTS =
             List.of(RegistrationResult.PASS, RegistrationResult.FAIL);
-    private static final int MAX_POPULAR = 8;
+    private static final int MAX_POPULAR = 4;
 
     private final RegistrationRepository registrationRepository;
     private final PostingAggregateLoader aggregateLoader;

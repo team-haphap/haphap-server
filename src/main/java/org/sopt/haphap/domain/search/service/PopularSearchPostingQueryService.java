@@ -1,22 +1,17 @@
 package org.sopt.haphap.domain.search.service;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.posting.service.PostingViewTracker;
-import org.sopt.haphap.domain.search.dto.PopularSearchPostingListResponse;
-import org.sopt.haphap.domain.search.dto.PopularSearchPostingResponse;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
+import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler.Scored;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.sopt.haphap.domain.posting.service.PopularPostingCacheRefresher;
 
 @Service
 @RequiredArgsConstructor
@@ -26,55 +21,32 @@ public class PopularSearchPostingQueryService {
     private static final int POPULAR_COUNT = 4;
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final PostingRepository postingRepository;
+    private final PostingAggregateLoader aggregateLoader;
+    private final PostingResponseAssembler assembler;
 
-    // 캐시 없이, 호출될 때마다 그 순간 기준으로 계산 (실시간 트래킹)
-    public PopularSearchPostingListResponse getPopularPostings() {
+    public PopularPostingListResponse getPopularPostings() {
         List<Long> topIds = fetchTopPostingIds();
         if (topIds.isEmpty()) {
-            return PopularSearchPostingListResponse.from(List.of());
+            return PopularPostingListResponse.from(List.of());
         }
-        return PopularSearchPostingListResponse.from(buildResponses(topIds));
+
+        PostingAggregate agg = aggregateLoader.load(topIds);
+
+        List<PopularPostingResponse> responses = topIds.stream()
+                .filter(id -> agg.posting(id) != null)
+                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id)))
+                .map(Scored::response)
+                .toList();
+
+        return PopularPostingListResponse.from(responses);
     }
 
     private List<Long> fetchTopPostingIds() {
-        Set<String> ids = redisTemplate.opsForZSet()
-                .reverseRange(PostingViewTracker.VIEW_COUNT_KEY, 0, POPULAR_COUNT - 1);
+        List<String> ids = redisTemplate.opsForList()
+                .range(PopularPostingCacheRefresher.POPULAR_CACHE_KEY, 0, -1);
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
         return ids.stream().map(Long::valueOf).toList();
-    }
-
-    private List<PopularSearchPostingResponse> buildResponses(List<Long> orderedIds) {
-        Map<Long, Posting> postingMap = postingRepository
-                .findAllWithCompanyAndCategoryByIds(orderedIds).stream()
-                .collect(Collectors.toMap(Posting::getId, Function.identity()));
-
-        return orderedIds.stream()
-                .map(postingMap::get)
-                .filter(Objects::nonNull)
-                .map(this::toResponse)
-                .toList();
-    }
-
-    private PopularSearchPostingResponse toResponse(Posting posting) {
-        LocalDate today = LocalDate.now();
-
-        Integer dDay = (posting.getDeadline() == null)
-                ? null
-                : (int) ChronoUnit.DAYS.between(today, posting.getDeadline());
-
-        String status = (posting.getDeadline() == null || !posting.getDeadline().isBefore(today))
-                ? "OPEN" : "CLOSED";
-
-        return new PopularSearchPostingResponse(
-                posting.getId(),
-                posting.getCompany().getName(),
-                posting.getTitle(),
-                posting.getCategory().getName(),
-                dDay,
-                status
-        );
     }
 }

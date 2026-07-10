@@ -21,14 +21,23 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String anonymousName;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String email;
 
     private LocalDate birthDate;
+
+    private String gender;
+
+    private String ageRange;
+
+    private String phoneNumber;
+
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -37,4 +46,3 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String providerId;
 }
-
