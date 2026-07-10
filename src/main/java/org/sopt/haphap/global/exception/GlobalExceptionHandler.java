@@ -39,18 +39,29 @@ public class GlobalExceptionHandler {
 
     // === 커스텀 예외 ===
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<FailureResponse> handleCustomException(CustomException e) {
-        log.warn("CustomException: {}", e.getMessage());
+    public ResponseEntity<FailureResponse> handleCustomException(CustomException e,HttpServletRequest request) {
+        log.warn(
+                "[{} {}] {} ({})",
+                request.getMethod(),
+                request.getRequestURI(),
+                e.getErrorCode(),
+                e.getErrorCode().getStatus()
+        );
         return buildErrorResponse(e.getErrorCode());
     }
 
     // === 요청 body / 파라미터 검증 ===
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<FailureResponse> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<FailureResponse> handleValidationException(MethodArgumentNotValidException e,HttpServletRequest request) {
         String message = e.getBindingResult().getFieldErrors().isEmpty()
                 ? GlobalErrorCode.INVALID_INPUT_VALUE.getMessage()
                 : e.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
-        log.warn("Validation failed: {}", message);
+        log.warn(
+                "[{} {}] Validation failed: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                message
+        );
         return buildErrorResponse(GlobalErrorCode.INVALID_INPUT_VALUE, message);
     }
 
