@@ -5,7 +5,8 @@ public enum ImageCategory {
     CARD_LOGO("card-logos"),
     IMAGE("images"),
     PASS_CARD("pass-cards"),
-    BANNER("banners");
+    BANNER("banners"),
+    PROFILE("profile-images");
 
     private final String dirName;
 
