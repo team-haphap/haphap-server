@@ -37,6 +37,10 @@ public class AlramDispatcher {
                 log.error("[알람] 발송 최종 실패 - tokenId={}", target.tokenId(), e);
                 failureRecorder.record(event, e);
             }
+            catch (Exception e) {   // 예상 못한 예외로 루프 전체가 죽는 것 방지
+                log.error("[알람] 예상치 못한 발송 오류 - tokenId={}", target.tokenId(), e);
+                failureRecorder.record(event, e);
+            }
         }
     }
 }
