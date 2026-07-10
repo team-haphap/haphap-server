@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.posting.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
@@ -30,10 +31,10 @@ public class PostingListingService {
             return PopularPostingListResponse.from(List.of());
         }
         List<Long> postingIds = postings.stream().map(Posting::getId).toList();
-        PostingAggregate agg = aggregateLoader.load(postingIds);
+        PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.LISTING);
 
         List<PopularPostingResponse> result = postingIds.stream()
-                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id)))
+                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
                 .sorted(PostingSortComparators.byAnnounceDate())
                 .map(PostingResponseAssembler.Scored::response)
                 .toList();
