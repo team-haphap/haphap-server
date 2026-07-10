@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.global.dto.ImageUploadResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
+import org.sopt.haphap.global.s3.ImageCategory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,10 +14,12 @@ public interface ImageApiDocs {
 
     @Operation(summary = "이미지 업로드",
             description = """
-                    이미지 파일을 S3에 업로드하고 접근 가능한 URL을 반환합니다.
+                    이미지 파일을 카테고리별 S3 경로에 업로드하고 접근 가능한 URL을 반환합니다.
                     로그인한 사용자만 호출할 수 있습니다.
                     파일 용량은 최대 10MB까지 허용되며, 초과 시 413 응답을 반환합니다.
+                    category는 LOGO_IMAGE, CARD_LOGO, IMAGE, PASS_CARD, BANNER 중 하나여야 합니다.
                     """)
     ResponseEntity<SuccessResponse<ImageUploadResponse>> uploadImage(
-            @Parameter(description = "업로드할 이미지 파일") MultipartFile file);
+            @Parameter(description = "업로드할 이미지 파일") MultipartFile file,
+            @Parameter(description = "이미지 카테고리 (LOGO_IMAGE, CARD_LOGO, IMAGE, PASS_CARD, BANNER)") ImageCategory category);
 }
