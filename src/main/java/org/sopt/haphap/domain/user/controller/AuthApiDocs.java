@@ -29,11 +29,16 @@ public interface AuthApiDocs {
                     content = @Content(schema = @Schema(implementation = AuthResponse.class),
                             examples = @ExampleObject(value = """
                             {
-                              "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-                              "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-                              "name": "김소프트",
-                              "anonymousName": "익명의 판다",
-                              "profileImageUrl": "https://.../profile.png"
+                              "status": 200,
+                              "code": "KAKAO_LOGIN_SUCCESS",
+                              "message": "카카오 로그인에 성공했습니다.",
+                              "data": {
+                                "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                "name": "김소프트",
+                                "anonymousName": "익명의 판다",
+                                "profileImageUrl": "https://.../profile.png"
+                              }
                             }
                             """))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청",
@@ -71,11 +76,16 @@ public interface AuthApiDocs {
                     content = @Content(schema = @Schema(implementation = AuthResponse.class),
                             examples = @ExampleObject(value = """
                             {
-                              "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-                              "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-                              "name": "김소프트",
-                              "anonymousName": "익명의 판다",
-                              "profileImageUrl": "https://.../profile.png"
+                              "status": 200,
+                              "code": "REISSUE_SUCCESS",
+                              "message": "토큰 재발급에 성공했습니다.",
+                              "data": {
+                                "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                "name": "김소프트",
+                                "anonymousName": "익명의 판다",
+                                "profileImageUrl": "https://.../profile.png"
+                              }
                             }
                             """))),
             @ApiResponse(responseCode = "401", description = "유효하지 않거나 저장된 값과 불일치하는 리프레시 토큰",

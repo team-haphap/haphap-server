@@ -52,10 +52,17 @@ public interface SearchApiDocs {
     @ApiResponse(responseCode = "200", description = "자동완성 결과",
             content = @Content(schema = @Schema(implementation = AutocompleteResponse.class),
                     examples = @ExampleObject(value = """
-                    { "results": [
-                        {"type":"company","name":"카카오","highlightRanges":[{"start":0,"end":2}],"postingId":1},
-                        {"type":"keyword","name":"백엔드 개발자","highlightRanges":[{"start":3,"end":5}],"postingId":null}
-                    ] }
+                    {
+                      "status": 200,
+                      "code": "AUTOCOMPLETE_FETCHED",
+                      "message": "검색 자동완성 조회에 성공했습니다.",
+                      "data": {
+                        "results": [
+                          {"type":"company","name":"카카오","highlightRanges":[{"start":0,"end":2}],"postingId":1},
+                          {"type":"keyword","name":"백엔드 개발자","highlightRanges":[{"start":3,"end":5}],"postingId":null}
+                        ]
+                      }
+                    }
                     """)))
     @Operation(summary = "검색 자동완성",
             description = """
@@ -75,9 +82,19 @@ public interface SearchApiDocs {
             @ApiResponse(responseCode = "200", description = "검색 결과",
                     content = @Content(schema = @Schema(implementation = SearchPostingListResponse.class),
                             examples = @ExampleObject(value = """
-                        { "postings": [
-                            {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":3}
-                          ], "page": 0, "size": 20, "hasNext": true }
+                        {
+                          "status": 200,
+                          "code": "POSTING_SEARCH_FETCHED",
+                          "message": "검색 결과 공고 목록 조회에 성공했습니다.",
+                          "data": {
+                            "postings": [
+                              {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":3}
+                            ],
+                            "page": 0,
+                            "size": 20,
+                            "hasNext": true
+                          }
+                        }
                         """))),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 카테고리",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class)))
