@@ -5,6 +5,7 @@ import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
+import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.util.AnonymousNameGenerator;
@@ -26,6 +27,12 @@ public class UserService {
 
     @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
+        if (userInfo.email() == null) {
+            throw new CustomException(AuthErrorCode.EMAIL_REQUIRED);
+        }
+        if (userInfo.name() == null) {
+            throw new CustomException(AuthErrorCode.NAME_REQUIRED);
+        }
         return userRepository.findByProviderAndProviderId(provider, providerId)
                 .map(user -> new FindOrCreateResult(user, false))
                 .orElseGet(() -> {

@@ -18,8 +18,9 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String secret;
 
-    private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 60;           // 1시간
-    private static final long REFRESH_TOKEN_EXPIRY = 1000 * 60 * 60 * 24 * 14; // 2주
+    // TODO. 만료 토큰을 바꾸어요~
+    private static final long ACCESS_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 30;      // 1달
+    private static final long REFRESH_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 90;     // 3달
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

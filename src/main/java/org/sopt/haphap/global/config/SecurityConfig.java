@@ -52,13 +52,19 @@ public class SecurityConfig {
                                 "/api/v1/postings/*/card-clicks"
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().hasRole("USER")
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json;charset=UTF-8");
                             FailureResponse body = FailureResponse.of(GlobalErrorCode.UNAUTHORIZED);
+                            response.getWriter().write(objectMapper.writeValueAsString(body));
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            FailureResponse body = FailureResponse.of(GlobalErrorCode.FORBIDDEN);
                             response.getWriter().write(objectMapper.writeValueAsString(body));
                         })
                 )

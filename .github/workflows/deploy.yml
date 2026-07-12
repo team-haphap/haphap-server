@@ -57,10 +57,15 @@ jobs:
             RDS_USERNAME=${{ secrets.RDS_USERNAME }}
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
             GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
             ENVEOF
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json
             chmod 600 firebase-service-account.json
+
+            echo "${{ secrets.DOZZLE_USERS_YML_B64 }}" | base64 -d > users.yml
+            chmod 600 users.yml
+
             chmod +x scripts/deploy.sh
             IMAGE_TAG=${{ github.sha }} bash scripts/deploy.sh

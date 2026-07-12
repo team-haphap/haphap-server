@@ -9,12 +9,12 @@ import org.sopt.haphap.domain.posting.dto.response.PostingStageStatusResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

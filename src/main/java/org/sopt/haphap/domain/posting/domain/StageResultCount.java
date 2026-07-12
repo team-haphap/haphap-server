@@ -19,6 +19,10 @@ public class StageResultCount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    @Column(nullable = false)
+    private long version;
+
     @Column(name = "posting_id", nullable = false)
     private Long postingId;
 
@@ -65,5 +69,11 @@ public class StageResultCount {
             case FAIL -> this.failCount += n;
             case PENDING -> this.pendingCount += n;
         }
+    }
+
+    public void reconcile(long passCount, long failCount, long pendingCount) {
+        this.passCount = passCount;
+        this.failCount = failCount;
+        this.pendingCount = pendingCount;
     }
 }

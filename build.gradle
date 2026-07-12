@@ -45,6 +45,8 @@ dependencies {
 
     // PostgreSQL
     runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -71,6 +73,10 @@ dependencies {
 
     // WebClient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //s3
+    implementation platform('software.amazon.awssdk:bom:2.29.52')
+    implementation 'software.amazon.awssdk:s3'
 }
 
 tasks.named('test') {

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,31 +34,38 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     List<PostingStageFlatProjection> findFlatByPostingIds(@Param("postingIds") List<Long> postingIds);
 
     @Query("""
-        SELECT s.id AS stageId, s.name AS stageName, s.expectedScore AS expectedScore,
-               p.id AS postingId, p.title AS title,
-               c.name AS companyName, cat.name AS categoryName,
-               c.imageUrl AS imageUrl
-        FROM PostingStage s
-        JOIN s.posting p
-        JOIN p.company c
-        JOIN p.category cat
-        WHERE s.expectedAnnouncementDate = :today
-        ORDER BY s.expectedScore DESC
-        """)
-    List<TodayAnnouncementProjection> findTodayAnnouncements(@Param("today") LocalDate today, Pageable pageable);
+    SELECT s.id AS stageId, s.name AS stageName, s.expectedScore AS expectedScore,
+           p.id AS postingId, p.title AS title,
+           c.name AS companyName, cat.name AS categoryName,
+           ci.imageUrl AS imageUrl
+    FROM PostingStage s
+    JOIN s.posting p
+    JOIN p.company c
+    JOIN p.category cat
+    LEFT JOIN CompanyImage ci ON ci.company = c AND ci.type = :imageType
+    WHERE s.expectedAnnouncementDate = :today
+    ORDER BY s.expectedScore DESC, p.title ASC
+    """)
+    List<TodayAnnouncementProjection> findTodayAnnouncements(
+            @Param("today") LocalDate today,
+            @Param("imageType") CompanyImageType imageType,
+            Pageable pageable);
 
-    // 캘린더 날짜별 조회 전용. 공고 수와 무관하게 쿼리 1번
     @Query("""
-        SELECT s.posting.id AS postingId, s.id AS stageId,
-               s.name AS stageName, s.expectedScore AS expectedScore,
-               s.expectedAnnouncementDate AS expectedAnnouncementDate,
-               p.title AS title, c.imageUrl AS companyImageUrl
-        FROM PostingStage s
-        JOIN s.posting p
-        JOIN p.company c
-        WHERE s.expectedAnnouncementDate = :date
-        """)
-    List<PostingStageCalendarProjection> findCalendarStagesByDate(@Param("date") LocalDate date);
+    SELECT s.posting.id AS postingId, s.id AS stageId,
+           s.name AS stageName, s.expectedScore AS expectedScore,
+           s.expectedAnnouncementDate AS expectedAnnouncementDate,
+           p.title AS title, ci.imageUrl AS logoImageUrl,
+           s.orderIndex AS orderIndex
+    FROM PostingStage s
+    JOIN s.posting p
+    JOIN p.company c
+    LEFT JOIN CompanyImage ci ON ci.company = c AND ci.type = :imageType
+    WHERE s.expectedAnnouncementDate = :date
+    """)
+    List<PostingStageCalendarProjection> findCalendarStagesByDate(
+            @Param("date") LocalDate date,
+            @Param("imageType") CompanyImageType imageType);
 
     // 월별 인디케이터 조회 전용
     @Query("""

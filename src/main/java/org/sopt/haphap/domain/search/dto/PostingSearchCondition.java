@@ -1,11 +1,12 @@
 package org.sopt.haphap.domain.search.dto;
 
+import org.sopt.haphap.domain.posting.service.support.CategoryParser;
+
 import java.util.List;
 
 public record PostingSearchCondition(
         String keyword,
         List<String> categories,
-        String status,
         int page,
         int size
 ) {
@@ -13,11 +14,12 @@ public record PostingSearchCondition(
     private static final int MAX_SIZE = 50;
 
     public static PostingSearchCondition of(
-            String q, List<String> categories, String status, Integer page, Integer size
+            String q, String category, Integer page, Integer size
     ) {
         int normalizedPage = (page == null || page < 0) ? 0 : page;
         int normalizedSize = (size == null || size <= 0) ? DEFAULT_SIZE : Math.min(size, MAX_SIZE);
         String normalizedKeyword = (q == null || q.isBlank()) ? null : q.trim();
-        return new PostingSearchCondition(normalizedKeyword, categories, status, normalizedPage, normalizedSize);
+        List<String> normalizedCategories = CategoryParser.parse(category); //← 이 계산 결과를 아래 생성자에 그대로 써야 함
+        return new PostingSearchCondition(normalizedKeyword, normalizedCategories, normalizedPage, normalizedSize);
     }
 }

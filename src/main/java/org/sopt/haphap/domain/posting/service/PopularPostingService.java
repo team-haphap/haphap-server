@@ -4,11 +4,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
+import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
+import org.sopt.haphap.domain.posting.service.support.CategoryParser;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
+import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
+import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
+import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +34,8 @@ public class PopularPostingService {
     private final PostingResponseAssembler assembler;
     private final NextStageCalculator nextStageCalculator;
 
-    public PopularPostingListResponse getPopularPostings(List<String> categoryNames) {
+    public PopularPostingListResponse getPopularPostings(String category) {
+        List<String> categoryNames = CategoryParser.parse(category);
         // "전체"이거나 비어있으면 null로 정규화 → 필터 미적용
         List<String> filter = (categoryNames == null || categoryNames.isEmpty())
                 ? null : categoryNames;
@@ -41,7 +48,7 @@ public class PopularPostingService {
             return PopularPostingListResponse.from(List.of());
         }
         // 2) 공통 배치 로딩 (공고·전형·누적등록수)
-        PostingAggregate agg = aggregateLoader.load(candidateIds);
+        PostingAggregate agg = aggregateLoader.load(candidateIds, CompanyImageType.POPULAR);
 
         // 3) 48h (공고,전형)별 등록수 — 필터 겸 정렬 기준
         Map<Long, Map<Long, Long>> recentCounts = registrationRepository
@@ -76,7 +83,7 @@ public class PopularPostingService {
                 .getOrDefault(current.getStageId(), 0L);
         if (recentCount <= 0) return null;   // 현재 진행 전형에 48h 활동 없음 → 제외
 
-        PopularPostingResponse response = assembler.assemble(agg.posting(id), stages, counts).response();
+        PopularPostingResponse response = assembler.assemble(agg.posting(id), stages, counts, agg.companyImageUrl(id)).response();
         return new PopularScored(response, recentCount);
     }
 

@@ -10,6 +10,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
 
   data:
     redis:
@@ -25,5 +31,21 @@ management:
     tags:
       application: ${spring.application.name}
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
 jwt:
   secret: ${JWT_SECRET}
+
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    region: ap-northeast-2
+
+logging:
+  level:
+    root: INFO
+    org.hibernate: WARN
+    org.springframework.web: WARN

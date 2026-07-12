@@ -2,11 +2,7 @@ package org.sopt.haphap.domain.registration.repository;
 
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
-import org.sopt.haphap.domain.registration.dto.RecentParticipantProjection;
-import org.sopt.haphap.domain.registration.dto.RegistrationFeedProjection;
-import org.sopt.haphap.domain.registration.dto.StagePendingCountProjection;
-import org.sopt.haphap.domain.registration.dto.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.dto.StageResultAggProjection;
+import org.sopt.haphap.domain.registration.projection.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,16 +14,6 @@ import java.util.Optional;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     Optional<Registration> findByUserIdAndPostingIdAndStageId(Long userId, Long postingId, Long stageId);
-
-    //(공고, 전형)별 등록 수를 한 번에
-    @Query("""
-        SELECT r.posting.id AS postingId, r.stage.id AS stageId, COUNT(r) AS cnt
-        FROM Registration r
-        WHERE r.posting.id IN :postingIds
-        GROUP BY r.posting.id, r.stage.id
-        """)
-    List<StageRegistrationCountProjection> countByPostingAndStage(
-            @Param("postingIds") List<Long> postingIds);
 
     //48시간 내 PASS/FAIL 결과가 있는 공고 id 추리기.
     @Query("""
@@ -107,18 +93,16 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY r.updatedAt DESC
         """)
     List<RegistrationFeedProjection> findRecentFeeds(@Param("postingId") Long postingId, Pageable pageable);
-           
-    //캘린더에서 추가
+
+    // 캘린더 참여인원: 공고의 모든 전형 통틀어 상태 등록한 유저 수 (result 무관, 중복 제거)
     @Query("""
-    SELECT r.stage.id AS stageId, COUNT(r) AS cnt
+    SELECT r.posting.id AS postingId, COUNT(DISTINCT r.user.id) AS cnt
     FROM Registration r
-    WHERE r.stage.id IN :stageIds
-      AND r.result = :result
-    GROUP BY r.stage.id
+    WHERE r.posting.id IN :postingIds
+    GROUP BY r.posting.id
     """)
-    List<StagePendingCountProjection> countByStageIdsAndResult(
-            @Param("stageIds") List<Long> stageIds,
-            @Param("result") RegistrationResult result);
+    List<PostingParticipantCountProjection> countDistinctUsersByPostingIds(
+            @Param("postingIds") List<Long> postingIds);
 
     //cumulatedCount
     @Query("""

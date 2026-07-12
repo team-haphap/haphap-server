@@ -8,7 +8,7 @@ public record CalendarPostingCardResponse (
         String stageName,
         AnnouncementLikelihood likelihood,
         long participantCount,
-        String companyImageUrl
+        String logoImageUrl
 ) {
     public static CalendarPostingCardResponse of(
             Long postingId,
@@ -16,7 +16,7 @@ public record CalendarPostingCardResponse (
             String stageName,
             AnnouncementLikelihood likelihood,
             long participantCount,
-            String companyImageUrl
+            String logoImageUrl
     ) {
         return new CalendarPostingCardResponse(
                 postingId,
@@ -24,7 +24,7 @@ public record CalendarPostingCardResponse (
                 stageName,
                 likelihood,
                 participantCount,
-                companyImageUrl
+                logoImageUrl
         );
     }
 }

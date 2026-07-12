@@ -56,7 +56,8 @@ public class PostingController implements PostingApiDocs {
 
     @GetMapping
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
-            @RequestParam(required = false) List<String> category
+            //@RequestParam(required = false) List<String> category
+            @RequestParam(required = false) String category
     ) {
         PopularPostingListResponse response = popularPostingService.getPopularPostings(category);
         SuccessResponse<PopularPostingListResponse> body =
@@ -66,7 +67,8 @@ public class PostingController implements PostingApiDocs {
 
     @GetMapping("/all")
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(
-            @RequestParam(required = false) List<String> category
+            //@RequestParam(required = false) List<String> category
+            @RequestParam(required = false) String category
     ) {
         PopularPostingListResponse response = postingListingService.getAllPostings(category);
         SuccessResponse<PopularPostingListResponse> body =
