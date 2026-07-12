@@ -1,0 +1,1 @@
+ALTER TABLE registration DROP CONSTRAINT IF EXISTS registration_contact_method_check;

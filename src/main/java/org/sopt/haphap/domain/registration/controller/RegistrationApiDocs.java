@@ -67,6 +67,7 @@ public interface RegistrationApiDocs {
                     description = """
                 - PENDING_MUST_NOT_HAVE_CONTACT : 대기 상태에서는 연락 정보를 보낼 수 없습니다.
                 - CONFIRMED_MUST_HAVE_CONTACT : 합격/불합격 결과에는 연락 정보가 필요합니다.
+                - INVALID_CONTACT_METHOD: 유효하지 않은 연락 수단입니다.)
                 - 요청값 검증 실패 (필수 필드 누락)
                 """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
@@ -76,6 +77,9 @@ public interface RegistrationApiDocs {
                                     """),
                                     @ExampleObject(name = "요청값 검증 실패 (필수 필드 누락)", value = """
                                     { "status": 400, "code": "INVALID_INPUT_VALUE", "message": "공고 ID는 필수입니다." }
+                                    """),
+                                    @ExampleObject(name = "INVALID_CONTACT_METHOD", value = """
+                                    { "status": 400, "code": "INVALID_CONTACT_METHOD", "message": "유효하지 않은 연락 수단입니다." }
                                     """)
                             })
             ),
@@ -92,6 +96,7 @@ public interface RegistrationApiDocs {
                 공고 . 전형 별 사용자의 상태를 등록하고 알람 여부를 설정합니다.
                 - PENDING 상태 인 경우 contactMethod와 contactedDate/contactedTime 필드를 null로 해주세요
                 - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                - EMAIL(이메일),SMS(문자),PAGE(기업 홈페이지),PHONE_CALL(전화)
                 """)
     ResponseEntity<SuccessResponse<RegistrationCreateResponse>> createRegistration(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,

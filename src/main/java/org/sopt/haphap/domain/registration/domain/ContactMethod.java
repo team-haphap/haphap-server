@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 public enum ContactMethod {
     EMAIL("이메일"),
     SMS("문자"),
-    MY_PAGE("마이페이지"),
-    PHONE_CALL("전화"),
-    ETC("기타");
+    PAGE("기업 홈페이지"),
+    PHONE_CALL("전화");
+    //ETC("기타");
 
     private final String description;
 }
