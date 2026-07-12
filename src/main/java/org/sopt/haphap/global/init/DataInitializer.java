@@ -15,7 +15,6 @@ import org.sopt.haphap.domain.posting.domain.Company;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.repository.CategoryRepository;
-import org.sopt.haphap.domain.posting.repository.CompanyImageRepository;
 import org.sopt.haphap.domain.posting.repository.CompanyRepository;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
@@ -34,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Profile("local")
+//@Profile("local")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
