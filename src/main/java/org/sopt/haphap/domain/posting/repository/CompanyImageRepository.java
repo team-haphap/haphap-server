@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CompanyImageRepository extends JpaRepository<CompanyImage, Long> {
-
     Optional<CompanyImage> findByCompanyIdAndType(Long companyId, CompanyImageType type);
 
     @Query("""
