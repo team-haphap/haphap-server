@@ -4,12 +4,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.alram.domain.DeviceType;
 import org.sopt.haphap.domain.alram.domain.PushToken;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
+import org.sopt.haphap.domain.banner.domain.Banner;
+import org.sopt.haphap.domain.banner.repository.BannerRepository;
 import org.sopt.haphap.domain.posting.service.aggregate.StageResultCountRebuilder;
 import org.sopt.haphap.domain.registration.domain.ContactMethod;
 import org.sopt.haphap.domain.registration.domain.Registration;
@@ -47,6 +50,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PostingStageRepository postingStageRepository;
     private final RegistrationRepository registrationRepository;
     private final StageResultCountRebuilder stageResultCountRebuilder;
+    private final BannerRepository bannerRepository;
 
     @Override
     public void run(String... args) {
@@ -59,25 +63,33 @@ public class DataInitializer implements CommandLineRunner {
         // ── 유저 40명 (프로필 이미지 포함) ──
         List<User> users = new ArrayList<>();
         for (int i = 1; i <= 40; i++) {
+            String profileImageUrl =
+                    PROFILE_IMAGES.get(random.nextInt(PROFILE_IMAGES.size()));
+
             users.add(userRepository.save(User.builder()
                     .anonymousName("익명" + i)
                     .name("유저" + i)
                     .email("user" + i + "@test.com")
                     .provider(Provider.KAKAO)
                     .providerId("user-" + i)
-                    .profileImageUrl("https://example.com/avatar/" + i + ".png")  // 랜덤 대체 예정
+                    .profileImageUrl(profileImageUrl)
                     .build()));
         }
+        bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/ecc92117-8479-45da-a164-05525cde7cba-img_card_banner-1.pdf",0));
+        bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/495b46d9-8541-4c4d-8eee-2a2adc0870c2-img_card_banner-2.pdf",1));
+        bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7e7209ca-e01d-457b-a4fb-1d09da35fcf5-img_card_banner-3.pdf",2));
+        bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/3b9936bc-7ffe-4641-9dba-ad2360ba60da-img_card_banner-4.pdf",3));
+        bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7f6b3412-4691-411b-81eb-b6b8856818a2-img_card_banner.pdf",4));
 
 
-        Category pm = categoryRepository.save(Category.create("기획"));
-        Category marcketing = categoryRepository.save(Category.create("마케팅/홍보"));
-        Category hr = categoryRepository.save(Category.create("인사"));
-        Category sales = categoryRepository.save(Category.create("영업"));
-        Category dev = categoryRepository.save(Category.create("개발/데이터"));
-        Category finance = categoryRepository.save(Category.create("디자인"));
+        Category pm = categoryRepository.save(Category.create("기획","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/88d4ce84-03ba-45a4-881d-4a76ff56bc3e-기획.pdf"));
+        Category marcketing = categoryRepository.save(Category.create("마케팅/홍보","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/d19b8bae-8110-472c-84dd-fdfe9ef00fa6-마케팅_홍보.pdf"));
+        Category hr = categoryRepository.save(Category.create("인사","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/77a00bf1-5d13-41c5-9353-bc7e44d050cc-인사.pdf"));
+        Category sales = categoryRepository.save(Category.create("영업","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/94e68943-c52e-4c64-9f3b-87c36dd40022-영업.pdf"));
+        Category dev = categoryRepository.save(Category.create("개발/데이터","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/77eb73fe-7c73-4200-9203-175700e1527f-개발_ 데이터.pdf"));
+        Category finance = categoryRepository.save(Category.create("금융/보험","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/703fccc1-e101-44d5-a269-44b0ede7c90c-금융_보험.pdf"));
 
-
+        //todo: 오늘발표로고/캘린더 로고 분리한다음 새로 저장하기!!
         Company toss = companyRepository.save(
                 Company.create("토스", "토스는 금융을 쉽고 간편하게 만듭니다.","logo.com1", "https://example.com/toss.png","card1.png"));
         Company kakao = companyRepository.save(
@@ -298,4 +310,18 @@ public class DataInitializer implements CommandLineRunner {
                             ContactMethod.EMAIL, LocalDateTime.now(), false));
         }
     }
+    private static final List<String> PROFILE_IMAGES = List.of(
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/d89f1451-9eee-4804-8abe-7bbfc82c1a91-img_10.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a4f26e5b-af33-446d-90ae-9d031dfad31c-img_9.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/dffb023e-8fc3-4b51-ba66-64b7e7058494-img_8.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6e6e6bb8-a2b4-4d0b-8ad9-f92ce01f5fb4-img_7.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a487346f-53b6-4668-814d-897da455ded4-img_6.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/b2884404-c166-431b-bbdb-a4c976a072f9-img_5.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/679bb4c2-8d51-4b6d-9f32-4b658eb7922b-img_4.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/71401700-2017-4457-b298-a664da59dc50-img_3.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6dc58d49-3849-4bf0-999d-1e890bedd9d0-img_2.pdf",
+            "https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/5d37a975-9b55-4033-8b14-c63ce30de1db-img_1.pdf"
+    );
+
+    private final Random random = new Random();
 }
