@@ -16,10 +16,10 @@ public class PostingResponseAssembler {
 
     private final NextStageCalculator nextStageCalculator;
 
-    /** 공고 + 전형 + 누적등록수 → 응답 DTO와 정렬키(nextStage 발표일)를 함께 담은 Scored */
     public Scored assemble(Posting posting,
                            List<PostingStageFlatProjection> stages,
-                           Map<Long, Long> counts) {
+                           Map<Long, Long> counts,
+                           String companyImageUrl) {
         PostingStageFlatProjection nextStage = nextStageCalculator.calculate(stages, counts);
         Integer days = nextStageCalculator.daysUntil(nextStage);
         LocalDate announceDate = (nextStage == null) ? null : nextStage.getExpectedAnnouncementDate();
@@ -29,11 +29,10 @@ public class PostingResponseAssembler {
                 posting.getCompany().getName(), posting.getCategory().getName(),
                 posting.getCompany().getDescription(),
                 nextStage == null ? null : nextStage.getName(),
-                days, posting.getCompany().getImageUrl());
+                days, companyImageUrl);
 
         return new Scored(response, posting.getTitle(), announceDate, posting.getDeadline());
     }
 
-    /** 응답 + 정렬키(발표일, 공고명)를 함께 */
     public record Scored(PopularPostingResponse response, String title, LocalDate announceDate, LocalDate deadline) {}
 }
