@@ -96,6 +96,7 @@ public interface RegistrationApiDocs {
                 공고 . 전형 별 사용자의 상태를 등록하고 알람 여부를 설정합니다.
                 - PENDING 상태 인 경우 contactMethod와 contactedDate/contactedTime 필드를 null로 해주세요
                 - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                - EMAIL(이메일),SMS(문자),PAGE(기업 홈페이지),PHONE_CALL(전화)
                 """)
     ResponseEntity<SuccessResponse<RegistrationCreateResponse>> createRegistration(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
