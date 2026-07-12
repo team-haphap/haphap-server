@@ -33,7 +33,7 @@ import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 
 @Slf4j
 @Component
-@Profile("local")
+//@Profile("local")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
