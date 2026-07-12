@@ -6,6 +6,7 @@ import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public record RegistrationCreateRequest(
 
@@ -15,7 +16,8 @@ public record RegistrationCreateRequest(
         @NotNull(message = "전형 단계는 필수입니다.")
         Long stageId,
 
-        LocalDateTime contactedAt,
+        LocalDate contactedDate,   // 날짜 (예: 2026-07-09)
+        LocalTime contactedTime,   // 시간 (예: 14:30)
 
         ContactMethod contactMethod,
 
@@ -28,4 +30,11 @@ public record RegistrationCreateRequest(
         @NotNull(message = "알람 수신 여부는 필수입니다.")
         Boolean alarmEnabled
 ) {
+        // 서버에서 하나로 합치는 편의 메서드
+        public LocalDateTime contactedAt() {
+                if (contactedDate == null || contactedTime == null) {
+                        return null;
+                }
+                return LocalDateTime.of(contactedDate, contactedTime);
+        }
 }

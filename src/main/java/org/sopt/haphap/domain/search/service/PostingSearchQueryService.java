@@ -17,6 +17,7 @@ import org.sopt.haphap.domain.search.dto.SearchPostingResponse;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +40,10 @@ public class PostingSearchQueryService {
             return SearchPostingListResponse.of(List.of(), condition.page(), condition.size(), false);
         }
 
-        PostingAggregate agg = aggregateLoader.load(postingIds);
+        PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.LISTING);
 
         List<Scored> sorted = postingIds.stream()
-                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id)))
+                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
                 .sorted(PostingSortComparators.byDeadline())
                 .toList();
 
