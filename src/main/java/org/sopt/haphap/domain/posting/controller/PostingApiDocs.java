@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
-import java.util.List;
 
 @Tag(name = "공고",description = "공고관련 API 입니다")
 public interface PostingApiDocs {
@@ -119,7 +118,9 @@ public interface PostingApiDocs {
                     - 카테고리를 , 기준으로 보내주세요!
                     """
     )
-    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) String category);
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
+            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: 인사,영업). '전체' 선택 시 파라미터 생략")
+            @RequestParam(required = false) String category);
 
     @ApiResponse(
             responseCode = "404",
@@ -160,7 +161,9 @@ public interface PostingApiDocs {
                     - 카테고리를 , 기준으로 보내주세요!
                     """
     )
-    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) String category);
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(
+            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: 인사,영업). '전체' 선택 시 파라미터 생략")
+            @RequestParam(required = false) String category);
 
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = TodayAnnouncementPostingListResponse.class),
