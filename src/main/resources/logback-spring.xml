@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <!-- requestId 가 없으면 NO_ID 로 표시해서 필터를 안 탄 경로를 눈으로 구분 -->
+    <property
+            name="CONSOLE_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId:-NO_ID}] %highlight(%-5level) %cyan(%logger{36}) - %msg%n"/>
+
+    <property
+            name="FILE_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId:-NO_ID}] %-5level %logger{36} - %msg%n"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_PATTERN}</pattern>
+            <!-- 한글 로그 깨짐 방지 -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--
+      로그 I/O 가 요청 스레드를 블로킹하지 않도록 비동기 래핑.
+      discardingThreshold=0 : 큐가 80% 차도 WARN/INFO 를 버리지 않는다.
+      neverBlock=false      : 큐가 꽉 차면 버리지 말고 블로킹(로그 유실 방지).
+    -->
+    <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>false</neverBlock>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- 공통: 프레임워크 노이즈 억제 -->
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.apache.catalina" level="WARN"/>
+
+    <springProfile name="local,dev">
+        <!-- 개발 중에는 실행 쿼리와 바인딩 파라미터를 본다 -->
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
+        <logger name="org.sopt.haphap" level="DEBUG"/>
+
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="org.sopt.haphap" level="INFO"/>
+
+        <root level="INFO">
+            <appender-ref ref="ASYNC_STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!-- 프로파일이 지정되지 않았을 때의 fallback -->
+    <springProfile name="!local &amp; !dev &amp; !prod">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+</configuration>

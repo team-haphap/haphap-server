@@ -4,6 +4,7 @@ import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import java.time.LocalDateTime;
 
 public interface RegistrationFeedProjection {
+    Long getRegistrationId();
     String getStage();              // 전형명 (예: 서류, 1차 면접)
     String getNickName();// 익명 이름 (anonymousName)
     RegistrationResult getStatus();

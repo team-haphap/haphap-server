@@ -193,15 +193,28 @@ public interface PostingApiDocs {
                                 "summary": {
                                   "registeredCount": 34,
                                   "profileImages": [
-                                    "https://.../profile1.png",
-                                    "https://.../profile2.png",
-                                    "https://.../profile3.png",
-                                    "https://.../profile4.png"
-                                  ],
+                                                          {
+                                                              "userId": 19,
+                                                              "profileImageUrl": "https://.../profile1.png"
+                                                          },
+                                                          {
+                                                              "userId": 20,
+                                                              "profileImageUrl": "https://.../profile2.png"
+                                                          },
+                                                          {
+                                                              "userId": 29,
+                                                              "profileImageUrl": "https://.../profile3.png"
+                                                          },
+                                                          {
+                                                              "userId": 33,
+                                                              "profileImageUrl": "https://.../profile4.png"
+                                                          }
+                                                      ],
                                   "additionalParticipantCount": 30
                                 },
                                 "registrations": [
                                   {
+                                    "registrationId": 292,
                                     "stage": "1차 면접",
                                     "nickName": "익명의 판다",
                                     "registrationResult": "PASS",

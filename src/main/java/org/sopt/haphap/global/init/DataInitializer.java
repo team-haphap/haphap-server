@@ -259,7 +259,7 @@ public class DataInitializer implements CommandLineRunner {
         for (int i = 0; i < count; i++) {
             registrationRepository.save(
                     Registration.create(users.get(offset + i), posting, stage, result,
-                            ContactMethod.EMAIL, LocalDateTime.now(), false));
+                            List.of(ContactMethod.EMAIL), LocalDateTime.now(), false));
         }
     }
 }

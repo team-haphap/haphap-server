@@ -1,9 +1,12 @@
 package org.sopt.haphap.global.config;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -11,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 @Configuration
 @EnableAsync
+@EnableRetry
 public class AsyncConfig implements AsyncConfigurer {
 
     @Override
@@ -20,6 +24,21 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(5);
         executor.setQueueCapacity(50);
         executor.setThreadNamePrefix("alram-async-");
+
+        // 요청 스레드의 MDC(requestId)를 비동기 스레드로 전달
+        executor.setTaskDecorator(runnable -> {
+            Map<String, String> context = MDC.getCopyOfContextMap();
+            return () -> {
+                try {
+                    if (context != null) {
+                        MDC.setContextMap(context);
+                    }
+                    runnable.run();
+                } finally {
+                    MDC.clear();   // 풀 스레드는 재사용되므로 반드시 비운다
+                }
+            };
+        });
         executor.initialize();
         return executor;
     }
