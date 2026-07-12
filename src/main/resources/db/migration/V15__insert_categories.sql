@@ -1,0 +1,43 @@
+INSERT INTO category (
+    name,
+    card_image_url,
+    created_at,
+    updated_at
+)
+VALUES
+    (
+        '기획',
+        'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/pass-cards/30b5bdf7-47db-40fa-a22d-0ff942374e9f-pass_planning.png',
+        NOW(),
+        NOW()
+    ),
+    (
+        '마케팅/홍보',
+        'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/pass-cards/71dedc97-181b-4e40-a1a0-ead86af6eaba-pass_marketing.png',
+        NOW(),
+        NOW()
+    ),
+    (
+        '인사',
+        'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/pass-cards/8d220f58-2d06-4c63-b8e0-212c3e55c749-pass_HR.png',
+        NOW(),
+        NOW()
+    ),
+    (
+        '영업',
+        'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/pass-cards/101934b8-6318-44b7-acc8-ba13e97f37e0-pass_sales.png',
+        NOW(),
+        NOW()
+    ),
+    (
+        '개발/데이터',
+        'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/pass-cards/a0c7e9eb-7ed3-4909-b608-c0c6382873c9-pass_data.png',
+        NOW(),
+        NOW()
+    ),
+    (
+        '금융/보험',
+        'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/pass-cards/63534f4c-a491-4211-adb9-a36c67a9ae5f-pass_finance.png',
+        NOW(),
+        NOW()
+    );
