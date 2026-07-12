@@ -3,6 +3,7 @@ package org.sopt.haphap.domain.registration.service;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.alram.service.AlramSettingService;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
+import org.sopt.haphap.domain.registration.domain.ContactMethod;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.event.RegistrationResultChangedEvent;
 import org.sopt.haphap.domain.registration.event.StageResultCountedEvent;
@@ -19,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -72,7 +74,7 @@ public class RegistrationService {
         }
 
         // 여기까지 왔으면 PENDING → PASS/FAIL 확정
-        existing.updateRegistration(request.result(), request.contactMethod(),
+        existing.updateRegistration(request.result(), parseContactMethods(request.contactMethods()),
                 request.contactedAt(), request.anonymous());
         eventPublisher.publishEvent(new RegistrationResultChangedEvent(
                 target.posting().getId(), target.stage().getId(), request.result()));
@@ -83,7 +85,7 @@ public class RegistrationService {
                                    RegistrationCreateRequest request) {
         Registration registration = Registration.create(
                 user, posting, stage, request.result(),
-                request.contactMethod(), request.contactedAt(), request.anonymous());
+                parseContactMethods(request.contactMethods()), request.contactedAt(), request.anonymous());
         registrationRepository.save(registration);
         // 집계 신규 이벤트만
         eventPublisher.publishEvent(new StageResultCountedEvent(
@@ -100,17 +102,31 @@ public class RegistrationService {
 
     private void validateResultConsistency(RegistrationCreateRequest request) {
         boolean isPending = request.result() == RegistrationResult.PENDING;
+        boolean hasContactMethods = request.contactMethods() != null && !request.contactMethods().isEmpty();
 
         if (isPending) {
             // PENDING이면 연락 정보(수단·날짜)가 없어야 함.
-            if (request.contactMethod() != null || request.contactedDate() != null || request.contactedTime() != null) {
+            if (hasContactMethods  || request.contactedDate() != null || request.contactedTime() != null) {
                 throw new CustomException(RegistrationErrorCode.PENDING_MUST_NOT_HAVE_CONTACT);
             }
         } else {
             // 확정이면 연락 정보가 있어야 함
-            if (request.contactMethod() == null || request.contactedDate() == null || request.contactedTime() == null) {
+            if (!hasContactMethods || request.contactedDate() == null || request.contactedTime() == null) {
                 throw new CustomException(RegistrationErrorCode.CONFIRMED_MUST_HAVE_CONTACT);
             }
+        }
+    }
+    private List<ContactMethod> parseContactMethods(List<String> raw) {
+        if (raw == null || raw.isEmpty()) {
+            return List.of();
+        }
+        try {
+            return raw.stream()
+                    .map(String::trim)
+                    .map(ContactMethod::valueOf)   // 잘못된 값이면 IllegalArgumentException
+                    .toList();
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(RegistrationErrorCode.INVALID_CONTACT_METHOD);
         }
     }
 }

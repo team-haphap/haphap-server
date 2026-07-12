@@ -1,8 +1,8 @@
 package org.sopt.haphap.domain.registration.domain;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,9 +37,9 @@ public class Registration extends BaseEntity {
     @Column(nullable = false, length = 20)
     private RegistrationResult result;  // 합격 / 불합격 / 대기
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private ContactMethod contactMethod;
+    @Convert(converter = ContactMethodListConverter.class)
+    @Column(name = "contact_methods")
+    private List<ContactMethod> contactMethods;
 
     private LocalDateTime contactedAt;
 
@@ -55,12 +55,12 @@ public class Registration extends BaseEntity {
     private User user;
 
     private Registration(User user, Posting posting, PostingStage stage, RegistrationResult result,
-                         ContactMethod contactMethod, LocalDateTime contactedAt, boolean anonymous) {
+                         List<ContactMethod> contactMethods, LocalDateTime contactedAt, boolean anonymous) {
         this.user = user;
         this.posting = posting;
         this.stage = stage;
         this.result = result;
-        this.contactMethod = contactMethod;
+        this.contactMethods = contactMethods;
         this.contactedAt = contactedAt;
         this.anonymous = anonymous;
     }
@@ -78,17 +78,17 @@ public class Registration extends BaseEntity {
     }
 
     public static Registration create(User user, Posting posting, PostingStage stage,
-                                      RegistrationResult result, ContactMethod contactMethod,
+                                      RegistrationResult result, List<ContactMethod> contactMethods,
                                       LocalDateTime contactedAt, boolean anonymous) {
-        return new Registration(user, posting, stage, result, contactMethod, contactedAt, anonymous);
+        return new Registration(user, posting, stage, result, contactMethods, contactedAt, anonymous);
     }
 
 
     // 기존 등록을 새 값으로 갱신 (force 재요청 시)
-    public void updateRegistration(RegistrationResult result, ContactMethod contactMethod,
+    public void updateRegistration(RegistrationResult result, List<ContactMethod> contactMethods,
                                    LocalDateTime contactedAt, boolean anonymous) {
         this.result = result;
-        this.contactMethod = contactMethod;
+        this.contactMethods = contactMethods;
         this.contactedAt = contactedAt;
         this.anonymous = anonymous;
     }
