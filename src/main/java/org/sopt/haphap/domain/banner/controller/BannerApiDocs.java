@@ -1,6 +1,9 @@
 package org.sopt.haphap.domain.banner.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.domain.banner.dto.response.BannerListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
@@ -16,6 +19,23 @@ public interface BannerApiDocs {
                     - 메인/서브 메시지는 전역 고정 문구로 클라이언트에서 관리하며 응답에 포함하지 않습니다.
                     - 배너 자동 전환(5초 간격)·스와이프 전환·인디케이터 갱신은 클라이언트가 이 응답을 기준으로 로컬에서 처리합니다.
                     """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(examples = @ExampleObject(value = """
+                    {
+                      "status": 200,
+                      "code": "BANNER_LIST_FETCHED",
+                      "message": "히어로 배너 목록 조회에 성공했습니다.",
+                      "data": {
+                        "banners": [
+                          { "imageUrl": "https://.../banner1.png", "displayOrder": 1 },
+                          { "imageUrl": "https://.../banner2.png", "displayOrder": 2 }
+                        ]
+                      }
+                    }
+                    """))
     )
     ResponseEntity<SuccessResponse<BannerListResponse>> getBanners();
 }

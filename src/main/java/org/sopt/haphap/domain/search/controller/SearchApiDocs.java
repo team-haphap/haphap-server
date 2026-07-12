@@ -4,12 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
 import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
+import org.sopt.haphap.global.dto.FailureResponse; // 프로젝트 패키지 구조에 맞게 확인 필요
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "검색", description = "검색 관련 API 입니다")
@@ -21,6 +24,31 @@ public interface SearchApiDocs {
                     카트클릭 + 상세진입 합산 기준이며, 매 요청마다 실시간 계산됩니다
                     아직 집계된 데이터가 없으면 빈 배열을 반환합니다.
                     """)
+    @ApiResponse(
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(examples = @ExampleObject(value = """
+                    {
+                      "status": 200,
+                      "code": "POPULAR_POSTINGS_FETCHED",
+                      "message": "인기 공고 목록 조회에 성공했습니다.",
+                      "data": {
+                        "postings": [
+                          {
+                            "id": 12,
+                            "title": "2026 상반기 신입 공채",
+                            "companyName": "토스",
+                            "category": "개발",
+                            "content": "서류 결과 발표",
+                            "nextStage": "1차 면접",
+                            "daysUntilNextStage": 3,
+                            "imageUrl": "https://.../toss.png"
+                          }
+                        ]
+                      }
+                    }
+                    """))
+    )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings();
 
     @Operation(summary = "검색 자동완성",
@@ -52,12 +80,22 @@ public interface SearchApiDocs {
             존재하지 않는 category 값이면 에러를 반환합니다.
             정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
             """)
-    @ApiResponse(responseCode = "200", description = "검색 결과",
-            content = @Content(examples = @ExampleObject(value = """
-                { "postings": [
-                    {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":3}
-                  ], "page": 0, "size": 20, "hasNext": true }
-                """)))
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 결과",
+                    content = @Content(examples = @ExampleObject(value = """
+                            { "postings": [
+                                {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":3}
+                              ], "page": 0, "size": 20, "hasNext": true }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "존재하지 않는 카테고리 (SearchErrorCode.CATEGORY_NOT_FOUND)",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class))
+            )
+    })
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @Parameter(description = "검색 키워드") String q,
             @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: DEV,PM). 전체 조회 시 파라미터 생략") String category,
