@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
@@ -15,13 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Tag(name = "공고", description = "공고관련 API 입니다")
+import java.util.List;
+
+@Tag(name = "공고",description = "공고관련 API 입니다")
 public interface PostingApiDocs {
 
-    @ApiResponse(
-            responseCode = "200",
-            description = "조회 성공",
-            content = @Content(examples = @ExampleObject(value = """
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = PostingListResponse.class),
+                    examples = @ExampleObject(value = """
                     {
                       "status": 200,
                       "code": "POSTING_LIST_FETCHED",
@@ -33,16 +35,14 @@ public interface PostingApiDocs {
                         ]
                       }
                     }
-                    """))
-    )
+                    """)))
     @Operation(summary = "공고 리스트 이름 조회", description = "전체 공고명을 가나다 순으로 반환합니다.")
     ResponseEntity<SuccessResponse<PostingListResponse>> getPostings();
 
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(examples = @ExampleObject(value = """
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = PostingStageListResponse.class),
+                            examples = @ExampleObject(value = """
                             {
                               "status": 200,
                               "code": "POSTING_STAGE_LIST_FETCHED",
@@ -56,13 +56,12 @@ public interface PostingApiDocs {
                                 ]
                               }
                             }
-                            """))
-            ),
+                            """))),
             @ApiResponse(
                     responseCode = "404",
                     description = """
-                            - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
-                            """,
+                - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+                """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))
             )
     })
@@ -83,10 +82,9 @@ public interface PostingApiDocs {
     @ApiResponse(responseCode = "204", description = "기록 성공, 응답 본문 없음")
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
 
-    @ApiResponse(
-            responseCode = "200",
-            description = "조회 성공",
-            content = @Content(examples = @ExampleObject(value = """
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = PopularPostingListResponse.class),
+                    examples = @ExampleObject(value = """
                     {
                       "status": 200,
                       "code": "POPULAR_POSTINGS_FETCHED",
@@ -106,8 +104,7 @@ public interface PostingApiDocs {
                         ]
                       }
                     }
-                    """))
-    )
+                    """)))
     @Operation(summary = "홈 메인-최근 등록 공고 조회(카테고리 별 공고조회)",
             description = """
                     홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
@@ -117,10 +114,9 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) String category);
 
-    @ApiResponse(
-            responseCode = "200",
-            description = "조회 성공",
-            content = @Content(examples = @ExampleObject(value = """
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = PopularPostingListResponse.class),
+                    examples = @ExampleObject(value = """
                     {
                       "status": 200,
                       "code": "POSTING_ALL_LIST_FETCHED",
@@ -140,8 +136,7 @@ public interface PostingApiDocs {
                         ]
                       }
                     }
-                    """))
-    )
+                    """)))
     @Operation(summary = "카테고리별 공고 전체 조회",
             description = """
                     공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
@@ -151,10 +146,9 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) String category);
 
-    @ApiResponse(
-            responseCode = "200",
-            description = "조회 성공",
-            content = @Content(examples = @ExampleObject(value = """
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = TodayAnnouncementPostingListResponse.class),
+                    examples = @ExampleObject(value = """
                     {
                       "status": 200,
                       "code": "TODAY_ANNOUNCEMENT_POSTING_FETCHED",
@@ -172,8 +166,7 @@ public interface PostingApiDocs {
                         ]
                       }
                     }
-                    """))
-    )
+                    """)))
     @Operation(summary = "오늘 발표 예상 공고조회",
             description = """
                     오늘 발표 예상 전형이 있는 공고들을 조회합니다.
@@ -183,10 +176,9 @@ public interface PostingApiDocs {
     ResponseEntity<SuccessResponse<TodayAnnouncementPostingListResponse>> getTodayAnnouncementPostings();
 
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(examples = @ExampleObject(value = """
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = PostingDetailResponse.class),
+                            examples = @ExampleObject(value = """
                             {
                               "status": 200,
                               "code": "POSTING_DETAIL_FETCHED",
@@ -219,13 +211,12 @@ public interface PostingApiDocs {
                                 ]
                               }
                             }
-                            """))
-            ),
+                            """))),
             @ApiResponse(
                     responseCode = "404",
                     description = """
-                            - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
-                            """,
+                - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+                """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))
             )
     })
@@ -240,10 +231,9 @@ public interface PostingApiDocs {
     ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId);
 
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(examples = @ExampleObject(value = """
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = PostingStageStatusListResponse.class),
+                            examples = @ExampleObject(value = """
                             {
                               "status": 200,
                               "code": "POSTING_STAGE_STATUS_FETCHED",
@@ -257,13 +247,12 @@ public interface PostingApiDocs {
                                 "defaultSelectedStageId": 102
                               }
                             }
-                            """))
-            ),
+                            """))),
             @ApiResponse(
                     responseCode = "404",
                     description = """
-                            - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
-                            """,
+                - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+                """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))
             )
     })
@@ -275,10 +264,9 @@ public interface PostingApiDocs {
     )
     ResponseEntity<SuccessResponse<PostingStageStatusListResponse>> getStagesStatus(@PathVariable Long postingId);
 
-    @ApiResponse(
-            responseCode = "200",
-            description = "조회 성공",
-            content = @Content(examples = @ExampleObject(value = """
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = TodayStatisticResponse.class),
+                    examples = @ExampleObject(value = """
                     {
                       "status": 200,
                       "code": "TODAY_STATISTIC_FETCHED",
@@ -289,8 +277,7 @@ public interface PostingApiDocs {
                         "announcedCount": 7
                       }
                     }
-                    """))
-    )
+                    """)))
     @Operation(summary = "오늘 집계 조회",
             description = """
                     오늘의 집계를 조회합니다. 
@@ -302,10 +289,9 @@ public interface PostingApiDocs {
     ResponseEntity<SuccessResponse<TodayStatisticResponse>> getTodayStatistics();
 
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(examples = @ExampleObject(value = """
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = PostingStageStatisticResponse.class),
+                            examples = @ExampleObject(value = """
                             {
                               "status": 200,
                               "code": "POSTING_STAGE_STATISTIC_FETCHED",
@@ -317,25 +303,24 @@ public interface PostingApiDocs {
                                 "pendingCount": 8
                               }
                             }
-                            """))
-            ),
+                            """))),
             @ApiResponse(
                     responseCode = "404",
                     description = """
-                            - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
-                            - STAGE_NOT_FOUND : 존재하지 않는 전형입니다.
-                            """,
+                - POSTING_NOT_FOUND : 존재하지 않는 공고입니다.
+                - STAGE_NOT_FOUND : 존재하지 않는 전형입니다.
+                """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = """
-                            - STAGE_NOT_IN_POSTING : 해당 공고의 전형 단계가 아닙니다.
-                            """,
+                - STAGE_NOT_IN_POSTING : 해당 공고의 전형 단계가 아닙니다.
+                """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))
             )
     })
-    @Operation(summary = "공고 상세 - 공고 전형별 집계 조회",
+    @Operation(summary= "공고 상세 - 공고 전형별 집계 조회",
             description = """
                     공고 전형별 집계 조회합니다. 
                     - 공고 전형 별 passCount,failCount,pendingCount를 제시합니다.
