@@ -23,6 +23,7 @@ public class RequestIdFilter extends OncePerRequestFilter {
 
     private static final String MDC_KEY = "requestId";
     private static final String HEADER_NAME = "X-Request-Id";
+    private static final String REQUEST_ATTR = RequestIdFilter.class.getName() + ".requestId";
     private static final int ID_LENGTH = 8;
 
     @Override
@@ -50,13 +51,22 @@ public class RequestIdFilter extends OncePerRequestFilter {
      * 게이트웨이/앞단 서버가 내려준 추적 ID가 있으면 승계하고, 없으면 새로 발급한다.
      */
     private String resolveRequestId(HttpServletRequest request) {
-        String inbound = request.getHeader(HEADER_NAME);
 
-        if (inbound != null && !inbound.isBlank()) {
-            // 외부 입력이므로 로그 인젝션 방지를 위해 길이/문자 제한
-            return sanitize(inbound);
+        // 1. 비동기 재진입이면 최초에 저장해둔 ID가 이미 있다
+        Object existing = request.getAttribute(REQUEST_ATTR);
+        if (existing instanceof String id) {
+            return id;
         }
-        return UUID.randomUUID().toString().substring(0, ID_LENGTH);
+
+        // 2. 최초 진입: 헤더 승계 or 새로 발급
+        String inbound = request.getHeader(HEADER_NAME);
+        String requestId = (inbound != null && !inbound.isBlank())
+                ? sanitize(inbound)
+                : UUID.randomUUID().toString().substring(0, ID_LENGTH);
+
+        // 3. 다음 재진입에서 꺼내 쓸 수 있게 요청 객체에 저장
+        request.setAttribute(REQUEST_ATTR, requestId);
+        return requestId;
     }
 
     private String sanitize(String value) {
