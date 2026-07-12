@@ -74,7 +74,7 @@ public class DataInitializer implements CommandLineRunner {
         Category pm = categoryRepository.findByName("기획")
                 .orElseThrow();
 
-        Category marketing = categoryRepository.findByName("디자인")
+        Category design = categoryRepository.findByName("디자인")
                 .orElseThrow();
 
         Category hr = categoryRepository.findByName("인사")
@@ -144,7 +144,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Posting d = postingRepository.save(
                 Posting.create("D 마케팅 신입 공채", LocalDate.now().plusDays(60),
-                        "성수 오피스", "프로덕트 디자이너", marketing, toss));
+                        "성수 오피스", "프로덕트 디자이너", design, toss));
         List<PostingStage> ds = addStages(d,
                 stage("서류", 0, LocalDate.now().plusDays(3), 10),
                 stage("최종", 1, LocalDate.now().plusDays(12), 10));
@@ -189,7 +189,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Posting t4 = postingRepository.save(
                 Posting.create("오늘발표 컷오프 공채", LocalDate.now().plusDays(60),
-                        "본사", "마케팅", marketing, kakao));
+                        "본사", "마케팅", design, kakao));
         addStages(t4, stage("최종", 0, LocalDate.now(), 40));
 
         Posting t5 = postingRepository.save(

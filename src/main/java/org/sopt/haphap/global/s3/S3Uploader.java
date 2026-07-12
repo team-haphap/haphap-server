@@ -8,7 +8,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
+import java.net.URLConnection;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -27,12 +27,20 @@ public class S3Uploader {
     public String upload(MultipartFile file, String dirName) {
         String key = dirName + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
 
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.equals("application/octet-stream")) {
+            String guessed = URLConnection.guessContentTypeFromName(file.getOriginalFilename());
+            if (guessed != null) {
+                contentType = guessed;
+            }
+        }
+
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
                             .key(key)
-                            .contentType(file.getContentType())
+                            .contentType(contentType)
                             .build(),
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize())
             );
