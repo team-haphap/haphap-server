@@ -51,6 +51,8 @@ firebase-service-account.json
 *-firebase-adminsdk-*.json
 
 .env
+users.yml
 *.yaml
 .postman/
 postman
+users.yml

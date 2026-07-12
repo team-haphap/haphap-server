@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
@@ -26,7 +27,7 @@ public class PopularPostingService {
     private static final int RECENT_HOURS = 48;
     private static final List<RegistrationResult> COUNTED_RESULTS =
             List.of(RegistrationResult.PASS, RegistrationResult.FAIL);
-    private static final int MAX_POPULAR = 4;
+    private static final int MAX_POPULAR = 8;
 
     private final RegistrationRepository registrationRepository;
     private final PostingAggregateLoader aggregateLoader;
@@ -48,7 +49,7 @@ public class PopularPostingService {
             return PopularPostingListResponse.from(List.of());
         }
         // 2) 공통 배치 로딩 (공고·전형·누적등록수)
-        PostingAggregate agg = aggregateLoader.load(candidateIds);
+        PostingAggregate agg = aggregateLoader.load(candidateIds, CompanyImageType.POPULAR);
 
         // 3) 48h (공고,전형)별 등록수 — 필터 겸 정렬 기준
         Map<Long, Map<Long, Long>> recentCounts = registrationRepository
@@ -83,7 +84,7 @@ public class PopularPostingService {
                 .getOrDefault(current.getStageId(), 0L);
         if (recentCount <= 0) return null;   // 현재 진행 전형에 48h 활동 없음 → 제외
 
-        PopularPostingResponse response = assembler.assemble(agg.posting(id), stages, counts).response();
+        PopularPostingResponse response = assembler.assemble(agg.posting(id), stages, counts, agg.companyImageUrl(id)).response();
         return new PopularScored(response, recentCount);
     }
 

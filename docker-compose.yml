@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:16
@@ -18,6 +20,24 @@ services:
       - "6379:6379"
     networks:
       - haphap-net
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: always
+    environment:
+      - DOZZLE_AUTH_PROVIDER=simple
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - dozzle-data:/data
+      - ./users.yml:/data/users.yml:ro
+    ports:
+      - "127.0.0.1:8888:8080"
+    networks:
+      - haphap-net
+
+volumes:
+  dozzle-data:
 
 networks:
   haphap-net:

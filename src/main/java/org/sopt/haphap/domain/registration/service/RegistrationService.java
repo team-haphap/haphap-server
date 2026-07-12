@@ -95,7 +95,7 @@ public class RegistrationService {
 
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
-                registration.getId(), posting.getId(), registration.getStage().getName(), user.getId()));
+                registration.getId(), posting.getId(), registration.getStage().getName(), registration.getResult(), user.getId()));
     }
 
     private void validateResultConsistency(RegistrationCreateRequest request) {
@@ -103,12 +103,12 @@ public class RegistrationService {
 
         if (isPending) {
             // PENDING이면 연락 정보(수단·날짜)가 없어야 함.
-            if (request.contactMethod() != null || request.contactedAt() != null) {
+            if (request.contactMethod() != null || request.contactedDate() != null || request.contactedTime() != null) {
                 throw new CustomException(RegistrationErrorCode.PENDING_MUST_NOT_HAVE_CONTACT);
             }
         } else {
             // 확정이면 연락 정보가 있어야 함
-            if (request.contactMethod() == null || request.contactedAt() == null) {
+            if (request.contactMethod() == null || request.contactedDate() == null || request.contactedTime() == null) {
                 throw new CustomException(RegistrationErrorCode.CONFIRMED_MUST_HAVE_CONTACT);
             }
         }

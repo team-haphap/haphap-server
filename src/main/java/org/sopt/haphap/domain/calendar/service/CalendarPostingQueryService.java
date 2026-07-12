@@ -6,6 +6,7 @@ import org.sopt.haphap.domain.calendar.dto.CalendarPostingCardResponse;
 import org.sopt.haphap.domain.calendar.dto.CalendarPostingListResponse;
 import org.sopt.haphap.domain.calendar.service.support.CalendarRepresentativeStageResolver;
 import org.sopt.haphap.domain.posting.domain.AnnouncementLikelihood;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageCalendarProjection;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
@@ -41,8 +42,9 @@ public class CalendarPostingQueryService {
     private static final YearMonth MAX = YearMonth.of(2030, 12);
 
     public CalendarPostingListResponse getPostingsByDate(LocalDate date) {
+        validateRange(YearMonth.from(date));
         List<PostingStageCalendarProjection> stages =
-                postingStageRepository.findCalendarStagesByDate(date);
+                postingStageRepository.findCalendarStagesByDate(date, CompanyImageType.CALENDAR_LOGO);
 
         if (stages.isEmpty()) {
             return CalendarPostingListResponse.of(date, List.of());
@@ -82,5 +84,11 @@ public class CalendarPostingQueryService {
         return Comparator
                 .comparing((Long id) -> stageByPostingId.get(id).getExpectedScore(), Comparator.reverseOrder())
                 .thenComparing(id -> stageByPostingId.get(id).getTitle(), korean);
+    }
+
+    private void validateRange(YearMonth yearMonth) {
+        if (yearMonth.isBefore(MIN) || yearMonth.isAfter(MAX)) {
+            throw new CustomException(CalendarErrorCode.UNSUPPORTED_DATE_RANGE);
+        }
     }
 }
