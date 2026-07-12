@@ -75,11 +75,14 @@ public class DataInitializer implements CommandLineRunner {
                     .profileImageUrl(profileImageUrl)
                     .build()));
         }
+        /*
         bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/ecc92117-8479-45da-a164-05525cde7cba-img_card_banner-1.pdf",0));
         bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/495b46d9-8541-4c4d-8eee-2a2adc0870c2-img_card_banner-2.pdf",1));
         bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7e7209ca-e01d-457b-a4fb-1d09da35fcf5-img_card_banner-3.pdf",2));
         bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/3b9936bc-7ffe-4641-9dba-ad2360ba60da-img_card_banner-4.pdf",3));
         bannerRepository.save(Banner.create("https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7f6b3412-4691-411b-81eb-b6b8856818a2-img_card_banner.pdf",4));
+
+         */
 
 
         Category pm = categoryRepository.save(Category.create("기획","https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/88d4ce84-03ba-45a4-881d-4a76ff56bc3e-기획.pdf"));
