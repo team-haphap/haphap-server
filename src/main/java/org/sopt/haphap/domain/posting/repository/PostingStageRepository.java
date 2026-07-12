@@ -94,4 +94,5 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
         ORDER BY s.posting.id ASC, s.orderIndex ASC
         """)
     List<PostingStageFlatProjection> findAllStages();
+    boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
 }
