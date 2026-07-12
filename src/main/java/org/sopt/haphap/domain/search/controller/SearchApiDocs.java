@@ -57,22 +57,21 @@ public interface SearchApiDocs {
                       "code": "AUTOCOMPLETE_FETCHED",
                       "message": "검색 자동완성 조회에 성공했습니다.",
                       "data": {
-                        "results": [
-                          {"type":"company","name":"카카오","highlightRanges":[{"start":0,"end":2}],"postingId":1,"imageUrl":"https://.../kakao.png","keywordId":null},
-                          {"type":"keyword","name":"카카오 스타일","highlightRanges":[{"start":3,"end":5}],"postingId":null,"imageUrl":null,"keywordId":7}
+                        "shortcuts": [
+                          {"postingId":1,"name":"카카오 기획 공개채용","imageUrl":"https://.../kakao.png","highlightRanges":[{"start":0,"end":2}]}
+                        ],
+                        "relatedKeywords": [
+                          {"keywordId":7,"name":"카카오 스타일","highlightRanges":[{"start":0,"end":2}]}
                         ]
                       }
                     }
                     """)))
     @Operation(summary = "검색 자동완성",
             description = """
-                    입력한 키워드로 공고명(title)을 매칭해 자동완성 결과를 반환합니다. 기업명으로는 매칭하지 않습니다.
-                    type: company / keyword 두 종류를 함께 반환하며, 각 항목의 highlightRanges는 매칭된
-                    텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
-                    - company: 공고명이 매칭된 특정 공고로 바로 이동하는 바로가기 카드입니다. postingId, imageUrl이 항상 존재합니다.
-                      (이름은 company이지만 기업명이 아니라 공고 제목 기준 매칭입니다.)
-                    - keyword: 검색 결과 목록 화면으로 이동하는 관련 검색어입니다. keywordId가 항상 존재하며,
-                      postingId/imageUrl은 항상 null입니다.
+                    입력한 키워드로 공고명(title) 및 관련 검색어를 매칭해 자동완성 결과를 반환합니다.
+                    shortcuts: 공고명이 매칭된 공고 바로가기 목록 (postingId, imageUrl로 상세 이동/로고 표시)
+                    relatedKeywords: 관련 검색어 목록 (keywordId로 GET /api/v1/search/postings?relatedKeywordId= 호출해 필터링된 목록으로 이동)
+                    highlightRanges는 매칭된 텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
                     결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
                     """)
     ResponseEntity<SuccessResponse<AutocompleteResponse>> autocomplete(

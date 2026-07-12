@@ -1,12 +1,12 @@
 package org.sopt.haphap.domain.search.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.search.dto.AutocompleteItemResponse;
+import org.sopt.haphap.domain.search.dto.AutocompleteRelatedKeywordResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
+import org.sopt.haphap.domain.search.dto.AutocompleteShortcutResponse;
 import org.sopt.haphap.domain.search.repository.RelatedSearchKeywordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +27,13 @@ public class AutocompleteService {
     public AutocompleteResponse autocomplete(String rawKeyword) {
         String keyword = normalize(rawKeyword);
         if (keyword == null) {
-            return AutocompleteResponse.from(List.of());
+            return AutocompleteResponse.from(List.of(), List.of());
         }
 
-        List<AutocompleteItemResponse> results = new ArrayList<>();
-        results.addAll(searchCompanies(keyword));
-        results.addAll(searchJobs(keyword));
+        List<AutocompleteShortcutResponse> shortcuts = searchShortcuts(keyword);
+        List<AutocompleteRelatedKeywordResponse> relatedKeywords = searchRelatedKeywords(keyword);
 
-        return AutocompleteResponse.from(results);
+        return AutocompleteResponse.from(shortcuts, relatedKeywords);
     }
 
     private String normalize(String rawKeyword) {
@@ -46,18 +45,19 @@ public class AutocompleteService {
         return trimmed;
     }
 
-    private List<AutocompleteItemResponse> searchCompanies(String keyword) {
+    // 바로가기: 공고명(title) 매칭, 클릭 시 해당 공고 상세로 이동
+    private List<AutocompleteShortcutResponse> searchShortcuts(String keyword) {
         return postingRepository.searchByTitleContaining(keyword, SHORTCUT_LIMIT).stream()
-                .map(p -> AutocompleteItemResponse.company(
-                        p.getId(), p.getTitle(),
-                        highlightRangeCalculator.calculate(p.getTitle(), keyword),
-                        p.getLogoImageUrl()))
+                .map(p -> new AutocompleteShortcutResponse(
+                        p.getId(), p.getTitle(), p.getLogoImageUrl(),
+                        highlightRangeCalculator.calculate(p.getTitle(), keyword)))
                 .toList();
     }
 
-    private List<AutocompleteItemResponse> searchJobs(String keyword) {
+    // 관련 검색어: 클릭 시 relatedKeywordId로 필터링된 목록 화면으로 이동
+    private List<AutocompleteRelatedKeywordResponse> searchRelatedKeywords(String keyword) {
         return relatedSearchKeywordRepository.searchByKeywordContaining(keyword, JOB_LIMIT).stream()
-                .map(k -> AutocompleteItemResponse.job(
+                .map(k -> new AutocompleteRelatedKeywordResponse(
                         k.getId(), k.getKeyword(),
                         highlightRangeCalculator.calculate(k.getKeyword(), keyword)))
                 .toList();
