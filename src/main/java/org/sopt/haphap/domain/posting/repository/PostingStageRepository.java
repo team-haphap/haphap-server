@@ -44,7 +44,7 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     JOIN p.category cat
     LEFT JOIN CompanyImage ci ON ci.company = c AND ci.type = :imageType
     WHERE s.expectedAnnouncementDate = :today
-    ORDER BY s.expectedScore DESC
+    ORDER BY s.expectedScore DESC, p.title ASC
     """)
     List<TodayAnnouncementProjection> findTodayAnnouncements(
             @Param("today") LocalDate today,
