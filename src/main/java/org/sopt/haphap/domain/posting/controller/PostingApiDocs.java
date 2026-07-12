@@ -93,7 +93,6 @@ public interface PostingApiDocs {
                             "title": "2026 상반기 신입 공채",
                             "companyName": "토스",
                             "category": "개발",
-                            "content": "서류 결과 발표",
                             "nextStage": "1차 면접",
                             "daysUntilNextStage": 3,
                             "imageUrl": "https://.../toss.png"
@@ -127,7 +126,6 @@ public interface PostingApiDocs {
                             "title": "SOPT 34기 모집",
                             "companyName": "SOPT",
                             "category": "동아리",
-                            "content": "서류 마감 임박",
                             "nextStage": "서류 발표",
                             "daysUntilNextStage": 1,
                             "imageUrl": "https://.../sopt.png"

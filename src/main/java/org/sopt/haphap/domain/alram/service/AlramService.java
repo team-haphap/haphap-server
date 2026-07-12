@@ -100,8 +100,8 @@ public class AlramService {
     }
 
     private NotificationMessage createMessage(Posting posting, String stage, RegistrationResult result) {
-        String title = "전형 소식 알림";
-        String body = String.format("%s %s의 %s %s가 등록중",
+        String title = "새로운 결과 등록중";
+        String body = String.format("%s %s의 %s %s 결과가 등록중",
                 posting.getCompany().getName(),   // 기업명
                 posting.getTitle(),               // 공고명
                 stage,                            // 전형
