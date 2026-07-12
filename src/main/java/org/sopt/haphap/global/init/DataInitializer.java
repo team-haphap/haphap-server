@@ -91,11 +91,11 @@ public class DataInitializer implements CommandLineRunner {
 
         //todo: 오늘발표로고/캘린더 로고 분리한다음 새로 저장하기!!
         Company toss = companyRepository.save(
-                Company.create("토스", "토스는 금융을 쉽고 간편하게 만듭니다.","logo.com1", "https://example.com/toss.png","card1.png"));
+                Company.create("토스","logo.com1", "https://example.com/toss.png","card1.png"));
         Company kakao = companyRepository.save(
-                Company.create("카카오", "사람과 기술로 더 나은 세상을.","logo.com2", "https://example.com/kakao.png","card2.png"));
+                Company.create("카카오","logo.com2", "https://example.com/kakao.png","card2.png"));
         Company naver = companyRepository.save(
-                Company.create("네이버", "연결의 힘을 믿습니다.","logo.com3", "https://example.com/naver.png","card3.png"));
+                Company.create("네이버","logo.com3", "https://example.com/naver.png","card3.png"));
 
 
         // ============================================================

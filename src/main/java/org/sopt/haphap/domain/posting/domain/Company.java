@@ -23,25 +23,21 @@ public class Company extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
     private String logoImageUrl;
 
     private String imageUrl;
 
     private String cardLogoImageUrl; //합격카드 로고이미지용
 
-    private Company(String name, String description,String logoImageUrl, String imageUrl,String cardLogoImageUrl) {
+    private Company(String name,String logoImageUrl, String imageUrl,String cardLogoImageUrl) {
         this.name = name;
-        this.description = description;
         this.logoImageUrl = logoImageUrl;
         this.imageUrl = imageUrl;
         this.cardLogoImageUrl = cardLogoImageUrl;
     }
 
-    public static Company create(String name, String description,String logoImageUrl, String imageUrl,String cardLogoImageUrl) {
-        return new Company(name, description, logoImageUrl, imageUrl,cardLogoImageUrl);
+    public static Company create(String name, String logoImageUrl, String imageUrl,String cardLogoImageUrl) {
+        return new Company(name, logoImageUrl, imageUrl,cardLogoImageUrl);
     }
 
     private Company(String name) {
