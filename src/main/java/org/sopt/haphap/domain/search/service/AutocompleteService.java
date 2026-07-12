@@ -46,20 +46,19 @@ public class AutocompleteService {
         return trimmed;
     }
 
-    // 바로가기: 공고명(title) 매칭, 클릭 시 해당 공고 상세로 이동 → postingId 필수
     private List<AutocompleteItemResponse> searchCompanies(String keyword) {
         return postingRepository.searchByTitleContaining(keyword, SHORTCUT_LIMIT).stream()
                 .map(p -> AutocompleteItemResponse.company(
                         p.getId(), p.getTitle(),
-                        highlightRangeCalculator.calculate(p.getTitle(), keyword)))
+                        highlightRangeCalculator.calculate(p.getTitle(), keyword),
+                        p.getLogoImageUrl()))
                 .toList();
     }
 
-    // 관련 검색어: 클릭 시 목록으로 이동, 특정 공고로 안 감 → postingId 항상 null
     private List<AutocompleteItemResponse> searchJobs(String keyword) {
         return relatedSearchKeywordRepository.searchByKeywordContaining(keyword, JOB_LIMIT).stream()
                 .map(k -> AutocompleteItemResponse.job(
-                        null, k.getKeyword(),
+                        k.getId(), k.getKeyword(),
                         highlightRangeCalculator.calculate(k.getKeyword(), keyword)))
                 .toList();
     }
