@@ -35,8 +35,11 @@ aws:
     bucket: ${AWS_S3_BUCKET}
     region: ap-northeast-2
 
+#logging:
+#  level:
+#    root: INFO
+#    org.hibernate: WARN
+#    org.springframework.web: WARN
+
 logging:
-  level:
-    root: INFO
-    org.hibernate: WARN
-    org.springframework.web: WARN
+  config: classpath:logback-spring.xml

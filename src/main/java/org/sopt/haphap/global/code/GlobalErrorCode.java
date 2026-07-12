@@ -20,6 +20,8 @@ public enum GlobalErrorCode implements ErrorResultCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
     FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "업로드 가능한 파일 크기를 초과했습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 미디어 타입입니다."),
+    NOT_ACCEPTABLE(HttpStatus.NOT_ACCEPTABLE, "응답할 수 없는 미디어 타입입니다."),
     ;
 
     private final HttpStatus status;
