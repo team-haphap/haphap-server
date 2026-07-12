@@ -95,7 +95,7 @@ public class RegistrationService {
 
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
-                registration.getId(), posting.getId(), registration.getStage().getName(), user.getId()));
+                registration.getId(), posting.getId(), registration.getStage().getName(), registration.getResult(), user.getId()));
     }
 
     private void validateResultConsistency(RegistrationCreateRequest request) {
