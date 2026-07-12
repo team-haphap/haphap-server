@@ -58,8 +58,8 @@ public interface SearchApiDocs {
                       "message": "검색 자동완성 조회에 성공했습니다.",
                       "data": {
                         "results": [
-                          {"type":"company","name":"카카오","highlightRanges":[{"start":0,"end":2}],"postingId":1},
-                          {"type":"keyword","name":"백엔드 개발자","highlightRanges":[{"start":3,"end":5}],"postingId":null}
+                          {"type":"company","name":"카카오","highlightRanges":[{"start":0,"end":2}],"postingId":1,"imageUrl":"https://.../kakao.png","keywordId":null},
+                          {"type":"keyword","name":"카카오 스타일","highlightRanges":[{"start":3,"end":5}],"postingId":null,"imageUrl":null,"keywordId":7}
                         ]
                       }
                     }
@@ -67,14 +67,14 @@ public interface SearchApiDocs {
     @Operation(summary = "검색 자동완성",
             description = """
                     입력한 키워드로 공고명(title)을 매칭해 자동완성 결과를 반환합니다. 기업명으로는 매칭하지 않습니다.
-                type: company / keyword 두 종류를 함께 반환하며, 각 항목의 highlightRanges는 매칭된
-                텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
-                - company: 공고명이 매칭된 특정 공고로 바로 이동하는 바로가기 카드입니다. postingId가 항상 존재합니다.
-                  (이름은 company이지만 기업명이 아니라 공고 제목 기준 매칭입니다.)
-                - keyword: 검색 결과 목록 화면으로 이동하는 관련 검색어입니다. 특정 공고를 가리키지 않으므로
-                  postingId는 항상 null입니다.
-                결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
-                """)
+                    type: company / keyword 두 종류를 함께 반환하며, 각 항목의 highlightRanges는 매칭된
+                    텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
+                    - company: 공고명이 매칭된 특정 공고로 바로 이동하는 바로가기 카드입니다. postingId, imageUrl이 항상 존재합니다.
+                      (이름은 company이지만 기업명이 아니라 공고 제목 기준 매칭입니다.)
+                    - keyword: 검색 결과 목록 화면으로 이동하는 관련 검색어입니다. keywordId가 항상 존재하며,
+                      postingId/imageUrl은 항상 null입니다.
+                    결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
+                    """)
     ResponseEntity<SuccessResponse<AutocompleteResponse>> autocomplete(
             @Parameter(description = "검색 키워드, 최소 1글자") String q);
 
@@ -96,20 +96,22 @@ public interface SearchApiDocs {
                           }
                         }
                         """))),
-            @ApiResponse(responseCode = "400", description = "존재하지 않는 카테고리",
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 카테고리 또는 관련 검색어",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class)))
     })
     @Operation(summary = "검색 결과 공고 목록 조회",
             description = """
             검색어 확정 후 결과 화면에 노출할 공고 목록을 반환합니다.
-            q는 공고명 포함된 경우 매칭되며, category는 기존 `/api/v1/postings`와 동일하게 콤마로 구분해 복수 카테고리를 전달할 수 있습니다
-            ('전체' 선택 시 파라미터를 아예 붙이지 마세요).
-            존재하지 않는 category 값이면 에러를 반환합니다.
+            q는 직접 입력한 텍스트, relatedKeywordId는 자동완성 관련 검색어를 탭했을 때 사용합니다.
+            둘 다 오면 relatedKeywordId가 우선하고 q는 무시됩니다. relatedKeywordId가 존재하지 않거나
+            비활성화된 값이면 400(RELATED_KEYWORD_NOT_FOUND)을 반환합니다.
+            category는 콤마로 구분해 복수 카테고리를 전달할 수 있습니다('전체' 선택 시 파라미터 생략).
             정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
             """)
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @Parameter(description = "검색 키워드") String q,
-            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: DEV,PM). 전체 조회 시 파라미터 생략") String category,
+            @Parameter(description = "관련 검색어 id") Long relatedKeywordId,
+            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능. 전체 조회 시 파라미터 생략") String category,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
             @Parameter(description = "페이지 크기, 기본 20, 최대 50") Integer size);
 }
