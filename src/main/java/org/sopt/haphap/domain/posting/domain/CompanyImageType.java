@@ -5,5 +5,6 @@ public enum CompanyImageType {
     LISTING,       // 공고 리스트 - 검색결과
     DETAIL,        // 상세페이지
     TODAY_LOGO,    // 홈 오늘 발표 예상공고 로고
-    CALENDAR_LOGO  // 캘린더 로고
+    CALENDAR_LOGO,  // 캘린더 로고
+    AUTOCOMPLETE    // 자동완성 바로가기
 }
