@@ -43,13 +43,15 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     Optional<Posting> findWithCompanyAndCategory(@Param("postingId") Long postingId);
 
     @Query(value = """
-            SELECT p.id AS id, p.title AS title
-            FROM posting p
-            WHERE p.title ILIKE CONCAT('%', :keyword, '%')
-              AND (p.deadline IS NULL OR p.deadline >= CURRENT_DATE)
-            ORDER BY similarity(p.title, :keyword) DESC
-            LIMIT :limit
-            """, nativeQuery = true)
+        SELECT p.id AS id, p.title AS title, ci.image_url AS logoImageUrl
+        FROM posting p
+        JOIN company c ON c.id = p.company_id
+        LEFT JOIN company_image ci ON ci.company_id = c.id AND ci.type = 'AUTOCOMPLETE'
+        WHERE p.title ILIKE CONCAT('%', :keyword, '%')
+          AND (p.deadline IS NULL OR p.deadline >= CURRENT_DATE)
+        ORDER BY similarity(p.title, :keyword) DESC
+        LIMIT :limit
+        """, nativeQuery = true)
     List<PostingAutocompleteProjection> searchByTitleContaining(
             @Param("keyword") String keyword, @Param("limit") int limit);
 
