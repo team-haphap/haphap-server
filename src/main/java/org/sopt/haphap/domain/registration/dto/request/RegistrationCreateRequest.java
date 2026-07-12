@@ -19,6 +19,8 @@ public record RegistrationCreateRequest(
         Long stageId,
 
         LocalDate contactedDate,   // 날짜 (예: 2026-07-09)
+
+        @Schema(example = "14:30")
         LocalTime contactedTime,   // 시간 (예: 14:30)
 
         @Schema(description = "연락받은 채널 목록 (PENDING이면 생략/빈 리스트). 여러 채널 선택 가능",
