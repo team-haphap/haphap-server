@@ -6,20 +6,20 @@ CREATE TABLE profile_image (
 );
 
 INSERT INTO profile_image (image_url, created_at, updated_at) VALUES
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/5d37a975-9b55-4033-8b14-c63ce30de1db-img_1.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6dc58d49-3849-4bf0-999d-1e890bedd9d0-img_2.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/71401700-2017-4457-b298-a664da59dc50-img_3.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/679bb4c2-8d51-4b6d-9f32-4b658eb7922b-img_4.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/b2884404-c166-431b-bbdb-a4c976a072f9-img_5.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a487346f-53b6-4668-814d-897da455ded4-img_6.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6e6e6bb8-a2b4-4d0b-8ad9-f92ce01f5fb4-img_7.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/dffb023e-8fc3-4b51-ba66-64b7e7058494-img_8.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a4f26e5b-af33-446d-90ae-9d031dfad31c-img_9.pdf', now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/d89f1451-9eee-4804-8abe-7bbfc82c1a91-img_10.pdf', now(), now());
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/dfe28372-b722-427d-b76e-48f96c64df2e-img_1.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/22c5be74-559e-4045-9ca3-4224a39b8e64-img_2.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/fc8532a0-34d9-4216-a0b7-ab1733b13513-img_3.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/79fe983a-ff67-455c-bfac-8fd832896d48-img_4.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a55daac0-f12d-4d8b-8db3-b2955f806ed0-img_5.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/0fdd9dac-f99c-4fd1-85a5-1901c82907ec-img_6.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/dba0495f-481a-41ed-80d0-50444b99e3dc-img_7.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/87b61b92-bfa6-4e3c-af93-187b4d310950-img_8.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/8316b4f3-3cd6-4d19-84c3-797d25810320-img_9.png', now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/2df12b44-b6fc-40e6-b852-92a1ceb58626-img_10.png', now(), now());
 
 INSERT INTO banner (image_url, display_order, is_active, created_at, updated_at) VALUES
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7f6b3412-4691-411b-81eb-b6b8856818a2-img_card_banner.pdf', 1, true, now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/ecc92117-8479-45da-a164-05525cde7cba-img_card_banner-1.pdf', 2, true, now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/495b46d9-8541-4c4d-8eee-2a2adc0870c2-img_card_banner-2.pdf', 3, true, now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/7e7209ca-e01d-457b-a4fb-1d09da35fcf5-img_card_banner-3.pdf', 4, true, now(), now()),
-('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/3b9936bc-7ffe-4641-9dba-ad2360ba60da-img_card_banner-4.pdf', 5, true, now(), now());
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/b5e6aa98-b832-4325-8526-abc187f90818-img_card_banner-1.png', 1, true, now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/45584ca1-3147-435d-a31b-b86f27aa30fb-img_card_banner-2.png', 2, true, now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/57f54492-7f50-40fc-978e-91349d54aebb-img_card_banner-3.png', 3, true, now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/2aa5f38f-7f16-46db-926b-cec50987ee24-img_card_banner-4.png', 4, true, now(), now()),
+('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/banners/e98c9d0e-0c1e-4878-9c15-8bca0f19f3bf-img_card_banner-5.png', 5, true, now(), now());
