@@ -18,11 +18,17 @@ public record PostingDetailResponse(
 ) {
     public record SummaryResponse(
             long registeredCount,
-            List<String> profileImages,       // 최근 4명
+            List<ParticipantProfile> profileImages,   // 유저 id + 이미지(최근 4명)
             long additionalParticipantCount   // registeredCount - 4 (음수면 0)
     ) {}
 
+    public record ParticipantProfile(
+            Long userId,
+            String profileImageUrl
+    ) {}
+
     public record RegistrationFeedResponse(
+            Long registrationId,
             String stage,
             String nickName,
             RegistrationResult registrationResult,

@@ -19,13 +19,13 @@ public class RegistrationQueryService {
 
     // 참여 요약: 유저 수 + 최근 참여자 프로필
     public ParticipantSummary getParticipantSummary(Long postingId, int profileLimit) {
-        long registeredCount = registrationRepository.countDistinctUsersByPostingId(postingId);
-        List<String> profileImages = registrationRepository
+        long count = registrationRepository.countDistinctUsersByPostingId(postingId);
+        List<ParticipantSummary.Participant> participants = registrationRepository
                 .findRecentParticipants(postingId, PageRequest.of(0, profileLimit))
                 .stream()
-                .map(RecentParticipantProjection::getProfileImageUrl)
+                .map(p -> new ParticipantSummary.Participant(p.getUserId(), p.getProfileImageUrl()))
                 .toList();
-        return new ParticipantSummary(registeredCount, profileImages);
+        return new ParticipantSummary(count, participants);
     }
 
     // 실시간 제보
@@ -33,7 +33,7 @@ public class RegistrationQueryService {
         return registrationRepository
                 .findRecentFeeds(postingId, PageRequest.of(0, limit))
                 .stream()
-                .map(f -> new RegistrationFeed(f.getStage(), f.getNickName(), f.getStatus(),f.getFeedCreatedAt()))
+                .map(f -> new RegistrationFeed(f.getRegistrationId(),f.getStage(), f.getNickName(), f.getStatus(),f.getFeedCreatedAt()))
                 .toList();
     }
 }
