@@ -27,7 +27,6 @@ public class PostingResponseAssembler {
         PopularPostingResponse response = new PopularPostingResponse(
                 posting.getId(), posting.getTitle(),
                 posting.getCompany().getName(), posting.getCategory().getName(),
-                posting.getCompany().getDescription(),
                 nextStage == null ? null : nextStage.getName(),
                 days, posting.getCompany().getImageUrl());
 
