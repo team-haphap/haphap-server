@@ -74,7 +74,7 @@ public class DataInitializer implements CommandLineRunner {
         Category pm = categoryRepository.findByName("기획")
                 .orElseThrow();
 
-        Category marketing = categoryRepository.findByName("마케팅/홍보")
+        Category marketing = categoryRepository.findByName("디자인")
                 .orElseThrow();
 
         Category hr = categoryRepository.findByName("인사")
