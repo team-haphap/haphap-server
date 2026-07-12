@@ -56,7 +56,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (userRepository.count() > 0) {
+        if (postingRepository.count() > 0) {
             log.info("=== 초기 데이터가 이미 존재하여 DataInitializer를 건너뜁니다 ===");
             return;
         }
