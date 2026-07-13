@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class PostingResponseAssembler {
 
     private final NextStageCalculator nextStageCalculator;
@@ -23,6 +25,11 @@ public class PostingResponseAssembler {
         PostingStageFlatProjection nextStage = nextStageCalculator.calculate(stages, counts);
         Integer days = nextStageCalculator.daysUntil(nextStage);
         LocalDate announceDate = (nextStage == null) ? null : nextStage.getExpectedAnnouncementDate();
+
+        // ← 로그 추가
+        log.info("assemble | posting={}, title={}, announceDate={}, deadline={}, closed={}",
+                posting.getId(), posting.getTitle(), announceDate, posting.getDeadline(),
+                announceDate == null);
 
         PopularPostingResponse response = new PopularPostingResponse(
                 posting.getId(), posting.getTitle(),
