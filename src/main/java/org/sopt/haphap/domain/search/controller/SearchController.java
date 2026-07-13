@@ -28,7 +28,6 @@ public class SearchController implements SearchApiDocs {
     private final PopularSearchPostingQueryService popularSearchPostingQueryService;
     private final AutocompleteService autocompleteService;
     private final PostingSearchQueryService postingSearchQueryService;
-    private final CategoryParser categoryParser;
 
     @GetMapping("/popular")
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings() {
