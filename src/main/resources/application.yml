@@ -35,11 +35,10 @@ aws:
     bucket: ${AWS_S3_BUCKET}
     region: ap-northeast-2
 
-#logging:
-#  level:
-#    root: INFO
-#    org.hibernate: WARN
-#    org.springframework.web: WARN
+admin:
+  login-id: ${ADMIN_LOGIN_ID:}
+  password-hash: ${ADMIN_PASSWORD_HASH:}
+  name: ${ADMIN_NAME:}
 
 logging:
   config: classpath:logback-spring.xml
