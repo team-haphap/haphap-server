@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.search.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
+import org.sopt.haphap.domain.posting.service.support.CategoryParser;
 import org.sopt.haphap.domain.search.code.SearchSuccessCode;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
 import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/search")
@@ -25,6 +28,7 @@ public class SearchController implements SearchApiDocs {
     private final PopularSearchPostingQueryService popularSearchPostingQueryService;
     private final AutocompleteService autocompleteService;
     private final PostingSearchQueryService postingSearchQueryService;
+    private final CategoryParser categoryParser;
 
     @GetMapping("/popular")
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings() {

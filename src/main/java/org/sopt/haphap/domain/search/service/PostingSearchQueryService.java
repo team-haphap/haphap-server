@@ -2,7 +2,6 @@ package org.sopt.haphap.domain.search.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.search.code.SearchErrorCode;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.repository.CategoryRepository;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
@@ -11,6 +10,7 @@ import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler.Scored;
 import org.sopt.haphap.domain.posting.service.support.PostingSortComparators;
+import org.sopt.haphap.domain.search.code.SearchErrorCode;
 import org.sopt.haphap.domain.search.domain.RelatedSearchKeyword;
 import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
 import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
