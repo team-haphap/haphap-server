@@ -114,10 +114,10 @@ public class DataInitializer implements CommandLineRunner {
                 Posting.create("A 백엔드 신입 공채", LocalDate.now().plusDays(60),
                         "판교 본사", "백엔드 개발자", dev, toss));
         List<PostingStage> as = addStages(a,
-                stage("서류", 0, LocalDate.now().minusDays(10), 10),
-                stage("코딩 테스트", 1, LocalDate.now().minusDays(2), 10),
-                stage("1차 면접", 2, LocalDate.now().plusDays(20), 10),
-                stage("최종", 3, LocalDate.now().plusDays(40), 10));
+                stage("서류", 1, LocalDate.now().minusDays(10), 10),
+                stage("코딩 테스트", 2, LocalDate.now().minusDays(2), 10),
+                stage("1차 면접", 3, LocalDate.now().plusDays(20), 10),
+                stage("최종", 4, LocalDate.now().plusDays(40), 10));
         register(users, a, as.get(0), 25, RegistrationResult.PASS);
         register(users, a, as.get(1), 20, RegistrationResult.PASS);
 
@@ -125,20 +125,20 @@ public class DataInitializer implements CommandLineRunner {
                 Posting.create("B 프론트 신입 공채", LocalDate.now().plusDays(60),
                         "역삼 지사", "프론트엔드 개발자", dev, kakao));
         List<PostingStage> bs = addStages(b,
-                stage("서류", 0, LocalDate.now().minusDays(1), 10),
-                stage("코딩 테스트", 1, LocalDate.now().plusDays(1), 10),
-                stage("1차 면접", 2, LocalDate.now().plusDays(10), 10),
-                stage("최종", 3, LocalDate.now().plusDays(20), 10));
+                stage("서류", 1, LocalDate.now().minusDays(1), 10),
+                stage("코딩 테스트", 2, LocalDate.now().plusDays(1), 10),
+                stage("1차 면접", 3, LocalDate.now().plusDays(10), 10),
+                stage("최종", 4, LocalDate.now().plusDays(20), 10));
         register(users, b, bs.get(0), 18, RegistrationResult.PASS);
 
         Posting c = postingRepository.save(
                 Posting.create("C 기획 신입 공채", LocalDate.now().plusDays(60),
                         "양재 본사", "책임매니저", pm, naver));
         List<PostingStage> cs = addStages(c,
-                stage("서류", 0, LocalDate.now().minusDays(3), 10),
-                stage("코딩 테스트", 1, LocalDate.now().minusDays(1), 10),
-                stage("1차 면접", 2, LocalDate.now().plusDays(5), 10),
-                stage("최종", 3, LocalDate.now().plusDays(15), 10));
+                stage("서류", 1, LocalDate.now().minusDays(3), 10),
+                stage("코딩 테스트", 2, LocalDate.now().minusDays(1), 10),
+                stage("1차 면접", 3, LocalDate.now().plusDays(5), 10),
+                stage("최종", 4, LocalDate.now().plusDays(15), 10));
         register(users, c, cs.get(0), 20, RegistrationResult.PASS);
         register(users, c, cs.get(1), 16, RegistrationResult.PASS);
 
@@ -146,16 +146,16 @@ public class DataInitializer implements CommandLineRunner {
                 Posting.create("D 마케팅 신입 공채", LocalDate.now().plusDays(60),
                         "성수 오피스", "프로덕트 디자이너", design, toss));
         List<PostingStage> ds = addStages(d,
-                stage("서류", 0, LocalDate.now().plusDays(3), 10),
-                stage("최종", 1, LocalDate.now().plusDays(12), 10));
+                stage("서류", 1, LocalDate.now().plusDays(3), 10),
+                stage("최종", 2, LocalDate.now().plusDays(12), 10));
         register(users, d, ds.get(0), 10, RegistrationResult.PENDING);
 
         Posting e = postingRepository.save(
                 Posting.create("E 백엔드 신입 공채", LocalDate.now().plusDays(60),
                         "분당 센터", "백엔드 개발자", dev, naver));
         List<PostingStage> es = addStages(e,
-                stage("서류", 0, LocalDate.now().plusDays(7), 10),
-                stage("1차 면접", 1, LocalDate.now().plusDays(14), 10));
+                stage("서류", 1, LocalDate.now().plusDays(7), 10),
+                stage("1차 면접", 2, LocalDate.now().plusDays(14), 10));
         register(users, e, es.get(0), 5, RegistrationResult.PASS);
 
         int[] counts = {35, 32, 28, 15, 12, 8};
@@ -165,7 +165,7 @@ public class DataInitializer implements CommandLineRunner {
                     Posting.create(names[i] + " 개발 공채", LocalDate.now().plusDays(60),
                             "본사", "개발자", dev, toss));
             List<PostingStage> ps = addStages(p,
-                    stage("서류", 0, LocalDate.now().plusDays(10 + i), 10));
+                    stage("서류", 1, LocalDate.now().plusDays(10 + i), 10));
             register(users, p, ps.get(0), counts[i], RegistrationResult.PASS);
         }
 
@@ -175,27 +175,27 @@ public class DataInitializer implements CommandLineRunner {
         Posting t1 = postingRepository.save(
                 Posting.create("오늘발표 하이스코어 공채", LocalDate.now().plusDays(60),
                         "본사", "개발자", dev, kakao));
-        addStages(t1, stage("1차 면접", 0, LocalDate.now(), 95));
+        addStages(t1, stage("1차 면접", 1, LocalDate.now(), 95));
 
         Posting t2 = postingRepository.save(
                 Posting.create("오늘발표 미드스코어 공채", LocalDate.now().plusDays(60),
                         "본사", "개발자", dev, toss));
-        addStages(t2, stage("서류", 0, LocalDate.now(), 80));
+        addStages(t2, stage("서류", 1, LocalDate.now(), 80));
 
         Posting t3 = postingRepository.save(
                 Posting.create("오늘발표 로우스코어 공채", LocalDate.now().plusDays(60),
                         "본사", "기획자", pm, naver));
-        addStages(t3, stage("코딩 테스트", 0, LocalDate.now(), 60));
+        addStages(t3, stage("코딩 테스트", 1, LocalDate.now(), 60));
 
         Posting t4 = postingRepository.save(
                 Posting.create("오늘발표 컷오프 공채", LocalDate.now().plusDays(60),
                         "본사", "마케팅", design, kakao));
-        addStages(t4, stage("최종", 0, LocalDate.now(), 40));
+        addStages(t4, stage("최종", 1, LocalDate.now(), 40));
 
         Posting t5 = postingRepository.save(
                 Posting.create("내일발표 공채", LocalDate.now().plusDays(60),
                         "본사", "개발자", dev, naver));
-        addStages(t5, stage("서류", 0, LocalDate.now().plusDays(1), 99));
+        addStages(t5, stage("서류", 1, LocalDate.now().plusDays(1), 99));
 
         // ============================================================
         // 공고 상세(/postings/{id}/detail) 검증 전용
@@ -204,10 +204,10 @@ public class DataInitializer implements CommandLineRunner {
                 Posting.create("카카오 에너지 태양광 사업 정책기획", LocalDate.now().plusDays(60),
                         "양재 본사", "책임매니저", pm, kakao));
         List<PostingStage> ds2 = addStages(detail,
-                stage("서류", 0, LocalDate.now().minusDays(2), 50),
-                stage("코딩 테스트", 1, LocalDate.now().plusDays(1), 50),
-                stage("1차 면접", 2, LocalDate.now().plusDays(5), 50),
-                stage("최종", 3, LocalDate.now().plusDays(12), 50));
+                stage("서류", 1, LocalDate.now().minusDays(2), 50),
+                stage("코딩 테스트", 2, LocalDate.now().plusDays(1), 50),
+                stage("1차 면접", 3, LocalDate.now().plusDays(5), 50),
+                stage("최종", 4, LocalDate.now().plusDays(12), 50));
         registerResults(users, detail, ds2.get(0), 12, RegistrationResult.PASS, 0);
         registerResults(users, detail, ds2.get(0), 4, RegistrationResult.FAIL, 12);
         registerResults(users, detail, ds2.get(0), 4, RegistrationResult.PENDING, 16);
