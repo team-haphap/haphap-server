@@ -28,7 +28,6 @@ public class SearchController implements SearchApiDocs {
     private final PopularSearchPostingQueryService popularSearchPostingQueryService;
     private final AutocompleteService autocompleteService;
     private final PostingSearchQueryService postingSearchQueryService;
-    private final CategoryParser categoryParser;
 
     @GetMapping("/popular")
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings() {
@@ -53,13 +52,13 @@ public class SearchController implements SearchApiDocs {
     @GetMapping("/postings")
     public ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long relatedKeywordId,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-
-        PostingSearchCondition condition = PostingSearchCondition.of(q,category, page, size);
-        SearchPostingListResponse response = postingSearchQueryService.search(condition);
+        SearchPostingListResponse response =
+                postingSearchQueryService.search(q, relatedKeywordId, category, page, size);
 
         SuccessResponse<SearchPostingListResponse> body =
                 ApiResponse.success(SearchSuccessCode.POSTING_SEARCH_FETCHED, response);
