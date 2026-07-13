@@ -1,4 +1,4 @@
-package org.sopt.haphap.domain.search.code;
+package org.sopt.haphap.domain.posting.code;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum SearchErrorCode implements ErrorResultCode {
+public enum CategoryErrorCode implements ErrorResultCode {
 
-    KEYWORD_REQUIRED(HttpStatus.BAD_REQUEST, "검색어 입력은 필수입니다.");
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -79,6 +79,15 @@ public interface PostingApiDocs {
     @ApiResponse(responseCode = "204", description = "기록 성공, 응답 본문 없음")
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - CATEGORY_NOT_FOUND : 존재하지 않는 카테고리입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = PopularPostingListResponse.class),
                     examples = @ExampleObject(value = """
@@ -112,6 +121,15 @@ public interface PostingApiDocs {
             @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: 인사,영업). '전체' 선택 시 파라미터 생략")
             @RequestParam(required = false) String category);
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - CATEGORY_NOT_FOUND : 존재하지 않는 카테고리입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = PopularPostingListResponse.class),
                     examples = @ExampleObject(value = """

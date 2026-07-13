@@ -33,9 +33,10 @@ public class PopularPostingService {
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
     private final NextStageCalculator nextStageCalculator;
+    private final CategoryParser categoryParser;
 
     public PopularPostingListResponse getPopularPostings(String category) {
-        List<String> categoryNames = CategoryParser.parse(category);
+        List<String> categoryNames = categoryParser.parse(category);
         // "전체"이거나 비어있으면 null로 정규화 → 필터 미적용
         List<String> filter = (categoryNames == null || categoryNames.isEmpty())
                 ? null : categoryNames;

@@ -2,15 +2,11 @@ package org.sopt.haphap.domain.search.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.service.support.*;
 import org.sopt.haphap.domain.search.code.SearchErrorCode;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
-import org.sopt.haphap.domain.posting.repository.CategoryRepository;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
-import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
-import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
-import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler.Scored;
-import org.sopt.haphap.domain.posting.service.support.PostingSortComparators;
 import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
 import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.domain.search.dto.SearchPostingResponse;
@@ -27,14 +23,15 @@ public class PostingSearchQueryService {
     private final PostingRepository postingRepository;
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
-    private final CategoryRepository categoryRepository;
+    private final CategoryParser categoryParser;
 
     public SearchPostingListResponse search(PostingSearchCondition condition) {
         validateKeyword(condition.keyword());
-        validateCategories(condition.categories());
+        List<String> categories =
+                categoryParser.parse(condition.categories());
 
         List<Long> postingIds = postingRepository.searchPostingIds(
-                condition.keyword(), condition.categories());
+                condition.keyword(),categories);
 
         if (postingIds.isEmpty()) {
             return SearchPostingListResponse.of(List.of(), condition.page(), condition.size(), false);
@@ -64,15 +61,6 @@ public class PostingSearchQueryService {
         // PostingSearchCondition.of()가 이미 blank → null로 정규화해줌
         if (keyword == null) {
             throw new CustomException(SearchErrorCode.KEYWORD_REQUIRED);
-        }
-    }
-
-    private void validateCategories(List<String> categories) {
-        if (categories == null || categories.isEmpty()) return;
-        List<String> distinct = categories.stream().distinct().toList();
-        long existingCount = categoryRepository.countByNameIn(distinct);
-        if (existingCount != distinct.size()) {
-            throw new CustomException(SearchErrorCode.CATEGORY_NOT_FOUND);
         }
     }
 
