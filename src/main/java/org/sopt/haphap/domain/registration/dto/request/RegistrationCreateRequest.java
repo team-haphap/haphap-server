@@ -25,7 +25,7 @@ public record RegistrationCreateRequest(
 
         @Schema(description = "연락받은 채널 목록 (PENDING이면 생략/빈 리스트). 여러 채널 선택 가능",
                 example = "[\"EMAIL\", \"SMS\"]",
-                allowableValues = {"EMAIL", "SMS", "PHONE", "KAKAO"})
+                allowableValues = {"EMAIL", "SMS", "PAGE", "PHONE_CALL"})
         List<String> contactMethods,
 
         @NotNull(message = "전형 결과는 필수입니다.")
