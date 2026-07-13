@@ -21,7 +21,7 @@ public class PostingListingService {
     private final PostingResponseAssembler assembler;
     private final CategoryParser categoryParser;
 
-    public PopularPostingListResponse getAllPostings(String category) {
+    public PopularPostingListResponse getAllPostings(List<String> category) {
 
         List<String> categoryNames = categoryParser.parse(category);
         List<String> filter = (categoryNames == null || categoryNames.isEmpty()) ? null : categoryNames;

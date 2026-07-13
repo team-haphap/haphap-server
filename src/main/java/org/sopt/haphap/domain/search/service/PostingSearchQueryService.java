@@ -33,10 +33,10 @@ public class PostingSearchQueryService {
     private final RelatedSearchKeywordRepository relatedSearchKeywordRepository;
 
     public SearchPostingListResponse search(
-            String q, Long relatedKeywordId, String category, Integer page, Integer size
+            String q, Long relatedKeywordId, List<String> category, Integer page, Integer size
     ) {
         String resolvedKeyword = resolveKeyword(q, relatedKeywordId);
-        List<String> categories = categoryParser.parse(category); // 파싱+존재 검증 여기서 끝
+        List<String> categories = categoryParser.parse(category);
 
         PostingSearchCondition condition = PostingSearchCondition.of(resolvedKeyword, categories, page, size);
         validateKeyword(condition.keyword());

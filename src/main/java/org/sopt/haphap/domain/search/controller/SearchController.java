@@ -53,7 +53,7 @@ public class SearchController implements SearchApiDocs {
     public ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long relatedKeywordId,
-            @RequestParam(required = false) String category,
+            @RequestParam(required = false) List<String> category,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+import java.util.List;
+
 @Tag(name = "공고",description = "공고관련 API 입니다")
 public interface PostingApiDocs {
 
@@ -110,16 +112,18 @@ public interface PostingApiDocs {
                       }
                     }
                     """)))
+
     @Operation(summary = "홈 메인-최근 등록 공고 조회(카테고리 별 공고조회)",
             description = """
-                    홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
-                    - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
-                    - 카테고리를 , 기준으로 보내주세요!
-                    """
+                홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                - 콤마로 구분한 단일 파라미터(category=인사,영업) 또는 반복 파라미터(category=인사&category=영업) 모두 지원합니다.
+                """
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
-            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: 인사,영업). '전체' 선택 시 파라미터 생략")
-            @RequestParam(required = false) String category);
+            @Parameter(description = "카테고리 필터, 복수 전달 가능. '전체' 선택 시 파라미터 생략")
+            @RequestParam(required = false) List<String> category);
+
 
     @ApiResponse(
             responseCode = "404",
@@ -152,16 +156,17 @@ public interface PostingApiDocs {
                       }
                     }
                     """)))
+
     @Operation(summary = "카테고리별 공고 전체 조회",
             description = """
-                    공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
-                    - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
-                    - 카테고리를 , 기준으로 보내주세요!
-                    """
+                공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                - 콤마로 구분한 단일 파라미터(category=인사,영업) 또는 반복 파라미터(category=인사&category=영업) 모두 지원합니다.
+                """
     )
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(
-            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능 (예: 인사,영업). '전체' 선택 시 파라미터 생략")
-            @RequestParam(required = false) String category);
+            @Parameter(description = "카테고리 필터, 복수 전달 가능. '전체' 선택 시 파라미터 생략")
+            @RequestParam(required = false) List<String> category);
 
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = TodayAnnouncementPostingListResponse.class),
