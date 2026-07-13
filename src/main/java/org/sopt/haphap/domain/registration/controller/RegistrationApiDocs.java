@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.sopt.haphap.domain.registration.dto.request.RegistrationCheckRequest;
 import org.sopt.haphap.domain.registration.dto.request.RegistrationCreateRequest;
 import org.sopt.haphap.domain.registration.dto.response.RegistrationCreateResponse;
 import org.sopt.haphap.global.dto.FailureResponse;
@@ -159,5 +160,6 @@ public interface RegistrationApiDocs {
     ResponseEntity<SuccessResponse<Void>> check(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId,
-            @PathVariable Long stageId);
+            @PathVariable Long stageId,
+            @Valid @RequestBody RegistrationCheckRequest request);
 }
