@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.search.dto.AutocompleteRelatedKeywordResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
-import org.sopt.haphap.domain.search.dto.AutocompleteShortcutResponse;
+import org.sopt.haphap.domain.search.dto.AutocompleteRelatedPostingResponse;
 import org.sopt.haphap.domain.search.repository.RelatedSearchKeywordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AutocompleteService {
 
-    private static final int SHORTCUT_LIMIT = 5;
+    private static final int RELATED_POSTING_LIMIT = 5;
     private static final int JOB_LIMIT = 10;
     private static final Pattern INCOMPLETE_JAMO_ONLY = Pattern.compile("^[ㄱ-ㅣ]+$");
 
@@ -30,10 +30,10 @@ public class AutocompleteService {
             return AutocompleteResponse.from(List.of(), List.of());
         }
 
-        List<AutocompleteShortcutResponse> shortcuts = searchShortcuts(keyword);
+        List<AutocompleteRelatedPostingResponse> relatedPostings = searchRelatedPostings(keyword);
         List<AutocompleteRelatedKeywordResponse> relatedKeywords = searchRelatedKeywords(keyword);
+        return AutocompleteResponse.from(relatedPostings, relatedKeywords);
 
-        return AutocompleteResponse.from(shortcuts, relatedKeywords);
     }
 
     private String normalize(String rawKeyword) {
@@ -46,9 +46,9 @@ public class AutocompleteService {
     }
 
     // 바로가기: 공고명(title) 매칭, 클릭 시 해당 공고 상세로 이동
-    private List<AutocompleteShortcutResponse> searchShortcuts(String keyword) {
-        return postingRepository.searchByTitleContaining(keyword, SHORTCUT_LIMIT).stream()
-                .map(p -> new AutocompleteShortcutResponse(
+    private List<AutocompleteRelatedPostingResponse> searchRelatedPostings(String keyword) {   // searchShortcuts → searchRelatedPostings
+        return postingRepository.searchByTitleContaining(keyword, RELATED_POSTING_LIMIT).stream()
+                .map(p -> new AutocompleteRelatedPostingResponse(
                         p.getId(), p.getTitle(), p.getLogoImageUrl(),
                         highlightRangeCalculator.calculate(p.getTitle(), keyword)))
                 .toList();

@@ -32,7 +32,6 @@ public interface SearchApiDocs {
                             "title": "2026 상반기 신입 공채",
                             "companyName": "토스",
                             "category": "개발",
-                            "content": "서류 결과 발표",
                             "nextStage": "1차 면접",
                             "daysUntilNextStage": 3,
                             "imageUrl": "https://.../toss.png"
@@ -57,7 +56,7 @@ public interface SearchApiDocs {
                       "code": "AUTOCOMPLETE_FETCHED",
                       "message": "검색 자동완성 조회에 성공했습니다.",
                       "data": {
-                        "shortcuts": [
+                        "relatedPostings": [
                           {"postingId":1,"name":"카카오 기획 공개채용","imageUrl":"https://.../kakao.png","highlightRanges":[{"start":0,"end":2}]}
                         ],
                         "relatedKeywords": [
@@ -69,7 +68,7 @@ public interface SearchApiDocs {
     @Operation(summary = "검색 자동완성",
             description = """
                     입력한 키워드로 공고명(title) 및 관련 검색어를 매칭해 자동완성 결과를 반환합니다.
-                    shortcuts: 공고명이 매칭된 공고 바로가기 목록 (postingId, imageUrl로 상세 이동/로고 표시)
+                    relatedPostings: 공고명이 매칭된 공고 바로가기 목록 (postingId, imageUrl로 상세 이동/로고 표시)
                     relatedKeywords: 관련 검색어 목록 (keywordId로 GET /api/v1/search/postings?relatedKeywordId= 호출해 필터링된 목록으로 이동)
                     highlightRanges는 매칭된 텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
                     결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
@@ -108,7 +107,7 @@ public interface SearchApiDocs {
             정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
             """)
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
-            @Parameter(description = "검색 키워드") String q,
+            @Parameter(description = "검색 키워드. 공백이거나 완성되지 않은 한글 자모(예: \"ㄱㄴㄷ\")만 입력하면 빈 배열 응답") String q,
             @Parameter(description = "관련 검색어 id") Long relatedKeywordId,
             @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능. 전체 조회 시 파라미터 생략") String category,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
