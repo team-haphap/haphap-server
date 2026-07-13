@@ -34,7 +34,7 @@ public class RegistrationController implements RegistrationApiDocs {
         return ResponseEntity.status(body.status()).body(body);
     }
 
-    @GetMapping("/{postingId}/{stageId}")
+    @PostMapping("/{postingId}/{stageId}")
     public ResponseEntity<SuccessResponse<Void>> check(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId,
