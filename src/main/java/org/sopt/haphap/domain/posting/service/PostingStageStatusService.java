@@ -59,7 +59,7 @@ public class PostingStageStatusService {
         // 각 전형에 상태 매핑
         List<PostingStageStatusResponse> result = stages.stream()
                 .map(s -> new PostingStageStatusResponse(
-                        s.getStageId(), s.getName() /*, s.getOrderIndex()*/,
+                        s.getStageId(), s.getName() , s.getOrderIndex(),
                         resolveStatus(s.getOrderIndex(), currentOrder)))
                 .toList();
 

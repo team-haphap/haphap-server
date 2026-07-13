@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface PostingStageRepository extends JpaRepository<PostingStage, Long> {
     @Query("""
-            SELECT new org.sopt.haphap.domain.posting.dto.response.PostingStageResponse(s.id, s.name)
+            SELECT new org.sopt.haphap.domain.posting.dto.response.PostingStageResponse(s.id, s.name, s.orderIndex)
             FROM PostingStage s
             WHERE s.posting.id = :postingId
             ORDER BY s.orderIndex ASC
