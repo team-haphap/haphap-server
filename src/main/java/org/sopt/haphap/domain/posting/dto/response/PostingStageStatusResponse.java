@@ -5,6 +5,6 @@ import org.sopt.haphap.domain.posting.domain.StageStatus;
 public record PostingStageStatusResponse(
         Long stageId,
         String stageName,
-        int orderIndex,
+        //int orderIndex,
         StageStatus status
 ) {}
