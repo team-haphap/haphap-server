@@ -7,11 +7,8 @@ import org.sopt.haphap.domain.search.code.SearchErrorCode;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler.Scored;
-<<<<<<< feat/#161-autocomplete-image-keyword
 import org.sopt.haphap.domain.posting.service.support.PostingSortComparators;
 import org.sopt.haphap.domain.search.domain.RelatedSearchKeyword;
-=======
->>>>>>> main
 import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
 import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.domain.search.dto.SearchPostingResponse;
@@ -29,7 +26,6 @@ public class PostingSearchQueryService {
     private final PostingRepository postingRepository;
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
-<<<<<<< feat/#161-autocomplete-image-keyword
     private final CategoryRepository categoryRepository;
     private final RelatedSearchKeywordRepository relatedSearchKeywordRepository;
 
