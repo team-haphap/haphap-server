@@ -5,7 +5,6 @@ import org.sopt.haphap.domain.posting.code.CategoryErrorCode;
 import org.sopt.haphap.domain.posting.repository.CategoryRepository;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Component;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,20 +15,24 @@ public class CategoryParser {
 
     private final CategoryRepository categoryRepository;
 
-    public List<String> parse(String category) {
-        if (category == null || category.isBlank()) {
+    public List<String> parse(List<String> category) {
+        if (category == null || category.isEmpty()) {
             return null;
         }
 
-        List<String> categories = Arrays.stream(category.split(","))
+        List<String> categories = category.stream()
+                .filter(c -> c != null && !c.isBlank())
                 .map(String::trim)
-                .filter(s -> !s.isEmpty())
                 .distinct()
                 .toList();
 
+        if (categories.isEmpty()) {
+            return null;
+        }
+
         validate(categories);
 
-        return categories.isEmpty() ? null : categories;
+        return categories;
     }
 
     private void validate(List<String> categories) {

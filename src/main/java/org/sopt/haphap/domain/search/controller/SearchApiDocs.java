@@ -15,6 +15,8 @@ import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 @Tag(name = "검색", description = "검색 관련 API 입니다")
 public interface SearchApiDocs {
 
@@ -120,10 +122,11 @@ public interface SearchApiDocs {
                     ('전체' 선택 시 파라미터 생략).
                     정렬 기준은 다음 전형 발표 예상일이 가까운 순이며, page/size 기반 페이지네이션입니다.
                     """)
+
     ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @Parameter(description = "검색 키워드. 공백이거나 완성되지 않은 한글 자모(예: \"ㄱㄴㄷ\")만 입력하면 빈 배열 응답") String q,
             @Parameter(description = "관련 검색어 id (자동완성 keyword 탭 시). q보다 우선함") Long relatedKeywordId,
-            @Parameter(description = "카테고리 필터, 콤마로 구분해 복수 전달 가능. 전체 조회 시 파라미터 생략") String category,
+            @Parameter(description = "카테고리 필터, 복수 전달 가능. 전체 조회 시 파라미터 생략") List<String> category,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
             @Parameter(description = "페이지 크기, 기본 20, 최대 50") Integer size);
 }
