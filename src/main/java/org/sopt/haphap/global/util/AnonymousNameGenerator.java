@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+// 초성×중성 조합(399×399=159,201가지) 기반 랜덤이라 유저 수 증가 시 닉네임 중복 가능.
+
 @Component
 public class AnonymousNameGenerator {
 
