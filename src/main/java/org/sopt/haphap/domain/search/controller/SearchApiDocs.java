@@ -51,30 +51,34 @@ public interface SearchApiDocs {
     @ApiResponse(responseCode = "200", description = "자동완성 결과",
             content = @Content(schema = @Schema(implementation = AutocompleteResponse.class),
                     examples = @ExampleObject(value = """
-                            {
-                              "status": 200,
-                              "code": "AUTOCOMPLETE_FETCHED",
-                              "message": "검색 자동완성 조회에 성공했습니다.",
-                              "data": {
-                                "relatedPostings": [
-                                  {"postingId":1,"name":"카카오 기획 공개채용","imageUrl":"https://.../kakao.png","highlightRanges":[{"start":0,"end":2}]}
-                                ],
-                                "relatedKeywords": [
-                                  {"keywordId":7,"name":"카카오 스타일","highlightRanges":[{"start":0,"end":2}]}
-                                ]
-                              }
-                            }
-                            """)))
+                        {
+                          "status": 200,
+                          "code": "AUTOCOMPLETE_FETCHED",
+                          "message": "검색 자동완성 조회에 성공했습니다.",
+                          "data": {
+                            "relatedPostings": [
+                              {"postingId":1,"name":"카카오 기획 공개채용","imageUrl":"https://.../kakao.png","highlightRanges":[{"start":0,"end":3}]}
+                            ],
+                            "relatedKeywords": [
+                              {"keywordId":7,"name":"카카오 스타일","highlightRanges":[{"start":0,"end":3}]}
+                            ]
+                          }
+                        }
+                        """)))
     @Operation(summary = "검색 자동완성",
             description = """
-                    입력한 키워드로 공고명(title) 및 관련 검색어를 매칭해 자동완성 결과를 반환합니다.
-                    relatedPostings: 공고명이 매칭된 공고 바로가기 목록 (postingId, imageUrl로 상세 이동/로고 표시)
-                    relatedKeywords: 관련 검색어 목록 (keywordId로 GET /api/v1/search/postings?relatedKeywordId= 호출해 필터링된 목록으로 이동)
-                    highlightRanges는 매칭된 텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
-                    결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
-                    """)
+                입력한 키워드로 "기업명 + 공고명" 결합 문자열 및 관련 검색어를 매칭해 자동완성 결과를 반환합니다.
+                relatedPostings: 기업명+공고명이 매칭된 공고 바로가기 목록 (postingId, imageUrl로 상세 이동/로고 표시).
+                    마감된 공고는 제외하며, 검색어와 완전히 일치하는 항목을 최상단에 노출하고 나머지는 가나다순 정렬합니다. 최대 5개.
+                    imageUrl은 해당 기업에 AUTOCOMPLETE 타입 이미지가 등록되어 있지 않으면 null일 수 있습니다.
+                relatedKeywords: 관련 검색어 목록 (keywordId로 GET /api/v1/search/postings?relatedKeywordId= 호출해 필터링된 목록으로 이동).
+                    검색어와 완전히 일치하는 항목을 최상단에 노출하고 나머지는 가나다순 정렬합니다. 최대 10개.
+                highlightRanges는 relatedPostings의 경우 "기업명+공고명" 결합 문자열, relatedKeywords의 경우 관련 검색어 텍스트를 기준으로
+                    매칭된 텍스트의 시작(inclusive)/끝(exclusive) offset입니다.
+                결과가 0건이어도 에러가 아니라 빈 배열로 응답합니다.
+                """)
     ResponseEntity<SuccessResponse<AutocompleteResponse>> autocomplete(
-            @Parameter(description = "검색 키워드, 최소 1글자") String q);
+            @Parameter(description = "검색 키워드. 공백이거나 완성되지 않은 한글 자모(예: \"ㄱㄴㄷ\")만 입력하면 빈 배열 응답") String q);
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "검색 결과",

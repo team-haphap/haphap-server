@@ -46,11 +46,14 @@ public class AutocompleteService {
     }
 
     // 바로가기: 공고명(title) 매칭, 클릭 시 해당 공고 상세로 이동
-    private List<AutocompleteRelatedPostingResponse> searchRelatedPostings(String keyword) {   // searchShortcuts → searchRelatedPostings
+    private List<AutocompleteRelatedPostingResponse> searchRelatedPostings(String keyword) {
         return postingRepository.searchByTitleContaining(keyword, RELATED_POSTING_LIMIT).stream()
-                .map(p -> new AutocompleteRelatedPostingResponse(
-                        p.getId(), p.getTitle(), p.getLogoImageUrl(),
-                        highlightRangeCalculator.calculate(p.getTitle(), keyword)))
+                .map(p -> {
+                    String displayName = p.getCompanyName() + " " + p.getTitle();
+                    return new AutocompleteRelatedPostingResponse(
+                            p.getId(), displayName, p.getLogoImageUrl(),
+                            highlightRangeCalculator.calculate(displayName, keyword));
+                })
                 .toList();
     }
 

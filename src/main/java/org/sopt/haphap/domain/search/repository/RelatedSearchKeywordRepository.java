@@ -11,13 +11,15 @@ import org.springframework.data.repository.query.Param;
 public interface RelatedSearchKeywordRepository extends JpaRepository<RelatedSearchKeyword, Long> {
 
     @Query(value = """
-            SELECT k.id AS id, k.keyword AS keyword
-            FROM related_search_keyword k
-            WHERE k.is_active = true
-              AND k.keyword ILIKE CONCAT('%', :keyword, '%')
-            ORDER BY k.keyword ASC
-            LIMIT :limit
-            """, nativeQuery = true)
+        SELECT k.id AS id, k.keyword AS keyword
+        FROM related_search_keyword k
+        WHERE k.is_active = true
+          AND k.keyword ILIKE CONCAT('%', :keyword, '%')
+        ORDER BY
+            CASE WHEN k.keyword = :keyword THEN 0 ELSE 1 END,
+            k.keyword ASC
+        LIMIT :limit
+        """, nativeQuery = true)
     List<RelatedSearchKeywordProjection> searchByKeywordContaining(
             @Param("keyword") String keyword, @Param("limit") int limit);
 
