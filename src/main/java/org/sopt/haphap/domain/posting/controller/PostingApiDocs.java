@@ -47,9 +47,9 @@ public interface PostingApiDocs {
                               "data": {
                                 "postingId": 12,
                                 "stages": [
-                                  { "stageId": 101, "stageName": "서류"},
-                                  { "stageId": 102, "stageName": "1차 면접" },
-                                  { "stageId": 103, "stageName": "최종 면접" }
+                                  { "stageId": 101, "stageName": "서류","orderIndex": 1},
+                                  { "stageId": 102, "stageName": "1차 면접","orderIndex": 2},
+                                  { "stageId": 103, "stageName": "최종 면접","orderIndex": 3}
                                 ]
                               }
                             }
@@ -270,9 +270,9 @@ public interface PostingApiDocs {
                               "message": "공고 전형 상태 조회에 성공했습니다.",
                               "data": {
                                 "stages": [
-                                  { "stageId": 101, "stageName": "서류", "status": "COMPLETED" },
-                                  { "stageId": 102, "stageName": "1차 면접", "status": "IN_PROGRESS" },
-                                  { "stageId": 103, "stageName": "최종 면접", "status": "UPCOMING" }
+                                  { "stageId": 101, "stageName": "서류", "orderIndex": 1,"status": "COMPLETED" },
+                                  { "stageId": 102, "stageName": "1차 면접","orderIndex": 2, "status": "IN_PROGRESS" },
+                                  { "stageId": 103, "stageName": "최종 면접","orderIndex": 3, "status": "UPCOMING" }
                                 ],
                                 "defaultSelectedStageId": 102
                               }
