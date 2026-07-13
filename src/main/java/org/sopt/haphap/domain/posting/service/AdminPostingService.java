@@ -7,6 +7,7 @@ import org.sopt.haphap.domain.posting.domain.Category;
 import org.sopt.haphap.domain.posting.domain.Company;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.request.PostingCreateRequest;
+import org.sopt.haphap.domain.posting.dto.request.PostingUpdateRequest;
 import org.sopt.haphap.domain.posting.dto.response.PostingAdminResponse;
 import org.sopt.haphap.domain.posting.repository.CategoryRepository;
 import org.sopt.haphap.domain.posting.repository.CompanyRepository;
@@ -31,6 +32,19 @@ public class AdminPostingService {
 
         Posting posting = postingRepository.save(Posting.create(
                 request.title(), request.deadline(), request.location(), request.position(), category, company));
+        return PostingAdminResponse.from(posting);
+    }
+
+    @Transactional
+    public PostingAdminResponse updatePosting(Long postingId, PostingUpdateRequest request) {
+        Posting posting = postingRepository.findById(postingId)
+                .orElseThrow(() -> new CustomException(PostingErrorCode.POSTING_NOT_FOUND));
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new CustomException(PostingErrorCode.CATEGORY_NOT_FOUND));
+        Company company = companyRepository.findById(request.companyId())
+                .orElseThrow(() -> new CustomException(PostingErrorCode.COMPANY_NOT_FOUND));
+
+        posting.update(request.title(), request.deadline(), request.location(), request.position(), category, company);
         return PostingAdminResponse.from(posting);
     }
 }
