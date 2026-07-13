@@ -38,10 +38,8 @@ public class PostingSearchQueryService {
     ) {
         String resolvedKeyword = resolveKeyword(q, relatedKeywordId);
         PostingSearchCondition condition = PostingSearchCondition.of(resolvedKeyword, category, page, size);
-=======
+        
     private final CategoryParser categoryParser;
->>>>>>> main
-
         validateKeyword(condition.keyword());
         List<String> categories =
                 categoryParser.parse(condition.categories());
