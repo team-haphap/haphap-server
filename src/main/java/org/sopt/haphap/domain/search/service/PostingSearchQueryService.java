@@ -3,8 +3,8 @@ package org.sopt.haphap.domain.search.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
-import org.sopt.haphap.domain.posting.repository.CategoryRepository;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
+import org.sopt.haphap.domain.posting.service.support.CategoryParser;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
@@ -29,17 +29,17 @@ public class PostingSearchQueryService {
     private final PostingRepository postingRepository;
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
-    private final CategoryRepository categoryRepository;
+    private final CategoryParser categoryParser;
     private final RelatedSearchKeywordRepository relatedSearchKeywordRepository;
 
     public SearchPostingListResponse search(
             String q, Long relatedKeywordId, String category, Integer page, Integer size
     ) {
         String resolvedKeyword = resolveKeyword(q, relatedKeywordId);
-        PostingSearchCondition condition = PostingSearchCondition.of(resolvedKeyword, category, page, size);
+        List<String> categories = categoryParser.parse(category); // 파싱+존재 검증 여기서 끝
 
+        PostingSearchCondition condition = PostingSearchCondition.of(resolvedKeyword, categories, page, size);
         validateKeyword(condition.keyword());
-        validateCategories(condition.categories());
 
         List<Long> postingIds = postingRepository.searchPostingIds(
                 condition.keyword(), condition.categories());
@@ -68,7 +68,6 @@ public class PostingSearchQueryService {
         return SearchPostingListResponse.of(pageContent, condition.page(), condition.size(), hasNext);
     }
 
-    // relatedKeywordId가 있으면 그걸 우선(q는 무시), 없으면 q 그대로 사용
     private String resolveKeyword(String q, Long relatedKeywordId) {
         if (relatedKeywordId == null) {
             return q;
@@ -81,15 +80,6 @@ public class PostingSearchQueryService {
     private void validateKeyword(String keyword) {
         if (keyword == null) {
             throw new CustomException(SearchErrorCode.KEYWORD_REQUIRED);
-        }
-    }
-
-    private void validateCategories(List<String> categories) {
-        if (categories == null || categories.isEmpty()) return;
-        List<String> distinct = categories.stream().distinct().toList();
-        long existingCount = categoryRepository.countByNameIn(distinct);
-        if (existingCount != distinct.size()) {
-            throw new CustomException(SearchErrorCode.CATEGORY_NOT_FOUND);
         }
     }
 
