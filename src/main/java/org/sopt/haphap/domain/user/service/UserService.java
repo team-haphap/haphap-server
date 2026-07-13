@@ -9,6 +9,7 @@ import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.util.AnonymousNameGenerator;
+import org.sopt.haphap.global.util.NicknameAssigner;
 import org.sopt.haphap.global.util.ProfileImageAssigner;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final AnonymousNameGenerator anonymousNameGenerator;
+    private final NicknameAssigner nicknameAssigner;
     private final ProfileImageAssigner profileImageAssigner;
 
     // User + isNew를 함께 담는 record
@@ -47,7 +48,7 @@ public class UserService {
                                         .gender(userInfo.gender())
                                         .ageRange(userInfo.ageRange())
                                         .phoneNumber(userInfo.phoneNumber())
-                                        .anonymousName(anonymousNameGenerator.generate())
+                                        .anonymousName(nicknameAssigner.assign())
                                         .profileImageUrl(profileImageAssigner.assign())
                                         .build()
                         );
