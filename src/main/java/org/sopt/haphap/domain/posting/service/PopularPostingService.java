@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PopularPostingService {
 
     private static final int RECENT_HOURS = 48;
@@ -41,6 +43,8 @@ public class PopularPostingService {
         List<String> filter = (categoryNames == null || categoryNames.isEmpty())
                 ? null : categoryNames;
         LocalDateTime since = LocalDateTime.now().minusHours(RECENT_HOURS);
+
+        log.info("Popular postings since={}", since);
 
         // 1) 48h 내 PASS/FAIL 결과 있는 공고 id목록
         List<Long> candidateIds = registrationRepository
