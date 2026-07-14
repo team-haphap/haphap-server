@@ -55,4 +55,7 @@ users.yml
 *.yaml
 .postman/
 postman
-users.yml
+*.png
+backup/
+urls.csv
+webp_convert.py
