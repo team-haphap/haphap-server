@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PopularPostingService {
 
     private static final int RECENT_HOURS = 48;
@@ -41,6 +43,8 @@ public class PopularPostingService {
         List<String> filter = (categoryNames == null || categoryNames.isEmpty())
                 ? null : categoryNames;
         LocalDateTime since = LocalDateTime.now().minusHours(RECENT_HOURS);
+
+        log.info("Popular postings since={}", since);
 
         // 1) 48h 내 PASS/FAIL 결과 있는 공고 id목록
         List<Long> candidateIds = registrationRepository
@@ -76,6 +80,11 @@ public class PopularPostingService {
                                           Map<Long, Map<Long, Long>> recentCounts) {
         List<PostingStageFlatProjection> stages = agg.stages(id);
         Map<Long, Long> counts = agg.counts(id);
+
+        // 마감 공고 제외: nextStage가 없으면(전 전형 완료) 인기 목록에서 뺌
+        if (nextStageCalculator.calculate(stages, counts) == null) {
+            return null;
+        }
 
         PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
         if (current == null) return null;

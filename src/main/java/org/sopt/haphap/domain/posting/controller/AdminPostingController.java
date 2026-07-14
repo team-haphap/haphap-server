@@ -5,15 +5,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
 import org.sopt.haphap.domain.posting.dto.request.PostingCreateRequest;
+import org.sopt.haphap.domain.posting.dto.request.PostingUpdateRequest;
 import org.sopt.haphap.domain.posting.dto.response.PostingAdminResponse;
 import org.sopt.haphap.domain.posting.service.AdminPostingService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/v1/admin/postings")
@@ -29,5 +30,12 @@ public class AdminPostingController {
         SuccessResponse<PostingAdminResponse> body =
                 ApiResponse.success(PostingSuccessCode.POSTING_CREATED, adminPostingService.createPosting(request));
         return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @PatchMapping("/{postingId}")
+    public ResponseEntity<SuccessResponse<PostingAdminResponse>> updatePosting(
+            @PathVariable Long postingId, @Valid @RequestBody PostingUpdateRequest request) {
+        PostingAdminResponse response = adminPostingService.updatePosting(postingId, request);
+        return ResponseEntity.ok(ApiResponse.success(PostingSuccessCode.POSTING_UPDATED, response));
     }
 }
