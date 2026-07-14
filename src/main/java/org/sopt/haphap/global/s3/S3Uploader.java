@@ -8,9 +8,15 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import java.net.URLConnection;
 import java.io.IOException;
 import java.util.UUID;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 
 @Component
 @RequiredArgsConstructor
@@ -25,30 +31,52 @@ public class S3Uploader {
     private String region;
 
     public String upload(MultipartFile file, String dirName) {
-        String key = dirName + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
-
-        String contentType = file.getContentType();
-        if (contentType == null || contentType.equals("application/octet-stream")) {
-            String guessed = URLConnection.guessContentTypeFromName(file.getOriginalFilename());
-            if (guessed != null) {
-                contentType = guessed;
-            }
-        }
+        String originalFilename = file.getOriginalFilename();
+        String baseName = (originalFilename != null && originalFilename.contains("."))
+                ? originalFilename.substring(0, originalFilename.lastIndexOf('.'))
+                : "file";
+        String key = dirName + "/" + UUID.randomUUID() + "-" + baseName + ".webp";
 
         try {
+            BufferedImage image = ImageIO.read(file.getInputStream());
+            if (image == null) {
+                throw new IllegalStateException("이미지를 읽을 수 없습니다: " + originalFilename);
+            }
+
+            byte[] webpBytes = convertToWebp(image, 0.85f);
+
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
                             .key(key)
-                            .contentType(contentType)
+                            .contentType("image/webp")
+                            .cacheControl("public, max-age=31536000, immutable")
                             .build(),
-                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+                    RequestBody.fromBytes(webpBytes)
             );
         } catch (IOException e) {
             throw new IllegalStateException("이미지 업로드 실패", e);
         }
 
         return "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
+    }
+
+    private byte[] convertToWebp(BufferedImage image, float quality) throws IOException {
+        ImageWriter writer = ImageIO.getImageWritersByFormatName("webp").next();
+        ImageWriteParam param = writer.getDefaultWriteParam();
+        if (param.canWriteCompressed()) {
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(quality);
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+            writer.setOutput(ios);
+            writer.write(null, new IIOImage(image, null, null), param);
+        } finally {
+            writer.dispose();
+        }
+        return baos.toByteArray();
     }
 
     public void delete(String key) {

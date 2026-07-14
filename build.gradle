@@ -73,6 +73,7 @@ dependencies {
 
     //s3
     implementation platform('software.amazon.awssdk:bom:2.29.52')
+    implementation 'org.sejda.imageio:webp-imageio:0.1.6'
     implementation 'software.amazon.awssdk:s3'
 }
 
