@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class NextStageCalculator {
 
-    private static final int PROGRESS_THRESHOLD = 15;
+    private static final int PROGRESS_THRESHOLD = 5;
 
     // 15 이상 중 마지막 인덱스 (없으면 -1)
     private int lastProgressedIndex(List<PostingStageFlatProjection> stages,
