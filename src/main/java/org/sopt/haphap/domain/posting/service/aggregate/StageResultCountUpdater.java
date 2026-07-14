@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StageResultCountUpdater {
 
-    private static final int THRESHOLD = 15;
+    private static final int THRESHOLD = 5;
 
     private final StageResultCountRepository repository;
     private final PostingStageRepository postingStageRepository;
