@@ -81,6 +81,11 @@ public class PopularPostingService {
         List<PostingStageFlatProjection> stages = agg.stages(id);
         Map<Long, Long> counts = agg.counts(id);
 
+        // 마감 공고 제외: nextStage가 없으면(전 전형 완료) 인기 목록에서 뺌
+        if (nextStageCalculator.calculate(stages, counts) == null) {
+            return null;
+        }
+
         PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
         if (current == null) return null;
 
