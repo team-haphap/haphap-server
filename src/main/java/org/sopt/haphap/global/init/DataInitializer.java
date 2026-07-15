@@ -341,10 +341,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p1 = posting("자율주행개발 - 2026 3월 신입 채용", "남양, 판교", dev, hyundai);
         List<PostingStage> s1 = addStages(p1,
-                stage("서류", 0, LocalDate.of(2026, 5, 22), 87),
-                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 23),
-                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 44),
-                stage("임원면접 (최종)", 3, LocalDate.of(2026, 7, 16), 65));
+                stage("서류", 1, LocalDate.of(2026, 5, 22), 87),
+                stage("인적성검사", 2, LocalDate.of(2026, 6, 5), 23),
+                stage("직무면접", 3, LocalDate.of(2026, 6, 19), 44),
+                stage("임원면접 (최종)", 4, LocalDate.of(2026, 7, 16), 65));
         registerResults(users, p1, s1.get(0), 20, RegistrationResult.PASS, 0);
         registerResults(users, p1, s1.get(0), 6, RegistrationResult.FAIL, 20);
         registerResults(users, p1, s1.get(0), 4, RegistrationResult.PENDING, 26);
@@ -359,10 +359,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p2 = posting("차량개발 - 2026 3월 신입 채용", "남양", dev, hyundai);
         List<PostingStage> s2 = addStages(p2,
-                stage("서류", 0, LocalDate.of(2026, 5, 22), 34),
-                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 80),
-                stage("직무면접", 2, LocalDate.of(2026, 6, 16), 23),  // 시트 0.234
-                stage("임원면접 (최종)", 3, LocalDate.of(2026, 7, 30), 65));
+                stage("서류", 1, LocalDate.of(2026, 5, 22), 34),
+                stage("인적성검사", 2, LocalDate.of(2026, 6, 5), 80),
+                stage("직무면접", 3, LocalDate.of(2026, 6, 16), 23),  // 시트 0.234
+                stage("임원면접 (최종)", 4, LocalDate.of(2026, 7, 30), 65));
         registerResults(users, p2, s2.get(0), 18, RegistrationResult.PASS, 0);
         registerResults(users, p2, s2.get(0), 5, RegistrationResult.FAIL, 18);
         register(users, p2, s2.get(1), 11, RegistrationResult.PASS);
@@ -374,10 +374,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p3 = posting("경영기획 - 2026 3월 신입 채용", "양재", pm, hyundai);
         List<PostingStage> s3 = addStages(p3,
-                stage("서류", 0, LocalDate.of(2026, 5, 22), 66),
-                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 23),
-                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 19),
-                stage("임원면접 (최종)", 3, LocalDate.of(2026, 6, 30), 70));
+                stage("서류", 1, LocalDate.of(2026, 5, 22), 66),
+                stage("인적성검사", 2, LocalDate.of(2026, 6, 5), 23),
+                stage("직무면접", 3, LocalDate.of(2026, 6, 19), 19),
+                stage("임원면접 (최종)", 4, LocalDate.of(2026, 6, 30), 70));
         register(users, p3, s3.get(0), 15, RegistrationResult.PASS);
         register(users, p3, s3.get(1), 9, RegistrationResult.PASS);
         register(users, p3, s3.get(2), 6, RegistrationResult.PASS);
@@ -388,10 +388,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p4 = posting("신사업 전략 기획 - 2026 3월 신입 채용", "양재", pm, hyundai);
         List<PostingStage> s4 = addStages(p4,
-                stage("서류", 0, LocalDate.of(2026, 5, 22), 86),
-                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 58),
-                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 34),
-                stage("임원면접 (최종)", 3, LocalDate.of(2026, 6, 30), 91));
+                stage("서류", 1, LocalDate.of(2026, 5, 22), 86),
+                stage("인적성검사", 2, LocalDate.of(2026, 6, 5), 58),
+                stage("직무면접", 3, LocalDate.of(2026, 6, 19), 34),
+                stage("임원면접 (최종)", 4, LocalDate.of(2026, 6, 30), 91));
         register(users, p4, s4.get(0), 12, RegistrationResult.PASS);
         register(users, p4, s4.get(1), 8, RegistrationResult.PASS);
         register(users, p4, s4.get(2), 6, RegistrationResult.PASS);
@@ -402,10 +402,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p5 = posting("HR - 2026 3월 신입 채용", "양재, 울산", hr, hyundai);
         List<PostingStage> s5 = addStages(p5,
-                stage("서류", 0, LocalDate.of(2026, 5, 22), 10),
-                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 45),
-                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 76),
-                stage("임원면접 (최종)", 3, LocalDate.of(2026, 6, 30), 34));
+                stage("서류", 1, LocalDate.of(2026, 5, 22), 10),
+                stage("인적성검사", 2, LocalDate.of(2026, 6, 5), 45),
+                stage("직무면접", 3, LocalDate.of(2026, 6, 19), 76),
+                stage("임원면접 (최종)", 4, LocalDate.of(2026, 6, 30), 34));
         register(users, p5, s5.get(0), 10, RegistrationResult.PASS);
         register(users, p5, s5.get(1), 7, RegistrationResult.PASS);
         register(users, p5, s5.get(2), 5, RegistrationResult.PASS);
@@ -416,10 +416,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p6 = posting("Product Design - 2025 신입 공채", "NAVER 1784", design, naver);
         List<PostingStage> s6 = addStages(p6,
-                stage("서류", 0, LocalDate.of(2025, 4, 8), 90),
-                stage("1차 면접", 1, LocalDate.of(2025, 4, 30), 45),
-                stage("챌린지", 2, LocalDate.of(2025, 5, 29), 12),
-                stage("2차 면접", 3, LocalDate.of(2025, 6, 27), 45));
+                stage("서류", 1, LocalDate.of(2025, 4, 8), 90),
+                stage("1차 면접", 2, LocalDate.of(2025, 4, 30), 45),
+                stage("챌린지", 3, LocalDate.of(2025, 5, 29), 12),
+                stage("2차 면접", 4, LocalDate.of(2025, 6, 27), 45));
         registerResults(users, p6, s6.get(0), 22, RegistrationResult.PASS, 0);
         registerResults(users, p6, s6.get(0), 6, RegistrationResult.FAIL, 22);
         register(users, p6, s6.get(1), 14, RegistrationResult.PASS);
@@ -431,9 +431,9 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p7 = posting("AI 서비스 개발 - 2026 신입크루 공채", "판교 오피스", dev, kakao);
         List<PostingStage> s7 = addStages(p7,
-                stage("서류", 0, LocalDate.of(2025, 11, 10), 67),
-                stage("1차 면접", 1, LocalDate.of(2025, 11, 24), 23),
-                stage("2차 면접", 2, LocalDate.of(2025, 12, 17), 12));
+                stage("서류", 1, LocalDate.of(2025, 11, 10), 67),
+                stage("1차 면접", 2, LocalDate.of(2025, 11, 24), 23),
+                stage("2차 면접", 3, LocalDate.of(2025, 12, 17), 12));
         registerResults(users, p7, s7.get(0), 32, RegistrationResult.PASS, 0);
         registerResults(users, p7, s7.get(0), 8, RegistrationResult.FAIL, 32);
         register(users, p7, s7.get(1), 19, RegistrationResult.PASS);
@@ -444,9 +444,9 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p8 = posting("AI 서비스 운영 - 2026 신입크루 공채", "판교 오피스", dev, kakao);
         List<PostingStage> s8 = addStages(p8,
-                stage("서류", 0, LocalDate.of(2025, 11, 10), 67),
-                stage("1차 면접", 1, LocalDate.of(2025, 11, 24), 34),
-                stage("2차 면접", 2, LocalDate.of(2025, 12, 17), 23));
+                stage("서류", 1, LocalDate.of(2025, 11, 10), 67),
+                stage("1차 면접", 2, LocalDate.of(2025, 11, 24), 34),
+                stage("2차 면접", 3, LocalDate.of(2025, 12, 17), 23));
         register(users, p8, s8.get(0), 25, RegistrationResult.PASS);
         register(users, p8, s8.get(1), 13, RegistrationResult.PASS);
         register(users, p8, s8.get(2), 7, RegistrationResult.PASS);
@@ -456,10 +456,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p9 = posting("공간디자인 - 2026 상반기 신입사원 수시채용", "본사", design, amore);
         List<PostingStage> s9 = addStages(p9,
-                stage("서류", 0, LocalDate.of(2026, 4, 20), 15),
-                stage("AI역량/영어면접", 1, LocalDate.of(2026, 4, 29), 76),
-                stage("1차 면접", 2, LocalDate.of(2026, 5, 15), 45),
-                stage("2차 면접", 3, LocalDate.of(2026, 6, 24), 63));
+                stage("서류", 1, LocalDate.of(2026, 4, 20), 15),
+                stage("AI역량/영어면접", 2, LocalDate.of(2026, 4, 29), 76),
+                stage("1차 면접", 3, LocalDate.of(2026, 5, 15), 45),
+                stage("2차 면접", 4, LocalDate.of(2026, 6, 24), 63));
         registerResults(users, p9, s9.get(0), 16, RegistrationResult.PASS, 0);
         registerResults(users, p9, s9.get(0), 5, RegistrationResult.PENDING, 16);
         register(users, p9, s9.get(1), 11, RegistrationResult.PASS);
@@ -471,10 +471,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p10 = posting("생산시스템 엔지니어 - 2026 상반기 신입사원 수시채용", "본사", dev, amore);
         List<PostingStage> s10 = addStages(p10,
-                stage("서류", 0, LocalDate.of(2026, 4, 20), 85),
-                stage("AI역량/영어면접", 1, LocalDate.of(2026, 4, 29), 95),
-                stage("1차 면접", 2, LocalDate.of(2026, 5, 15), 24),
-                stage("2차 면접", 3, LocalDate.of(2026, 6, 24), 64));
+                stage("서류", 1, LocalDate.of(2026, 4, 20), 85),
+                stage("AI역량/영어면접", 2, LocalDate.of(2026, 4, 29), 95),
+                stage("1차 면접", 3, LocalDate.of(2026, 5, 15), 24),
+                stage("2차 면접", 4, LocalDate.of(2026, 6, 24), 64));
         register(users, p10, s10.get(0), 14, RegistrationResult.PASS);
         register(users, p10, s10.get(1), 9, RegistrationResult.PASS);
         register(users, p10, s10.get(2), 6, RegistrationResult.PASS);
@@ -485,11 +485,11 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p11 = posting("SW개발 - 2026년 상반기 3급 신입사원 채용 공고", "화성", dev, lg);
         addStages(p11,
-                stage("지원서 접수", 0, null, 0),
-                stage("직무 적합성 평가", 1, null, 0),
-                stage("직무 적성 검사", 2, null, 0),
-                stage("면접", 3, null, 0),
-                stage("건강검진", 4, null, 0));
+                stage("지원서 접수", 1, LocalDate.of(2026, 3, 30), 0),
+                stage("직무 적합성 평가", 2, LocalDate.of(2026, 4, 6), 0),
+                stage("직무 적성 검사", 3, LocalDate.of(2026, 4, 25), 0),
+                stage("면접", 4, LocalDate.of(2026, 5, 10), 0));
+                //stage("건강검진", 5, LocalDate.of(2026, 4, 20), 0));
 
         pushTokenRepository.save(
                 PushToken.create(users.get(0), "device-001", "token-001", DeviceType.ANDROID));
@@ -530,8 +530,15 @@ public class DataInitializer implements CommandLineRunner {
     private List<PostingStage> addStages(Posting posting, StageSpec... specs) {
         List<PostingStage> saved = new ArrayList<>();
         for (StageSpec s : specs) {
-            saved.add(postingStageRepository.save(
-                    PostingStage.create(s.name(), s.orderIndex(), s.announceDate(), s.score(), posting)));
+            PostingStage stage = PostingStage.create(
+                    s.name(), s.orderIndex(), s.announceDate(), s.score(), posting);
+
+            // 발표일이 오늘(2026-07-16) 이전이면 이미 발표된 것으로 처리
+            if (s.announceDate() != null && s.announceDate().isBefore(TODAY)) {
+                stage.markAnnouncedIfAbsent(s.announceDate());
+            }
+
+            saved.add(postingStageRepository.save(stage));
         }
         return saved;
     }
