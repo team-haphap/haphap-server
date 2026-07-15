@@ -67,11 +67,13 @@ public class CalendarPostingQueryService {
 
         return CalendarPostingListResponse.of(date, cards);
     }
+
     private CalendarPostingCardResponse toCard(PostingStageCalendarProjection stage,
                                                Map<Long, Long> participantCountByPostingId) {
+        String displayTitle = stage.getCompanyName() + " " + stage.getTitle();
         return CalendarPostingCardResponse.of(
                 stage.getPostingId(),
-                stage.getTitle(),
+                displayTitle,
                 stage.getStageName(),
                 AnnouncementLikelihood.from(stage.getExpectedScore()),
                 participantCountByPostingId.getOrDefault(stage.getPostingId(), 0L),
