@@ -92,7 +92,7 @@ public interface SearchApiDocs {
                                       "message": "검색 결과 공고 목록 조회에 성공했습니다.",
                                       "data": {
                                         "postings": [
-                                          {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":D-3}
+                                          {"postingId":1,"companyName":"카카오","title":"백엔드 개발자","categoryName":"개발","nextStage":"1차 면접","imageUrl":"https://...","dDay":"D-3"}
                                         ],
                                         "page": 0,
                                         "size": 20,
