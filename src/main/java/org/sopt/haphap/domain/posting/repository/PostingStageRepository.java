@@ -24,13 +24,14 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     List<PostingStageResponse> findStagesByPostingId(@Param("postingId") Long postingId);
 
     @Query("""
-        SELECT s.posting.id AS postingId, s.id AS stageId,
-               s.name AS name, s.orderIndex AS orderIndex,
-               s.expectedAnnouncementDate AS expectedAnnouncementDate
-        FROM PostingStage s
-        WHERE s.posting.id IN :postingIds
-        ORDER BY s.posting.id ASC, s.orderIndex ASC
-        """)
+    SELECT s.posting.id AS postingId, s.id AS stageId,
+           s.name AS name, s.orderIndex AS orderIndex,
+           s.expectedAnnouncementDate AS expectedAnnouncementDate,
+           s.announcedDate AS announcedDate
+    FROM PostingStage s
+    WHERE s.posting.id IN :postingIds
+    ORDER BY s.posting.id ASC, s.orderIndex ASC
+    """)
     List<PostingStageFlatProjection> findFlatByPostingIds(@Param("postingIds") List<Long> postingIds);
 
     @Query("""

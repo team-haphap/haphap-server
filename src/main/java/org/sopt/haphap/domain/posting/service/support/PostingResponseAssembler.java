@@ -26,6 +26,8 @@ public class PostingResponseAssembler {
         Integer days = nextStageCalculator.daysUntil(nextStage);
         LocalDate announceDate = (nextStage == null) ? null : nextStage.getExpectedAnnouncementDate();
 
+        boolean closed = nextStageCalculator.isClosed(stages, counts);
+
         // ← 로그 추가
         log.info("assemble | posting={}, title={}, announceDate={}, deadline={}, closed={}",
                 posting.getId(), posting.getTitle(), announceDate, posting.getDeadline(),
@@ -37,8 +39,8 @@ public class PostingResponseAssembler {
                 nextStage == null ? null : nextStage.getName(),
                 days, companyImageUrl);
 
-        return new Scored(response, posting.getTitle(), announceDate, posting.getDeadline());
+        return new Scored(response, posting.getTitle(), announceDate, posting.getDeadline(), closed);
     }
 
-    public record Scored(PopularPostingResponse response, String title, LocalDate announceDate, LocalDate deadline) {}
+    public record Scored(PopularPostingResponse response, String title, LocalDate announceDate, LocalDate deadline, boolean closed) {}
 }

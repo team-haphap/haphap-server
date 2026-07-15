@@ -37,6 +37,7 @@ public class PopularSearchPostingQueryService {
                 .filter(id -> agg.posting(id) != null)
                 .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
                 .filter(scored -> !scored.closed())
+                .map(Scored::response)
                 .toList();
 
         return PopularPostingListResponse.from(responses);
