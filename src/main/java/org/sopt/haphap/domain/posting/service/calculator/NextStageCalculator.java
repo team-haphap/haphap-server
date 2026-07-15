@@ -14,6 +14,7 @@ public class NextStageCalculator {
 
     private static final int PROGRESS_THRESHOLD = 5;
     private static final int CLOSE_GRACE_DAYS = 2;
+    private static final String D_DAY = "D-day";
 
     private int lastProgressedIndex(List<PostingStageFlatProjection> stages,
                                     Map<Long, Long> countByStageId) {
@@ -84,7 +85,7 @@ public class NextStageCalculator {
 
     private String toLabel(Integer days) {
         if (days == null) return null;             // 발표 예정일 미정
-        return days <= 0 ? "D-0" : "D-" + days;
+        return days <= 0 ? D_DAY : "D-" + days;
     }
 
     public record StageDisplay(PostingStageFlatProjection stage, String label, boolean closed) {}
