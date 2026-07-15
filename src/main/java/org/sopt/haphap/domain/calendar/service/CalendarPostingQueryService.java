@@ -85,7 +85,9 @@ public class CalendarPostingQueryService {
         Collator korean = Collator.getInstance(Locale.KOREAN);
         return Comparator
                 .comparing((Long id) -> stageByPostingId.get(id).getExpectedScore(), Comparator.reverseOrder())
-                .thenComparing(id -> stageByPostingId.get(id).getTitle(), korean);
+                .thenComparing(
+                        id -> stageByPostingId.get(id).getCompanyName() + " " + stageByPostingId.get(id).getTitle(),
+                        korean);
     }
 
     private void validateRange(YearMonth yearMonth) {
