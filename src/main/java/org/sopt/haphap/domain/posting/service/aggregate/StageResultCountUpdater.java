@@ -49,7 +49,7 @@ public class StageResultCountUpdater {
         if (result == RegistrationResult.PENDING) return;
 
         Long confirmed = repository.findConfirmedCount(postingId, stageId);
-        if (confirmed != null && confirmed == THRESHOLD) {
+        if (confirmed != null && confirmed >= THRESHOLD) {
             // 정확히 THRESHOLD가 된 순간 = 방금 돌파 → 오늘로 기록
             postingStageRepository.findById(stageId)
                     .ifPresent(stage -> stage.markAnnouncedIfAbsent(LocalDate.now()));

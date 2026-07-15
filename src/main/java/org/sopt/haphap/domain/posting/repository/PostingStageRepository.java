@@ -90,12 +90,13 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
 
     // 전체 전형 (공고별 그룹핑용)
     @Query("""
-        SELECT s.posting.id AS postingId, s.id AS stageId,
-               s.name AS name, s.orderIndex AS orderIndex,
-               s.expectedAnnouncementDate AS expectedAnnouncementDate
-        FROM PostingStage s
-        ORDER BY s.posting.id ASC, s.orderIndex ASC
-        """)
+    SELECT s.posting.id AS postingId, s.id AS stageId,
+           s.name AS name, s.orderIndex AS orderIndex,
+           s.expectedAnnouncementDate AS expectedAnnouncementDate,
+           s.announcedDate AS announcedDate
+    FROM PostingStage s
+    ORDER BY s.posting.id ASC, s.orderIndex ASC
+    """)
     List<PostingStageFlatProjection> findAllStages();
     boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
 }

@@ -36,7 +36,6 @@ public class PostingResponseAssembler {
 
         return new Scored(response, posting.getTitle(), announceDate,
                 posting.getDeadline(), display.closed());
-
     }
 
     public record Scored(PopularPostingResponse response, String title,
