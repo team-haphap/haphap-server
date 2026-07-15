@@ -10,7 +10,7 @@ public record PopularPostingResponse(
         @Schema(description = "다음 전형명. 모든 전형이 진행 임계치 이상 도달(마감)이면 null", nullable = true)
         String nextStage,
         @Schema(description = "다음 전형 발표까지 남은 일수. 발표예정일이 지나면 음수 가능", nullable = true)
-        Integer daysUntilNextStage,
+        String daysUntilNextStage,
         String imageUrl
 ) {
 }
