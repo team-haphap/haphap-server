@@ -22,25 +22,23 @@ public class PostingResponseAssembler {
                            List<PostingStageFlatProjection> stages,
                            Map<Long, Long> counts,
                            String companyImageUrl) {
-        PostingStageFlatProjection nextStage = nextStageCalculator.calculate(stages, counts);
-        Integer days = nextStageCalculator.daysUntil(nextStage);
-        LocalDate announceDate = (nextStage == null) ? null : nextStage.getExpectedAnnouncementDate();
 
-        boolean closed = nextStageCalculator.isClosed(stages, counts);
-
-        // ← 로그 추가
-        log.info("assemble | posting={}, title={}, announceDate={}, deadline={}, closed={}",
-                posting.getId(), posting.getTitle(), announceDate, posting.getDeadline(),
-                announceDate == null);
+        var display = nextStageCalculator.resolveDisplay(stages, counts);
+        var stage = display.stage();
+        LocalDate announceDate = (stage == null) ? null : stage.getExpectedAnnouncementDate();
 
         PopularPostingResponse response = new PopularPostingResponse(
                 posting.getId(), posting.getTitle(),
                 posting.getCompany().getName(), posting.getCategory().getName(),
-                nextStage == null ? null : nextStage.getName(),
-                days, companyImageUrl);
+                stage == null ? null : stage.getName(),
+                display.label(),
+                companyImageUrl);
 
-        return new Scored(response, posting.getTitle(), announceDate, posting.getDeadline(), closed);
+        return new Scored(response, posting.getTitle(), announceDate,
+                posting.getDeadline(), display.closed());
     }
 
-    public record Scored(PopularPostingResponse response, String title, LocalDate announceDate, LocalDate deadline, boolean closed) {}
+    public record Scored(PopularPostingResponse response, String title,
+                         LocalDate announceDate, LocalDate deadline,
+                         boolean closed) {}
 }
