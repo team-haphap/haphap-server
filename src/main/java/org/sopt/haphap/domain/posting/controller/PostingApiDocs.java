@@ -105,7 +105,7 @@ public interface PostingApiDocs {
                             "companyName": "토스",
                             "category": "개발",
                             "nextStage": "1차 면접",
-                            "daysUntilNextStage": 3,
+                            "daysUntilNextStage": D-3,
                             "imageUrl": "https://.../toss.png"
                           }
                         ]
@@ -149,7 +149,7 @@ public interface PostingApiDocs {
                             "companyName": "SOPT",
                             "category": "동아리",
                             "nextStage": "서류 발표",
-                            "daysUntilNextStage": 1,
+                            "daysUntilNextStage": D-3,
                             "imageUrl": "https://.../sopt.png"
                           }
                         ]
