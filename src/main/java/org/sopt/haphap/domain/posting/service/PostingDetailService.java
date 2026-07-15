@@ -14,6 +14,8 @@ import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -37,6 +39,10 @@ public class PostingDetailService {
         var summary = registrationQueryService.getParticipantSummary(postingId, PROFILE_LIMIT);
         var feeds = registrationQueryService.getRecentFeeds(postingId, FEED_LIMIT);
 
+        List<PostingDetailResponse.ParticipantProfile> profileImages = summary.participants().stream()
+                .map(p -> new PostingDetailResponse.ParticipantProfile(p.userId(), p.profileImageUrl()))
+                .toList();
+
         long additional = Math.max(0, summary.registeredCount() - PROFILE_LIMIT);
 
         String companyImageUrl = companyImageRepository
@@ -49,8 +55,8 @@ public class PostingDetailService {
                 posting.getLocation(), posting.getPosition(), currentState,
                 companyImageUrl,
                 new PostingDetailResponse.SummaryResponse(
-                        summary.registeredCount(), summary.profileImages(), additional),
+                        summary.registeredCount(), profileImages, additional),
                 feeds.stream().map(f -> new PostingDetailResponse.RegistrationFeedResponse(
-                        f.stage(), f.nickName(), f.status(), f.feedCreatedAt())).toList());
+                        f.registrationId(),f.stage(), f.nickName(), f.status(), f.feedCreatedAt())).toList());
     }
 }

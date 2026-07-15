@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.registration.code.RegistrationSuccessCode;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.domain.Registration;
+import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+import org.sopt.haphap.domain.registration.dto.request.RegistrationCheckRequest;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.sopt.haphap.global.code.SuccessResultCode;
 import org.sopt.haphap.global.exception.CustomException;
@@ -19,22 +21,29 @@ public class RegistrationCheckService {
     private final RegistrationTargetValidator registrationTargetValidator;
 
     @Transactional(readOnly = true)
-    public SuccessResultCode check(Long userId, Long postingId, Long stageId) {
+    public SuccessResultCode check(Long userId, Long postingId, Long stageId, RegistrationCheckRequest request) {
 
         registrationTargetValidator.validate(userId, postingId, stageId);
 
         return registrationRepository
                 .findByUserIdAndPostingIdAndStageId(userId, postingId, stageId)
-                .map(this::judgeExisting)
+                .map(existing -> judgeExisting(existing, request.result()))
                 .orElse(RegistrationSuccessCode.NEW_REGISTRATION);  // 등록 이력 없음 → 신규
     }
 
-    private SuccessResultCode judgeExisting(Registration existing) {
-        // 기존이 대기(PENDING) 상태 → 변경 가능하니 확인 토글 유도
+    private SuccessResultCode judgeExisting(Registration existing, RegistrationResult newResult) {
+
+        // 기존이 대기(PENDING) 상태
         if (existing.isPending()) {
+            // 새로 들어온 것도 대기 → 중복
+            if (newResult == RegistrationResult.PENDING) {
+                throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
+            }
+            // 새로 들어온 것이 대기가 아님 → 확인 토글 유도
             return RegistrationSuccessCode.REGISTRATION_CONFIRM_REQUIRED;
         }
-        // 기존이 이미 확정(PASS/FAIL) → 다시 등록 불가
+        // 기존이 확정(PASS/FAIL) → 항상 중복
         throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
     }
+
 }

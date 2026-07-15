@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.search.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
+import org.sopt.haphap.domain.posting.service.support.CategoryParser;
 import org.sopt.haphap.domain.search.code.SearchSuccessCode;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
 import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,12 +52,13 @@ public class SearchController implements SearchApiDocs {
     @GetMapping("/postings")
     public ResponseEntity<SuccessResponse<SearchPostingListResponse>> searchPostings(
             @RequestParam(required = false) String q,
-            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Long relatedKeywordId,
+            @RequestParam(required = false) List<String> category,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-        PostingSearchCondition condition = PostingSearchCondition.of(q, category, page, size);
-        SearchPostingListResponse response = postingSearchQueryService.search(condition);
+        SearchPostingListResponse response =
+                postingSearchQueryService.search(q, relatedKeywordId, category, page, size);
 
         SuccessResponse<SearchPostingListResponse> body =
                 ApiResponse.success(SearchSuccessCode.POSTING_SEARCH_FETCHED, response);

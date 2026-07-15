@@ -5,12 +5,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -50,9 +49,9 @@ public interface PostingApiDocs {
                               "data": {
                                 "postingId": 12,
                                 "stages": [
-                                  { "stageId": 101, "stageName": "서류", "orderIndex": 1 },
-                                  { "stageId": 102, "stageName": "1차 면접", "orderIndex": 2 },
-                                  { "stageId": 103, "stageName": "최종 면접", "orderIndex": 3 }
+                                  { "stageId": 101, "stageName": "서류","orderIndex": 1},
+                                  { "stageId": 102, "stageName": "1차 면접","orderIndex": 2},
+                                  { "stageId": 103, "stageName": "최종 면접","orderIndex": 3}
                                 ]
                               }
                             }
@@ -82,6 +81,15 @@ public interface PostingApiDocs {
     @ApiResponse(responseCode = "204", description = "기록 성공, 응답 본문 없음")
     ResponseEntity<Void> recordCardClick(@PathVariable Long postingId);
 
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - CATEGORY_NOT_FOUND : 존재하지 않는 카테고리입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = PopularPostingListResponse.class),
                     examples = @ExampleObject(value = """
@@ -96,7 +104,6 @@ public interface PostingApiDocs {
                             "title": "2026 상반기 신입 공채",
                             "companyName": "토스",
                             "category": "개발",
-                            "content": "서류 결과 발표",
                             "nextStage": "1차 면접",
                             "daysUntilNextStage": 3,
                             "imageUrl": "https://.../toss.png"
@@ -105,15 +112,28 @@ public interface PostingApiDocs {
                       }
                     }
                     """)))
+
     @Operation(summary = "홈 메인-최근 등록 공고 조회(카테고리 별 공고조회)",
             description = """
-                    홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
-                    - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
-                    - 카테고리를 , 기준으로 보내주세요!
-                    """
+                홈 메인화면에서 최근 등록 공고 8개를 반환합니다.(48내 등록 건수 많은 순으로 반환)
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                - 콤마로 구분한 단일 파라미터(category=인사,영업) 또는 반복 파라미터(category=인사&category=영업) 모두 지원합니다.
+                """
     )
-    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(@RequestParam(required = false) String category);
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings(
+            @Parameter(description = "카테고리 필터, 복수 전달 가능. '전체' 선택 시 파라미터 생략")
+            @RequestParam(required = false) List<String> category);
 
+
+    @ApiResponse(
+            responseCode = "404",
+            description = """
+        - CATEGORY_NOT_FOUND : 존재하지 않는 카테고리입니다.
+        """,
+            content = @Content(
+                    schema = @Schema(implementation = FailureResponse.class)
+            )
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = PopularPostingListResponse.class),
                     examples = @ExampleObject(value = """
@@ -128,7 +148,6 @@ public interface PostingApiDocs {
                             "title": "SOPT 34기 모집",
                             "companyName": "SOPT",
                             "category": "동아리",
-                            "content": "서류 마감 임박",
                             "nextStage": "서류 발표",
                             "daysUntilNextStage": 1,
                             "imageUrl": "https://.../sopt.png"
@@ -137,14 +156,17 @@ public interface PostingApiDocs {
                       }
                     }
                     """)))
+
     @Operation(summary = "카테고리별 공고 전체 조회",
             description = """
-                    공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
-                    - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
-                    - 카테고리를 , 기준으로 보내주세요!
-                    """
+                공고 리스트 전체보기에서 마감일 임박 순으로 전체 공고를 반환합니다.
+                - '전체' 선택한 경우 파라미터를 붙이지 말아주세요!
+                - 콤마로 구분한 단일 파라미터(category=인사,영업) 또는 반복 파라미터(category=인사&category=영업) 모두 지원합니다.
+                """
     )
-    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(@RequestParam(required = false) String category);
+    ResponseEntity<SuccessResponse<PopularPostingListResponse>> getAllPostings(
+            @Parameter(description = "카테고리 필터, 복수 전달 가능. '전체' 선택 시 파라미터 생략")
+            @RequestParam(required = false) List<String> category);
 
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = TodayAnnouncementPostingListResponse.class),
@@ -194,15 +216,28 @@ public interface PostingApiDocs {
                                 "summary": {
                                   "registeredCount": 34,
                                   "profileImages": [
-                                    "https://.../profile1.png",
-                                    "https://.../profile2.png",
-                                    "https://.../profile3.png",
-                                    "https://.../profile4.png"
-                                  ],
+                                                          {
+                                                              "userId": 19,
+                                                              "profileImageUrl": "https://.../profile1.png"
+                                                          },
+                                                          {
+                                                              "userId": 20,
+                                                              "profileImageUrl": "https://.../profile2.png"
+                                                          },
+                                                          {
+                                                              "userId": 29,
+                                                              "profileImageUrl": "https://.../profile3.png"
+                                                          },
+                                                          {
+                                                              "userId": 33,
+                                                              "profileImageUrl": "https://.../profile4.png"
+                                                          }
+                                                      ],
                                   "additionalParticipantCount": 30
                                 },
                                 "registrations": [
                                   {
+                                    "registrationId": 292,
                                     "stage": "1차 면접",
                                     "nickName": "익명의 판다",
                                     "registrationResult": "PASS",
@@ -240,9 +275,9 @@ public interface PostingApiDocs {
                               "message": "공고 전형 상태 조회에 성공했습니다.",
                               "data": {
                                 "stages": [
-                                  { "stageId": 101, "stageName": "서류", "orderIndex": 1, "status": "COMPLETED" },
-                                  { "stageId": 102, "stageName": "1차 면접", "orderIndex": 2, "status": "IN_PROGRESS" },
-                                  { "stageId": 103, "stageName": "최종 면접", "orderIndex": 3, "status": "UPCOMING" }
+                                  { "stageId": 101, "stageName": "서류", "orderIndex": 1,"status": "COMPLETED" },
+                                  { "stageId": 102, "stageName": "1차 면접","orderIndex": 2, "status": "IN_PROGRESS" },
+                                  { "stageId": 103, "stageName": "최종 면접","orderIndex": 3, "status": "UPCOMING" }
                                 ],
                                 "defaultSelectedStageId": 102
                               }

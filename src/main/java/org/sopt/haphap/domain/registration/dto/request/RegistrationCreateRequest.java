@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.registration.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import org.sopt.haphap.domain.registration.domain.ContactMethod;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
@@ -7,6 +8,7 @@ import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 public record RegistrationCreateRequest(
 
@@ -17,9 +19,14 @@ public record RegistrationCreateRequest(
         Long stageId,
 
         LocalDate contactedDate,   // 날짜 (예: 2026-07-09)
+
+        @Schema(example = "14:30")
         LocalTime contactedTime,   // 시간 (예: 14:30)
 
-        ContactMethod contactMethod,
+        @Schema(description = "연락받은 채널 목록 (PENDING이면 생략/빈 리스트). 여러 채널 선택 가능",
+                example = "[\"EMAIL\", \"SMS\"]",
+                allowableValues = {"EMAIL", "SMS", "PAGE", "PHONE_CALL"})
+        List<String> contactMethods,
 
         @NotNull(message = "전형 결과는 필수입니다.")
         RegistrationResult result,

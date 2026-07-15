@@ -47,11 +47,12 @@ public class AlramService {
         String currentStage = currentStageResolver.resolveCurrentState(event.postingId());
 
         if (currentStage == null) {
+            log.info("알람 스킵(진행 전형 없음) - postingId={}", event.postingId());
             return AlramDispatch.empty();
         }
 
         if (!currentStage.equals(event.stage())) {
-            log.debug(
+            log.info(
                     "현재 진행 전형이 아니므로 알람 미발송 - postingId={}, stage={}, currentStage={}",
                     event.postingId(),
                     event.stage(),
@@ -65,7 +66,7 @@ public class AlramService {
                 .findActiveSubscribers(event.postingId(), event.registrantUserId());
 
         if (subscribers.isEmpty()) {
-            log.debug("알람 수신 대상 없음 - postingId={}", event.postingId());
+            log.info("알람 수신 대상 없음 - postingId={}", event.postingId());
             return AlramDispatch.empty();
         }
 
@@ -100,8 +101,8 @@ public class AlramService {
     }
 
     private NotificationMessage createMessage(Posting posting, String stage, RegistrationResult result) {
-        String title = "전형 소식 알림";
-        String body = String.format("%s %s의 %s %s가 등록중",
+        String title = "새로운 결과 등록중";
+        String body = String.format("%s %s의 %s %s 결과가 등록중",
                 posting.getCompany().getName(),   // 기업명
                 posting.getTitle(),               // 공고명
                 stage,                            // 전형
@@ -112,7 +113,7 @@ public class AlramService {
     private void pushToAllDevices(User receiver, NotificationMessage message) {
         List<PushToken> tokens = pushTokenRepository.findByUserIdAndActiveTrue(receiver.getId());
         if (tokens.isEmpty()) {
-            log.debug("활성 푸시 토큰 없음 - memberId={}", receiver.getId());
+            log.info("활성 푸시 토큰 없음 - memberId={}", receiver.getId());
             return;
         }
         tokens.forEach(token -> notificationSender.send(token.getFcmToken(), message));

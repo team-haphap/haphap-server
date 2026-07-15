@@ -35,8 +35,9 @@ public class PopularSearchPostingQueryService {
 
         List<PopularPostingResponse> responses = topIds.stream()
                 .filter(id -> agg.posting(id) != null)
-                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id),agg.companyImageUrl(id)))
+                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
                 .map(Scored::response)
+                .filter(response -> response.nextStage() != null)   // 마감(다음 전형 없음) 공고 제외
                 .toList();
 
         return PopularPostingListResponse.from(responses);

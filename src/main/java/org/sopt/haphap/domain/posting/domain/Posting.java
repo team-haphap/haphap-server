@@ -49,4 +49,14 @@ public class Posting extends BaseEntity {
     public static Posting create(String title, LocalDate deadline,  String location, String position,Category category, Company company) {
         return new Posting(title, deadline,location,position, category, company);
     }
+
+    public void update(String title, LocalDate deadline, String location, String position,
+                       Category category, Company company) {
+        this.title = title;
+        this.deadline = deadline;
+        this.location = location;
+        this.position = position;
+        this.category = category;
+        this.company = company;
+    }
 }

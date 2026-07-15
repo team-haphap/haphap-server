@@ -85,7 +85,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     // 실시간 제보 30개 (registrations)( updatedAt 최신순, 수정 포함.)
     @Query("""
-        SELECT s.name AS stage, u.anonymousName AS nickName,r.result AS status, r.updatedAt AS feedCreatedAt
+        SELECT r.id AS registrationId, s.name AS stage, u.anonymousName AS nickName,r.result AS status, r.updatedAt AS feedCreatedAt
         FROM Registration r
         JOIN r.stage s
         JOIN r.user u

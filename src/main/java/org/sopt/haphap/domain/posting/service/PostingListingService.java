@@ -19,10 +19,11 @@ public class PostingListingService {
     private final PostingRepository postingRepository;
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
+    private final CategoryParser categoryParser;
 
-    public PopularPostingListResponse getAllPostings(String category) {
+    public PopularPostingListResponse getAllPostings(List<String> category) {
 
-        List<String> categoryNames = CategoryParser.parse(category);
+        List<String> categoryNames = categoryParser.parse(category);
         List<String> filter = (categoryNames == null || categoryNames.isEmpty()) ? null : categoryNames;
 
         // 1) 카테고리로 전체 공고 (회사·카테고리 fetch join)

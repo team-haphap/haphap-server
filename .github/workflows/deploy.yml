@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -38,6 +38,7 @@ jobs:
           TAG=${{ github.sha }}
           docker build -t $IMAGE:$TAG .
           docker push $IMAGE:$TAG
+
   cd:
     needs: ci
     runs-on: ubuntu-latest
@@ -52,7 +53,8 @@ jobs:
             set -e
             cd /home/ubuntu/haphap
             git pull origin main
-            cat >> .env <<'ENVEOF'
+
+            cat > .env <<'ENVEOF'
             RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
             RDS_USERNAME=${{ secrets.RDS_USERNAME }}
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
@@ -60,9 +62,13 @@ jobs:
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
             GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+            ADMIN_LOGIN_ID=${{ secrets.ADMIN_LOGIN_ID }}
+            ADMIN_PASSWORD_HASH=${{ secrets.ADMIN_PASSWORD_HASH }}
+            ADMIN_NAME=${{ secrets.ADMIN_NAME }}
             ENVEOF
+
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json
-            chmod 600 firebase-service-account.json
+            chmod 644 firebase-service-account.json
 
             echo "${{ secrets.DOZZLE_USERS_YML_B64 }}" | base64 -d > users.yml
             chmod 600 users.yml

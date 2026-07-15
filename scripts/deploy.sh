@@ -67,4 +67,7 @@ if docker ps --format '{{.Names}}' | grep -q "^haphap-$CURRENT$"; then
   echo "haphap-$CURRENT 종료"
 fi
 
+echo ">>> 사용하지 않는 이미지 정리 중..."
+docker image prune -af --filter "until=24h" || true
+
 echo "배포 완료! Active: haphap-$NEXT (port $NEXT_PORT)"

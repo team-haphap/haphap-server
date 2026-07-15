@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.registration.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.registration.dto.request.RegistrationCheckRequest;
 import org.sopt.haphap.domain.registration.service.RegistrationCheckService;
 import org.sopt.haphap.global.code.SuccessResultCode;
 import org.sopt.haphap.global.dto.ApiResponse;
@@ -33,13 +34,15 @@ public class RegistrationController implements RegistrationApiDocs {
         return ResponseEntity.status(body.status()).body(body);
     }
 
-    @GetMapping("/{postingId}/{stageId}")
+    @PostMapping("/{postingId}/{stageId}")
     public ResponseEntity<SuccessResponse<Void>> check(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long postingId,
-            @PathVariable Long stageId) {
+            @PathVariable Long stageId,
+            @Valid @RequestBody RegistrationCheckRequest request
+    ) {
 
-        SuccessResultCode code = registrationCheckService.check(userId, postingId, stageId);
+        SuccessResultCode code = registrationCheckService.check(userId, postingId, stageId,request);
         SuccessResponse<Void> body = ApiResponse.success(code);
         return ResponseEntity.status(body.status()).body(body);
     }

@@ -9,8 +9,8 @@ public record PassCardResponse(
         String companyName,
         String companyCardLogoImageUrl,
         String title,
-        String stageName,
-        String categoryName,
+        //String stageName,
+        //String categoryName,
         String cardImageUrl
 ) {
     public static PassCardResponse from(Registration registration) {
@@ -21,8 +21,8 @@ public record PassCardResponse(
                 posting.getCompany().getName(),
                 posting.getCompany().getCardLogoImageUrl(),
                 posting.getTitle(),
-                registration.getStage().getName(),
-                category.getName(),
+                //registration.getStage().getName(),
+                //category.getName(),
                 category.getCardImageUrl()
         );
     }

@@ -56,3 +56,12 @@ users.yml
 .postman/
 postman
 users.yml
+*.webp
+*.png
+urls.csv
+
+backup/
+tmp.png
+final.webp
+check.tmp
+webp_convert.py
