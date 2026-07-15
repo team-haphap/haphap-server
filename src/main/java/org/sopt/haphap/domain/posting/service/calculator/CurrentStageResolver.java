@@ -33,7 +33,14 @@ public class CurrentStageResolver {
                         StageRegistrationCountProjection::getStageId,
                         StageRegistrationCountProjection::getCnt));
 
+        if (nextStageCalculator.isClosed(stages, counts)) {
+            return "마감";
+        }
+
         PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
-        return current == null ? null : current.getName();
+        if (current == null) {
+            return "진행 예정";                    // 첫 전형이 아직 5 미달
+        }
+        return current.getName() + " 진행 중";
     }
 }
