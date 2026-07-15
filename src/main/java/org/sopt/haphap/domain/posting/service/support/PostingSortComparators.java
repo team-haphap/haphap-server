@@ -37,7 +37,7 @@ public final class PostingSortComparators {
     }
     // 발표일(nextStage)이 없으면 마감으로 간주
     private static boolean isClosed(Scored s) {
-        return s.announceDate() == null;
+        return s.closed();
     }
 
     public static Comparator<Scored> byDeadline() {

@@ -8,4 +8,5 @@ public interface PostingStageFlatProjection {
     String getName();                           // 전형명 → nextStage 이름
     int getOrderIndex();                        // 전형 순서 → nextStage 계산의 핵심
     LocalDate getExpectedAnnouncementDate();    // 발표예정일 → daysUntilNextStage, 정렬키
+    LocalDate getAnnouncedDate();
 }
