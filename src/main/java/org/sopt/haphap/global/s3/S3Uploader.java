@@ -8,8 +8,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import java.io.IOException;
-import java.util.UUID;
+
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -17,6 +16,8 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -62,10 +63,23 @@ public class S3Uploader {
     }
 
     private byte[] convertToWebp(BufferedImage image, float quality) throws IOException {
+        ImageIO.scanForPlugins();
+
         ImageWriter writer = ImageIO.getImageWritersByFormatName("webp").next();
         ImageWriteParam param = writer.getDefaultWriteParam();
+
         if (param.canWriteCompressed()) {
             param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+
+            String[] types = param.getCompressionTypes();
+            String lossyType = types[0];
+            for (String type : types) {
+                if (type.toLowerCase().contains("lossy")) {
+                    lossyType = type;
+                    break;
+                }
+            }
+            param.setCompressionType(lossyType);
             param.setCompressionQuality(quality);
         }
 
