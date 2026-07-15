@@ -30,7 +30,7 @@ import org.sopt.haphap.global.util.ProfileImageAssigner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
+/*
 @Slf4j
 @Component
 //@Profile("local")
@@ -229,6 +229,297 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     // ── 헬퍼 ──
+
+    private record StageSpec(String name, int orderIndex, LocalDate announceDate, int score) {}
+
+    private StageSpec stage(String name, int orderIndex, LocalDate announceDate, int score) {
+        return new StageSpec(name, orderIndex, announceDate, score);
+    }
+
+    private List<PostingStage> addStages(Posting posting, StageSpec... specs) {
+        List<PostingStage> saved = new ArrayList<>();
+        for (StageSpec s : specs) {
+            saved.add(postingStageRepository.save(
+                    PostingStage.create(s.name(), s.orderIndex(), s.announceDate(), s.score(), posting)));
+        }
+        return saved;
+    }
+
+    private void register(List<User> users, Posting posting, PostingStage stage,
+                          int count, RegistrationResult result) {
+        registerResults(users, posting, stage, count, result, 0);
+    }
+
+    private void registerResults(List<User> users, Posting posting, PostingStage stage,
+                                 int count, RegistrationResult result, int offset) {
+        if (offset + count > users.size()) {
+            throw new IllegalArgumentException(
+                    "offset+count(" + (offset + count) + ") > 유저수(" + users.size() + ").");
+        }
+        for (int i = 0; i < count; i++) {
+            registrationRepository.save(
+                    Registration.create(users.get(offset + i), posting, stage, result,
+                            List.of(ContactMethod.EMAIL), LocalDateTime.now(), false));
+        }
+    }
+}
+
+ */
+
+
+/**
+ * 스프레드시트(공고 11건 + 전형 41건) 기반 더미데이터 초기화.
+ *
+ * 등록(Registration) 규칙
+ *  - posting 1 : 임원면접(최종) 이전 전형(서류/인적성/직무면접) 전부 5건 이상
+ *  - posting 2 : 직무면접까지 전부 5건 이상
+ *  - 그 외 공고 : expectedAnnouncementDate 가 TODAY(2026-07-16) 이전인 전형은 전부 5건 이상
+ *  - posting 11(삼성전자) : 시트에 발표일이 없어 전형별 등록 없음
+ */
+@Slf4j
+@Component
+//@Profile("local")
+@RequiredArgsConstructor
+public class DataInitializer implements CommandLineRunner {
+
+    private static final int THRESHOLD = 15;
+
+    /** 시트 기준 "오늘". 등록 여부 판단 기준일 */
+    private static final LocalDate TODAY = LocalDate.of(2026, 7, 16);
+
+    private final UserRepository userRepository;
+    private final PostingRepository postingRepository;
+    private final PushTokenRepository pushTokenRepository;
+    private final CategoryRepository categoryRepository;
+    private final CompanyRepository companyRepository;
+    private final PostingStageRepository postingStageRepository;
+    private final RegistrationRepository registrationRepository;
+    private final StageResultCountRebuilder stageResultCountRebuilder;
+    private final ProfileImageAssigner profileImageAssigner;
+
+    @Override
+    public void run(String... args) {
+
+        if (postingRepository.count() > 0) {
+            log.info("=== 초기 데이터가 이미 존재하여 DataInitializer를 건너뜁니다 ===");
+            return;
+        }
+
+        // ── 유저 40명 ──
+        List<User> users = new ArrayList<>();
+        for (int i = 1; i <= 40; i++) {
+            users.add(userRepository.save(User.builder()
+                    .anonymousName("익명" + i)
+                    .name("유저" + i)
+                    .email("user" + i + "@test.com")
+                    .provider(Provider.KAKAO)
+                    .providerId("user-" + i)
+                    .profileImageUrl(profileImageAssigner.assign())
+                    .build()));
+        }
+
+        // ── 카테고리 ──
+        Category pm = category("기획");
+        Category design = category("디자인");
+        Category hr = category("인사");
+        Category sales = category("영업");      // 시트에 해당 공고 없음
+        Category dev = category("개발/데이터");
+        Category finance = category("금융/보험"); // 시트에 해당 공고 없음
+
+        // ── 회사 ──
+        Company toss = company("토스");         // 시트에 해당 공고 없음
+        Company kakao = company("카카오");
+        Company naver = company("네이버");
+        Company amore = company("아모레퍼시픽");
+        Company hyundai = company("현대자동차");
+        Company lg = company("LG");             // 시트에 해당 공고 없음
+        //Company samsung = company("LG");  // ★ company 테이블에 미리 넣어두어야 함
+
+        // =====================================================================
+        // 1. 현대자동차 - 자율주행개발
+        //    임원면접(최종, 7/16 = 오늘) 이전 전형 전부 등록 5건 이상
+        // =====================================================================
+        Posting p1 = posting("자율주행개발 - 2026 3월 신입 채용", "남양, 판교", dev, hyundai);
+        List<PostingStage> s1 = addStages(p1,
+                stage("서류", 0, LocalDate.of(2026, 5, 22), 87),
+                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 23),
+                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 44),
+                stage("임원면접 (최종)", 3, LocalDate.of(2026, 7, 16), 65));
+        registerResults(users, p1, s1.get(0), 20, RegistrationResult.PASS, 0);
+        registerResults(users, p1, s1.get(0), 6, RegistrationResult.FAIL, 20);
+        registerResults(users, p1, s1.get(0), 4, RegistrationResult.PENDING, 26);
+        registerResults(users, p1, s1.get(1), 12, RegistrationResult.PASS, 0);
+        registerResults(users, p1, s1.get(1), 5, RegistrationResult.FAIL, 12);
+        register(users, p1, s1.get(2), 8, RegistrationResult.PASS);
+        // s1.get(3) 임원면접(최종) → 등록 없음
+
+        // =====================================================================
+        // 2. 현대자동차 - 차량개발
+        //    직무면접까지 등록 5건 이상 / 임원면접(7/30, 미래)은 등록 없음
+        // =====================================================================
+        Posting p2 = posting("차량개발 - 2026 3월 신입 채용", "남양", dev, hyundai);
+        List<PostingStage> s2 = addStages(p2,
+                stage("서류", 0, LocalDate.of(2026, 5, 22), 34),
+                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 80),
+                stage("직무면접", 2, LocalDate.of(2026, 6, 16), 23),  // 시트 0.234
+                stage("임원면접 (최종)", 3, LocalDate.of(2026, 7, 30), 65));
+        registerResults(users, p2, s2.get(0), 18, RegistrationResult.PASS, 0);
+        registerResults(users, p2, s2.get(0), 5, RegistrationResult.FAIL, 18);
+        register(users, p2, s2.get(1), 11, RegistrationResult.PASS);
+        register(users, p2, s2.get(2), 6, RegistrationResult.PASS);
+        // s2.get(3) 임원면접(최종) → 등록 없음
+
+        // =====================================================================
+        // 3. 현대자동차 - 경영기획 (전 전형 발표일이 오늘 이전 → 전부 5건 이상)
+        // =====================================================================
+        Posting p3 = posting("경영기획 - 2026 3월 신입 채용", "양재", pm, hyundai);
+        List<PostingStage> s3 = addStages(p3,
+                stage("서류", 0, LocalDate.of(2026, 5, 22), 66),
+                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 23),
+                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 19),
+                stage("임원면접 (최종)", 3, LocalDate.of(2026, 6, 30), 70));
+        register(users, p3, s3.get(0), 15, RegistrationResult.PASS);
+        register(users, p3, s3.get(1), 9, RegistrationResult.PASS);
+        register(users, p3, s3.get(2), 6, RegistrationResult.PASS);
+        register(users, p3, s3.get(3), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 4. 현대자동차 - 신사업 전략 기획
+        // =====================================================================
+        Posting p4 = posting("신사업 전략 기획 - 2026 3월 신입 채용", "양재", pm, hyundai);
+        List<PostingStage> s4 = addStages(p4,
+                stage("서류", 0, LocalDate.of(2026, 5, 22), 86),
+                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 58),
+                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 34),
+                stage("임원면접 (최종)", 3, LocalDate.of(2026, 6, 30), 91));
+        register(users, p4, s4.get(0), 12, RegistrationResult.PASS);
+        register(users, p4, s4.get(1), 8, RegistrationResult.PASS);
+        register(users, p4, s4.get(2), 6, RegistrationResult.PASS);
+        register(users, p4, s4.get(3), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 5. 현대자동차 - HR
+        // =====================================================================
+        Posting p5 = posting("HR - 2026 3월 신입 채용", "양재, 울산", hr, hyundai);
+        List<PostingStage> s5 = addStages(p5,
+                stage("서류", 0, LocalDate.of(2026, 5, 22), 10),
+                stage("인적성검사", 1, LocalDate.of(2026, 6, 5), 45),
+                stage("직무면접", 2, LocalDate.of(2026, 6, 19), 76),
+                stage("임원면접 (최종)", 3, LocalDate.of(2026, 6, 30), 34));
+        register(users, p5, s5.get(0), 10, RegistrationResult.PASS);
+        register(users, p5, s5.get(1), 7, RegistrationResult.PASS);
+        register(users, p5, s5.get(2), 5, RegistrationResult.PASS);
+        register(users, p5, s5.get(3), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 6. 네이버 - Product Design (공고명이 "2025 신입 공채" → 2025년으로 가정)
+        // =====================================================================
+        Posting p6 = posting("Product Design - 2025 신입 공채", "NAVER 1784", design, naver);
+        List<PostingStage> s6 = addStages(p6,
+                stage("서류", 0, LocalDate.of(2025, 4, 8), 90),
+                stage("1차 면접", 1, LocalDate.of(2025, 4, 30), 45),
+                stage("챌린지", 2, LocalDate.of(2025, 5, 29), 12),
+                stage("2차 면접", 3, LocalDate.of(2025, 6, 27), 45));
+        registerResults(users, p6, s6.get(0), 22, RegistrationResult.PASS, 0);
+        registerResults(users, p6, s6.get(0), 6, RegistrationResult.FAIL, 22);
+        register(users, p6, s6.get(1), 14, RegistrationResult.PASS);
+        register(users, p6, s6.get(2), 9, RegistrationResult.PASS);
+        register(users, p6, s6.get(3), 6, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 7. 카카오 - AI 서비스 개발 (11~12월 → 2025년 하반기로 가정)
+        // =====================================================================
+        Posting p7 = posting("AI 서비스 개발 - 2026 신입크루 공채", "판교 오피스", dev, kakao);
+        List<PostingStage> s7 = addStages(p7,
+                stage("서류", 0, LocalDate.of(2025, 11, 10), 67),
+                stage("1차 면접", 1, LocalDate.of(2025, 11, 24), 23),
+                stage("2차 면접", 2, LocalDate.of(2025, 12, 17), 12));
+        registerResults(users, p7, s7.get(0), 32, RegistrationResult.PASS, 0);
+        registerResults(users, p7, s7.get(0), 8, RegistrationResult.FAIL, 32);
+        register(users, p7, s7.get(1), 19, RegistrationResult.PASS);
+        register(users, p7, s7.get(2), 10, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 8. 카카오 - AI 서비스 운영
+        // =====================================================================
+        Posting p8 = posting("AI 서비스 운영 - 2026 신입크루 공채", "판교 오피스", dev, kakao);
+        List<PostingStage> s8 = addStages(p8,
+                stage("서류", 0, LocalDate.of(2025, 11, 10), 67),
+                stage("1차 면접", 1, LocalDate.of(2025, 11, 24), 34),
+                stage("2차 면접", 2, LocalDate.of(2025, 12, 17), 23));
+        register(users, p8, s8.get(0), 25, RegistrationResult.PASS);
+        register(users, p8, s8.get(1), 13, RegistrationResult.PASS);
+        register(users, p8, s8.get(2), 7, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 9. 아모레퍼시픽 - 공간디자인
+        // =====================================================================
+        Posting p9 = posting("공간디자인 - 2026 상반기 신입사원 수시채용", "본사", design, amore);
+        List<PostingStage> s9 = addStages(p9,
+                stage("서류", 0, LocalDate.of(2026, 4, 20), 15),
+                stage("AI역량/영어면접", 1, LocalDate.of(2026, 4, 29), 76),
+                stage("1차 면접", 2, LocalDate.of(2026, 5, 15), 45),
+                stage("2차 면접", 3, LocalDate.of(2026, 6, 24), 63));
+        registerResults(users, p9, s9.get(0), 16, RegistrationResult.PASS, 0);
+        registerResults(users, p9, s9.get(0), 5, RegistrationResult.PENDING, 16);
+        register(users, p9, s9.get(1), 11, RegistrationResult.PASS);
+        register(users, p9, s9.get(2), 7, RegistrationResult.PASS);
+        register(users, p9, s9.get(3), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 10. 아모레퍼시픽 - 생산시스템 엔지니어
+        // =====================================================================
+        Posting p10 = posting("생산시스템 엔지니어 - 2026 상반기 신입사원 수시채용", "본사", dev, amore);
+        List<PostingStage> s10 = addStages(p10,
+                stage("서류", 0, LocalDate.of(2026, 4, 20), 85),
+                stage("AI역량/영어면접", 1, LocalDate.of(2026, 4, 29), 95),
+                stage("1차 면접", 2, LocalDate.of(2026, 5, 15), 24),
+                stage("2차 면접", 3, LocalDate.of(2026, 6, 24), 64));
+        register(users, p10, s10.get(0), 14, RegistrationResult.PASS);
+        register(users, p10, s10.get(1), 9, RegistrationResult.PASS);
+        register(users, p10, s10.get(2), 6, RegistrationResult.PASS);
+        register(users, p10, s10.get(3), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 11. 삼성전자 - SW개발 (시트에 발표일/점수 없음 → 발표일 null, score 0, 등록 없음)
+        // =====================================================================
+        Posting p11 = posting("SW개발 - 2026년 상반기 3급 신입사원 채용 공고", "화성", dev, lg);
+        addStages(p11,
+                stage("지원서 접수", 0, null, 0),
+                stage("직무 적합성 평가", 1, null, 0),
+                stage("직무 적성 검사", 2, null, 0),
+                stage("면접", 3, null, 0),
+                stage("건강검진", 4, null, 0));
+
+        pushTokenRepository.save(
+                PushToken.create(users.get(0), "device-001", "token-001", DeviceType.ANDROID));
+
+        stageResultCountRebuilder.rebuildAll();
+
+        log.info("=== 시트 기반 더미데이터 준비 완료 (공고 11건 / 전형 41건, 임계값 {}) ===", THRESHOLD);
+        log.info("[등록 규칙] p1: 임원면접 이전 전부 5건+ / p2: 직무면접까지 5건+ / 그 외: 발표일 < {} 전형 5건+", TODAY);
+        log.info("[오늘({}) 발표 예정] p1 임원면접 (최종) score=65", TODAY);
+        log.info("[미래 발표] p2 임원면접 (최종) 2026-07-30 score=65");
+        log.info("[등록 없음] p11 삼성전자 SW개발 (발표일 미정)");
+    }
+
+    // ── 헬퍼 ──
+
+    private Category category(String name) {
+        return categoryRepository.findByName(name)
+                .orElseThrow(() -> new IllegalStateException("category 테이블에 '" + name + "' 가 없습니다."));
+    }
+
+    private Company company(String name) {
+        return companyRepository.findByName(name)
+                .orElseThrow(() -> new IllegalStateException("company 테이블에 '" + name + "' 가 없습니다."));
+    }
+
+    /** 시트에 deadline / expectedAnnouncementDate(공고) 컬럼이 없어 null 로 저장 */
+    private Posting posting(String title, String location, Category category, Company company) {
+        return postingRepository.save(
+                Posting.create(title, null, location, "신입", category, company));
+    }
 
     private record StageSpec(String name, int orderIndex, LocalDate announceDate, int score) {}
 
