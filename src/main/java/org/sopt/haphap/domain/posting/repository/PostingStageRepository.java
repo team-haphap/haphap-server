@@ -24,12 +24,15 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     List<PostingStageResponse> findStagesByPostingId(@Param("postingId") Long postingId);
 
     @Query("""
-        SELECT s.posting.id AS postingId, s.id AS stageId,
-               s.name AS name, s.orderIndex AS orderIndex,
-               s.expectedAnnouncementDate AS expectedAnnouncementDate
-        FROM PostingStage s
-        WHERE s.posting.id IN :postingIds
-        ORDER BY s.posting.id ASC, s.orderIndex ASC
+        SELECT ps.posting.id AS postingId,
+               ps.id AS stageId,
+               ps.name AS name,
+               ps.orderIndex AS orderIndex,
+               ps.expectedAnnouncementDate AS expectedAnnouncementDate,
+               ps.announcedDate AS announcedDate
+        FROM PostingStage ps
+        WHERE ps.posting.id IN :postingIds
+        ORDER BY ps.posting.id, ps.orderIndex
         """)
     List<PostingStageFlatProjection> findFlatByPostingIds(@Param("postingIds") List<Long> postingIds);
 
@@ -87,12 +90,13 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
 
     // 전체 전형 (공고별 그룹핑용)
     @Query("""
-        SELECT s.posting.id AS postingId, s.id AS stageId,
-               s.name AS name, s.orderIndex AS orderIndex,
-               s.expectedAnnouncementDate AS expectedAnnouncementDate
-        FROM PostingStage s
-        ORDER BY s.posting.id ASC, s.orderIndex ASC
-        """)
+    SELECT s.posting.id AS postingId, s.id AS stageId,
+           s.name AS name, s.orderIndex AS orderIndex,
+           s.expectedAnnouncementDate AS expectedAnnouncementDate,
+           s.announcedDate AS announcedDate
+    FROM PostingStage s
+    ORDER BY s.posting.id ASC, s.orderIndex ASC
+    """)
     List<PostingStageFlatProjection> findAllStages();
     boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
 }

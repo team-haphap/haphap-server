@@ -1,0 +1,13 @@
+DELETE FROM profile_image;
+
+INSERT INTO profile_image (image_url, created_at, updated_at) VALUES
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/97e56bfe-cd2b-49ae-944a-bbf93c7207f8-profile_1.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/fe798587-7aab-4051-909c-121c2e5f8c1a-profile_2.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/83f1a147-5d61-41bb-aac6-45f06ee30fac-profile_3.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/b990d0ff-e948-499c-a0ea-e3a3652288e0-profile_4.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/8dbfcdc9-795b-40d1-a77c-ed743d185913-profile_5.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/6769d6db-c519-4f60-9550-f48563f885b2-profile_6.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/a772c9d2-5d0c-43ee-ab61-f47ba45f8b7a-profile_7.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/dcbca4f9-69e7-4006-9d5c-417c430cc2a7-profile_8.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/04478a47-7ffe-4be4-9ada-89920d46a390-profile_9.webp', NOW(), NOW()),
+                                                                  ('https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/profile-images/bd210cdd-fd16-46f9-96c7-f3bd4f7b563a-profile_10.webp', NOW(), NOW());

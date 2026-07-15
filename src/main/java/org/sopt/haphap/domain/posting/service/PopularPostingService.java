@@ -81,17 +81,42 @@ public class PopularPostingService {
         List<PostingStageFlatProjection> stages = agg.stages(id);
         Map<Long, Long> counts = agg.counts(id);
 
-        // 마감 공고 제외: nextStage가 없으면(전 전형 완료) 인기 목록에서 뺌
-        if (nextStageCalculator.calculate(stages, counts) == null) {
+        PostingStageFlatProjection next = nextStageCalculator.calculate(stages, counts);
+        PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
+        boolean closed = nextStageCalculator.isClosed(stages, counts);
+
+        // 전형별 누적/48h 현황을 한 줄로
+        log.info("popular check | posting={}, title={}, counts={}, current={}, next={}, announced={}, closed={}, recent48h={}",
+                id,
+                agg.posting(id).getTitle(),
+                counts,
+                current == null ? "null" : current.getName() + "(" + current.getStageId() + ")",
+                next == null ? "null" : next.getName(),
+                current == null ? "-" : current.getAnnouncedDate(),   // 돌파일 (유예 판정 근거)
+                closed,
+                recentCounts.getOrDefault(id, Map.of()));
+
+        // 마감 공고 제외
+        if (closed) {
+            log.info("  -> 제외: 마감(nextStage 없음) | posting={}", id);
             return null;
         }
 
-        PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
-        if (current == null) return null;
+        // 시작 전 공고 제외
+        if (current == null) {
+            log.info("  -> 제외: 시작 전(currentStage 없음) | posting={}", id);
+            return null;
+        }
 
         long recentCount = recentCounts.getOrDefault(id, Map.of())
                 .getOrDefault(current.getStageId(), 0L);
-        if (recentCount <= 0) return null;   // 현재 진행 전형에 48h 활동 없음 → 제외
+
+        if (recentCount <= 0) {
+            log.info("  -> 제외: 현재 전형({})에 48h 활동 없음 | posting={}", current.getName(), id);
+            return null;
+        }
+
+        log.info("  -> 통과: posting={}, 현재전형={}, 48h등록수={}", id, current.getName(), recentCount);
 
         PopularPostingResponse response = assembler.assemble(agg.posting(id), stages, counts, agg.companyImageUrl(id)).response();
         return new PopularScored(response, recentCount);

@@ -67,6 +67,8 @@ services:
 
 volumes:
   dozzle-data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   haphap-net:

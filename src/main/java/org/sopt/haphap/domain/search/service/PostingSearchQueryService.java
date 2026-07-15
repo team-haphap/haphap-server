@@ -52,7 +52,7 @@ public class PostingSearchQueryService {
 
         List<Scored> sorted = postingIds.stream()
                 .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
-                .sorted(PostingSortComparators.byDeadline())
+                .sorted(PostingSortComparators.byAnnounceDate())
                 .toList();
 
         int totalSize = sorted.size();
