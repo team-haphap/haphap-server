@@ -53,8 +53,8 @@ public class PostingStageStatusService {
 
         // 현재 진행 전형 (재사용)
         PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
-        //Long currentStageId = (current == null) ? null : current.getStageId();
-        //int currentOrder = (current == null) ? Integer.MAX_VALUE : current.getOrderIndex();
+        boolean closed = nextStageCalculator.isClosed(stages, counts);
+
         // 기본 선택: 진행 중 전형, 없으면 첫 전형 (stages.isEmpty()는 위에서 이미 반환됨)
         Long defaultSelectedStageId = (current != null)
                 ? current.getStageId()
@@ -63,22 +63,14 @@ public class PostingStageStatusService {
         List<PostingStageStatusResponse> result = stages.stream()
                 .map(s -> new PostingStageStatusResponse(
                         s.getStageId(), s.getName(), s.getOrderIndex(),
-                        resolveStatus(s.getOrderIndex(), current)))
+                        resolveStatus(s.getOrderIndex(), current,closed)))
                 .toList();
-/*
-        // 각 전형에 상태 매핑
-        List<PostingStageStatusResponse> result = stages.stream()
-                .map(s -> new PostingStageStatusResponse(
-                        s.getStageId(), s.getName() , s.getOrderIndex(),
-                        resolveStatus(s.getOrderIndex(), currentOrder)))
-                .toList();
-
- */
 
         return PostingStageStatusListResponse.of(result, defaultSelectedStageId);
     }
 
-    private StageStatus resolveStatus(int stageOrder, PostingStageFlatProjection current) {
+    private StageStatus resolveStatus(int stageOrder, PostingStageFlatProjection current,boolean closed) {
+        if (closed) return StageStatus.COMPLETED;
         if (current == null) return StageStatus.UPCOMING;
         int currentOrder = current.getOrderIndex();
         if (stageOrder < currentOrder) return StageStatus.COMPLETED;
