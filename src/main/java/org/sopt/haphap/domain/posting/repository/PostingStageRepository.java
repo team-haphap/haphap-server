@@ -58,7 +58,7 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     SELECT s.posting.id AS postingId, s.id AS stageId,
            s.name AS stageName, s.expectedScore AS expectedScore,
            s.expectedAnnouncementDate AS expectedAnnouncementDate,
-           p.title AS title, ci.imageUrl AS logoImageUrl,
+           p.title AS title, c.name AS companyName, ci.imageUrl AS logoImageUrl,
            s.orderIndex AS orderIndex
     FROM PostingStage s
     JOIN s.posting p

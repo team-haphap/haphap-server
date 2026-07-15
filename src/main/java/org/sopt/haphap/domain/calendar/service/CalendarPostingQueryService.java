@@ -67,11 +67,13 @@ public class CalendarPostingQueryService {
 
         return CalendarPostingListResponse.of(date, cards);
     }
+
     private CalendarPostingCardResponse toCard(PostingStageCalendarProjection stage,
                                                Map<Long, Long> participantCountByPostingId) {
+        String displayTitle = stage.getCompanyName() + " " + stage.getTitle();
         return CalendarPostingCardResponse.of(
                 stage.getPostingId(),
-                stage.getTitle(),
+                displayTitle,
                 stage.getStageName(),
                 AnnouncementLikelihood.from(stage.getExpectedScore()),
                 participantCountByPostingId.getOrDefault(stage.getPostingId(), 0L),
@@ -83,7 +85,9 @@ public class CalendarPostingQueryService {
         Collator korean = Collator.getInstance(Locale.KOREAN);
         return Comparator
                 .comparing((Long id) -> stageByPostingId.get(id).getExpectedScore(), Comparator.reverseOrder())
-                .thenComparing(id -> stageByPostingId.get(id).getTitle(), korean);
+                .thenComparing(
+                        id -> stageByPostingId.get(id).getCompanyName() + " " + stageByPostingId.get(id).getTitle(),
+                        korean);
     }
 
     private void validateRange(YearMonth yearMonth) {
