@@ -7,6 +7,7 @@ import org.sopt.haphap.domain.posting.service.*;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -91,8 +92,8 @@ public class PostingController implements PostingApiDocs {
     }
 
     @GetMapping("/{postingId}/detail")
-    public ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId) {
-        PostingDetailResponse response = postingDetailService.getDetail(postingId);
+    public ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@AuthenticationPrincipal Long userId, @PathVariable Long postingId) {
+        PostingDetailResponse response = postingDetailService.getDetail(userId,postingId);
 
         SuccessResponse<PostingDetailResponse> body =
                 ApiResponse.success(PostingSuccessCode.POSTING_DETAIL_FETCHED, response);

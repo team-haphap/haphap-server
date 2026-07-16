@@ -49,4 +49,14 @@ public class AlramSettingService {
                         () -> alramSettingRepository.save(AlramSetting.create(user, posting, enabled))
                 );
     }
+
+    @Transactional(readOnly = true)
+    public boolean isAlarmEnabled(Long userId, Long postingId) {
+        if (userId == null) {
+            return false;   // 비로그인 사용자는 항상 false
+        }
+        return alramSettingRepository.findByUserIdAndPostingId(userId, postingId)
+                .map(AlramSetting::isEnabled)
+                .orElse(false);
+    }
 }

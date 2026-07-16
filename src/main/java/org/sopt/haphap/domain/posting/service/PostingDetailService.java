@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.posting.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.alram.service.AlramSettingService;
 import org.sopt.haphap.domain.posting.code.PostingErrorCode;
 import org.sopt.haphap.domain.posting.domain.CompanyImage;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
@@ -28,8 +29,9 @@ public class PostingDetailService {
     private final RegistrationQueryService registrationQueryService;
     private final CurrentStageResolver currentStageResolver;
     private final CompanyImageRepository companyImageRepository;
+    private final AlramSettingService alramSettingService;
 
-    public PostingDetailResponse getDetail(Long postingId) {
+    public PostingDetailResponse getDetail(Long userId,Long postingId) {
         // 공고 + 회사 + 카테고리
         Posting posting = postingRepository.findWithCompanyAndCategory(postingId)
                 .orElseThrow(() -> new CustomException(PostingErrorCode.POSTING_NOT_FOUND));
@@ -50,6 +52,8 @@ public class PostingDetailService {
                 .map(CompanyImage::getImageUrl)
                 .orElse(null);
 
+        boolean alarmEnabled = alramSettingService.isAlarmEnabled(userId, postingId);
+
         return new PostingDetailResponse(
                 posting.getCompany().getName(), posting.getTitle(), posting.getCategory().getName(),
                 posting.getLocation(), posting.getPosition(), currentState,
@@ -57,6 +61,6 @@ public class PostingDetailService {
                 new PostingDetailResponse.SummaryResponse(
                         summary.registeredCount(), profileImages, additional),
                 feeds.stream().map(f -> new PostingDetailResponse.RegistrationFeedResponse(
-                        f.registrationId(),f.stage(), f.nickName(), f.status(), f.feedCreatedAt())).toList());
+                        f.registrationId(),f.stage(), f.nickName(), f.status(), f.feedCreatedAt())).toList(),alarmEnabled);
     }
 }

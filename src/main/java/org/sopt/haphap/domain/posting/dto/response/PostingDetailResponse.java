@@ -14,8 +14,9 @@ public record PostingDetailResponse(
         String currentState, // 현재 진행 전형 (없으면 null)
         String companyImageUrl,
         SummaryResponse summary,
-        List<RegistrationFeedResponse> registrations
-) {
+        List<RegistrationFeedResponse> registrations,
+        boolean alarmEnabled
+        ) {
     public record SummaryResponse(
             long registeredCount,
             List<ParticipantProfile> profileImages,   // 유저 id + 이미지(최근 4명)

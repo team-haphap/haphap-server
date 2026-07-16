@@ -10,6 +10,7 @@ import org.sopt.haphap.domain.posting.dto.response.*;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -243,7 +244,8 @@ public interface PostingApiDocs {
                                     "registrationResult": "PASS",
                                     "feedCreatedAt": "2026-07-12T10:30:00"
                                   }
-                                ]
+                                ],
+                                "alarmEnabled": true
                               }
                             }
                             """))),
@@ -263,7 +265,7 @@ public interface PostingApiDocs {
                     - 해당 공고에 실시간으로 등록한 전형을 제보합니다.(최대 30개 제시)
                     """
     )
-    ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@PathVariable Long postingId);
+    ResponseEntity<SuccessResponse<PostingDetailResponse>> getDetail(@AuthenticationPrincipal Long userId, @PathVariable Long postingId);
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
