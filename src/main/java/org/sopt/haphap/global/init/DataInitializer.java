@@ -609,9 +609,9 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p21 = posting("Security Research Specialist 신입 채용", "강남", dev, toss);
         List<PostingStage> s21 = addStages(p21,
-                stage("서류 전형", 1, LocalDate.of(2026, 4, 23), 69),
-                stage("직무 인터뷰", 2, LocalDate.of(2026, 5, 1), 43),
-                stage("문화적합성 인터뷰", 3, LocalDate.of(2026, 5, 9), 56));
+                stage("서류 전형", 1, LocalDate.of(2026, 7, 16), 69),
+                stage("직무 인터뷰", 2, LocalDate.of(2026, 8, 1), 43),
+                stage("문화적합성 인터뷰", 3, LocalDate.of(2026, 8, 9), 56));
         register(users, p21, s21.get(0), 21, RegistrationResult.PASS);
         register(users, p21, s21.get(1), 12, RegistrationResult.PASS);
         register(users, p21, s21.get(2), 7, RegistrationResult.PASS);
@@ -621,10 +621,10 @@ public class DataInitializer implements CommandLineRunner {
         // =====================================================================
         Posting p22 = posting("여신 상품 Manager 신입 채용", "강남", sales, toss);
         List<PostingStage> s22 = addStages(p22,
-                stage("서류 전형", 1, LocalDate.of(2026, 6, 5), 45),
-                stage("직무 인터뷰", 2, LocalDate.of(2026, 6, 13), 63),
-                stage("문화적합성 인터뷰", 3, LocalDate.of(2026, 6, 20), 24),
-                stage("레퍼런스 체크", 4, LocalDate.of(2026, 6, 29), 87));
+                stage("서류 전형", 1, LocalDate.of(2026, 7, 16), 45),
+                stage("직무 인터뷰", 2, LocalDate.of(2026, 7, 29), 63),
+                stage("문화적합성 인터뷰", 3, LocalDate.of(2026, 8, 26), 24),
+                stage("레퍼런스 체크", 4, LocalDate.of(2026, 8, 29), 87));
         registerResults(users, p22, s22.get(0), 18, RegistrationResult.PASS, 0);
         registerResults(users, p22, s22.get(0), 5, RegistrationResult.PENDING, 18);
         register(users, p22, s22.get(1), 11, RegistrationResult.PASS);
