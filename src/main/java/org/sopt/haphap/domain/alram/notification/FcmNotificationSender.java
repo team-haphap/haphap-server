@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.alram.notification;
 
 import com.google.firebase.messaging.*;
 import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
 import org.sopt.haphap.domain.alram.exception.InvalidTokenException;
 import org.sopt.haphap.domain.alram.exception.NotificationDeliveryException;
 import org.sopt.haphap.domain.alram.exception.NotificationException;
@@ -28,11 +29,20 @@ public class FcmNotificationSender implements NotificationSender {
         try {
             Message fcmMessage = Message.builder()
                     .setToken(fcmToken)
+                    /*
                     .setNotification(Notification.builder()
                             .setTitle(message.title())
                             .setBody(message.body())
                             .build())
                     .putData("postingId", String.valueOf(message.postingId()))
+                    .build();
+
+                     */
+                    .putAllData(Map.of(
+                            "title", message.title(),
+                            "body", message.body(),
+                            "postingId", String.valueOf(message.postingId())
+                    ))
                     .build();
             String messageId = FirebaseMessaging.getInstance().send(fcmMessage);
             log.info("[FCM 발송 성공] messageId={}", messageId);
