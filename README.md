@@ -7,6 +7,14 @@
 <br/>
 카카오 소셜 로그인 기반 인증부터 전형 결과 등록, 공고별 통계 집계, FCM 푸시 알림, 무중단 배포까지 서비스 운영에 필요한 백엔드 기능 전반을 다룹니다.
 <br/>
+
+
+## **✨ Contributors**
+
+|            😻변희민(LEAD)<br/>[@byunhm02](https://github.com/byunhm02)           |            😻김규리<br/>[@sophie-24](https://github.com/sophie-24)            
+|:--------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
+| <img src="https://i.namu.wiki/i/Rti8L28WGRCPo4xGjg5KDzFhWGSRsmYH_F4wWPuKE6EfsYTBtWPG9NNC83oSsw-Ad6ZY2KcuWTSi06WAaXifYSvW39r1Pt3XXpXxHFTqR82_S14U4mozWroeU5uFO_PM0cc-oAZfbaaTmjXpLzitNA.webp" height="200" /> | <img src="https://i.namu.wiki/i/DGwSB9Pi-Ix9ZuM4xnka3eduALV7vkdhyJcZpPCj7cxUyIu262f96qKGyGcXNhv9vh4zClisSW-ZJihHBBUv_bEAXjoP5gGbB-Gn_CKkZ9D5RRDZ_yd2nO_BfxG8RDu3kDLPvTBAKuexGNAPsrpweA.webp" height="200" /> 
+
 <br/>
 
 ## **⚒️ Tech Stack**
@@ -82,13 +90,3 @@
         ├── 📁 s3               # S3 업로드 (webp 변환)
         └── 📁 util             # 공통 유틸
 ```
-
-<br/>
-
-## **👥 Contributors**
-
-<-- TODO: 실제 팀원 정보로 교체해 주세요 (이름 / GitHub 링크 / 프로필 이미지 / 담당 파트) -->
-
-| 이름 | GitHub | 담당 |
-| 변희민 | :--- | 서버 리드 |
-| 김규리 |  | 서버 |
