@@ -11,9 +11,11 @@
 
 ## **✨ Contributors**
 
-|            😻변희민(LEAD)<br/>[@byunhm02](https://github.com/byunhm02)           |            😻김규리<br/>[@sophie-24](https://github.com/sophie-24)            
-|:--------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
-| <img src="https://i.namu.wiki/i/Rti8L28WGRCPo4xGjg5KDzFhWGSRsmYH_F4wWPuKE6EfsYTBtWPG9NNC83oSsw-Ad6ZY2KcuWTSi06WAaXifYSvW39r1Pt3XXpXxHFTqR82_S14U4mozWroeU5uFO_PM0cc-oAZfbaaTmjXpLzitNA.webp" height="200" /> | <img src="https://i.namu.wiki/i/DGwSB9Pi-Ix9ZuM4xnka3eduALV7vkdhyJcZpPCj7cxUyIu262f96qKGyGcXNhv9vh4zClisSW-ZJihHBBUv_bEAXjoP5gGbB-Gn_CKkZ9D5RRDZ_yd2nO_BfxG8RDu3kDLPvTBAKuexGNAPsrpweA.webp" height="200" /> 
+| <a href="https://github.com/byunhm02"><img src="https://github.com/byunhm02.png" width="180" height="180" style="border-radius: 8px;" /></a> | <a href="https://github.com/sophie-24"><img src="https://github.com/sophie-24.png" width="180" height="180" style="border-radius: 8px;" /></a> |
+| :---: | :---: |
+| **변희민** <br> (LEAD) <br><br> <a href="https://github.com/byunhm02"><img width="117" height="116" alt="image" src="https://github.com/user-attachments/assets/29e1d541-ba30-4033-bd28-b5ddff6a39fc" /></a> | **김규리** <br> (MEMBER) <br><br> <a href="https://github.com/sophie-24"><img src="<img width="95" height="119" alt="image" src="https://github.com/user-attachments/assets/b91a45b7-ae11-4a59-9702-9a0775d31c59" />
+"/></a> |
+
 
 <br/>
 
