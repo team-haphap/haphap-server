@@ -11,7 +11,7 @@ public class LoggingNotificationSender implements NotificationSender {
 
     @Override
     public void send(String fcmToken, NotificationMessage message) {
-        log.info("[푸시 발송(MOCK)] token={}, title={}, body={}",
-                fcmToken, message.title(), message.body());
+        log.info("[푸시 발송(MOCK)] token={}, title={}, body={},postingId={}",
+                fcmToken, message.title(), message.body(),message.postingId());
     }
 }

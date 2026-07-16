@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Profile("prod")   // 운영에서만 FCM
+//@Profile("prod")   // 운영에서만 FCM
+@Profile({"local", "prod"})
 public class FcmNotificationSender implements NotificationSender {
 
     @Override
@@ -31,6 +32,7 @@ public class FcmNotificationSender implements NotificationSender {
                             .setTitle(message.title())
                             .setBody(message.body())
                             .build())
+                    .putData("postingId", String.valueOf(message.postingId()))
                     .build();
             String messageId = FirebaseMessaging.getInstance().send(fcmMessage);
             log.info("[FCM 발송 성공] messageId={}", messageId);

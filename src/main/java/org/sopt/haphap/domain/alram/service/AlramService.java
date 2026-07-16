@@ -107,7 +107,7 @@ public class AlramService {
                 posting.getTitle(),               // 공고명
                 stage,                            // 전형
                 result.getDescription());         // 결과 (합격/불합격/대기)
-        return new NotificationMessage(title, body);
+        return new NotificationMessage(title, body,posting.getId());
     }
 
     private void pushToAllDevices(User receiver, NotificationMessage message) {
