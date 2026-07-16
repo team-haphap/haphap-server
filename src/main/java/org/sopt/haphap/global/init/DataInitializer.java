@@ -481,15 +481,155 @@ public class DataInitializer implements CommandLineRunner {
         register(users, p10, s10.get(3), 5, RegistrationResult.PASS);
 
         // =====================================================================
-        // 11. 삼성전자 - SW개발 (시트에 발표일/점수 없음 → 발표일 null, score 0, 등록 없음)
+        // 11. LG - SW개발 (시트에 발표일/점수 없음 → 발표일 null, score 0, 등록 없음)
         // =====================================================================
         Posting p11 = posting("SW개발 - 2026년 상반기 3급 신입사원 채용 공고", "화성", dev, lg);
-        addStages(p11,
-                stage("지원서 접수", 1, LocalDate.of(2026, 3, 30), 0),
-                stage("직무 적합성 평가", 2, LocalDate.of(2026, 4, 6), 0),
-                stage("직무 적성 검사", 3, LocalDate.of(2026, 4, 25), 0),
-                stage("면접", 4, LocalDate.of(2026, 5, 10), 0));
-                //stage("건강검진", 5, LocalDate.of(2026, 4, 20), 0));
+        List<PostingStage> s11 = addStages(p11,
+                stage("지원서 접수", 1, LocalDate.of(2026, 3, 30), 36),
+                stage("직무 적합성 평가", 2, LocalDate.of(2026, 4, 6), 59),
+                stage("직무 적성 검사", 3, LocalDate.of(2026, 4, 25), 25),
+                stage("면접", 4, LocalDate.of(2026, 5, 10), 88));
+        registerResults(users, p11, s11.get(0), 30, RegistrationResult.PASS, 0);
+        registerResults(users, p11, s11.get(0), 7, RegistrationResult.FAIL, 30);
+        register(users, p11, s11.get(1), 18, RegistrationResult.PASS);
+        register(users, p11, s11.get(2), 10, RegistrationResult.PASS);
+        register(users, p11, s11.get(3), 6, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 12. LG생활건강 - 2025년 하반기 신입사원 채용 (공고명 "2025년" → 2025)
+        // =====================================================================
+        Posting p12 = posting("2025년 하반기 신입사원 채용 (마케팅 / 영업)", "종로구", sales, lg);
+        List<PostingStage> s12 = addStages(p12,
+                stage("서류 전형", 1, LocalDate.of(2025, 5, 27), 22),
+                stage("인적성 검사", 2, LocalDate.of(2025, 6, 11), 46),
+                stage("1차 면접", 3, LocalDate.of(2025, 6, 20), 39),
+                stage("2차 면접", 4, LocalDate.of(2025, 7, 1), 65),
+                stage("인턴십 전형", 5, LocalDate.of(2025, 7, 14), 43));
+        registerResults(users, p12, s12.get(0), 24, RegistrationResult.PASS, 0);
+        registerResults(users, p12, s12.get(0), 6, RegistrationResult.FAIL, 24);
+        register(users, p12, s12.get(1), 15, RegistrationResult.PASS);
+        register(users, p12, s12.get(2), 10, RegistrationResult.PASS);
+        register(users, p12, s12.get(3), 7, RegistrationResult.PASS);
+        register(users, p12, s12.get(4), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 13. 카카오 - LLM Research Engineer (9~10월, 2026 가정 → 전부 미래 / 등록 없음)
+        // =====================================================================
+        Posting p13 = posting("LLM Research Engineer (Pre-training) 신입 채용", "판교 오피스", dev, kakao);
+        addStages(p13,
+                stage("서류 전형", 1, LocalDate.of(2026, 9, 4), 34),
+                stage("코딩테스트", 2, LocalDate.of(2026, 9, 18), 58),
+                stage("1차 면접", 3, LocalDate.of(2026, 10, 4), 78),
+                stage("2차 면접", 4, LocalDate.of(2026, 10, 13), 63));
+
+        // =====================================================================
+        // 14. 카카오 - 카카오쇼핑 판매자 성장지원 담당자 (3~4월, 2026 가정)
+        // =====================================================================
+        Posting p14 = posting("카카오쇼핑(톡딜/선물하기) 판매자 성장지원 담당자 신입", "판교 오피스", pm, kakao);
+        List<PostingStage> s14 = addStages(p14,
+                stage("서류 전형", 1, LocalDate.of(2026, 3, 5), 55),   // 시트 오타 "서류 젼형" 수정
+                stage("1차 면접", 2, LocalDate.of(2026, 3, 22), 26),
+                stage("2차 면접", 3, LocalDate.of(2026, 4, 3), 49));
+        register(users, p14, s14.get(0), 20, RegistrationResult.PASS);
+        register(users, p14, s14.get(1), 12, RegistrationResult.PASS);
+        register(users, p14, s14.get(2), 6, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 15. 네이버 - 2025 팀네이버 신입 공채 (공고명 "2025" → 2025)
+        // =====================================================================
+        Posting p15 = posting("2025 팀네이버 신입 공채", "분당", pm, naver);
+        List<PostingStage> s15 = addStages(p15,
+                stage("서류 전형", 1, LocalDate.of(2025, 7, 9), 65),
+                stage("프로덕트 디벨롭 인터뷰", 2, LocalDate.of(2025, 7, 18), 77),
+                stage("챌린지 전형 & 종합 역량 인터뷰", 3, LocalDate.of(2025, 8, 1), 94));
+        registerResults(users, p15, s15.get(0), 30, RegistrationResult.PASS, 0);
+        registerResults(users, p15, s15.get(0), 8, RegistrationResult.FAIL, 30);
+        register(users, p15, s15.get(1), 20, RegistrationResult.PASS);
+        register(users, p15, s15.get(2), 11, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 16. 네이버 - 백엔드 서버 개발 (1~2월, 2026 가정)
+        // =====================================================================
+        Posting p16 = posting("백엔드 서버 개발 신입 채용", "NAVER 1784", dev, naver);
+        List<PostingStage> s16 = addStages(p16,
+                stage("지원서 리뷰", 1, LocalDate.of(2026, 1, 14), 38),
+                stage("프리 인터뷰", 2, LocalDate.of(2026, 1, 29), 56),
+                stage("실무 인터뷰", 3, LocalDate.of(2026, 2, 8), 23),
+                stage("Culture-Fit 인터뷰", 4, LocalDate.of(2026, 2, 17), 75));
+        registerResults(users, p16, s16.get(0), 28, RegistrationResult.PASS, 0);
+        registerResults(users, p16, s16.get(0), 6, RegistrationResult.FAIL, 28);
+        register(users, p16, s16.get(1), 17, RegistrationResult.PASS);
+        register(users, p16, s16.get(2), 9, RegistrationResult.PASS);
+        register(users, p16, s16.get(3), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 17. 네이버 - IT 보안 기술 담당 (5~6월, 2026 가정)
+        // =====================================================================
+        Posting p17 = posting("IT 보안 기술 담당 신입 채용", "NAVER 1784", dev, naver);
+        List<PostingStage> s17 = addStages(p17,
+                stage("서류 전형", 1, LocalDate.of(2026, 5, 11), 17),
+                stage("1차 인터뷰 & 기업문화 적합도 검사", 2, LocalDate.of(2026, 5, 30), 62),
+                stage("2차 인터뷰", 3, LocalDate.of(2026, 6, 9), 59));
+        register(users, p17, s17.get(0), 16, RegistrationResult.PASS);
+        register(users, p17, s17.get(1), 10, RegistrationResult.PASS);
+        register(users, p17, s17.get(2), 6, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 18. 네이버 - 쇼핑 신사업 개발 담당 (3~4월, 2026 가정)
+        // =====================================================================
+        Posting p18 = posting("쇼핑 신사업 개발 담당 신입 채용", "NAVER 1784", sales, naver);
+        List<PostingStage> s18 = addStages(p18,
+                stage("서류전형&기업문화 적합도 검사", 1, LocalDate.of(2026, 3, 22), 28),
+                stage("직무 인터뷰", 2, LocalDate.of(2026, 4, 7), 57),
+                stage("종합 인터뷰", 3, LocalDate.of(2026, 4, 24), 78));
+        register(users, p18, s18.get(0), 13, RegistrationResult.PASS);
+        register(users, p18, s18.get(1), 8, RegistrationResult.PASS);
+        register(users, p18, s18.get(2), 5, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 19. 네이버 - Embodied AI Research Engineer (11~12월, 2026 가정 → 전부 미래)
+        // =====================================================================
+        Posting p19 = posting("Embodied AI Research Engineer 신입 채용", "NAVER 1784", dev, naver);
+        addStages(p19,
+                stage("서류 전형", 1, LocalDate.of(2026, 11, 13), 53),
+                stage("전화 면접", 2, LocalDate.of(2026, 11, 21), 31),
+                stage("1차 면접", 3, LocalDate.of(2026, 11, 30), 67),
+                stage("2차 면접", 4, LocalDate.of(2026, 12, 8), 48));
+
+        // =====================================================================
+        // 20. 네이버 - 헬스케어 산업 리서치 (8월, 2026 가정 → 전부 미래)
+        // =====================================================================
+        Posting p20 = posting("헬스케어 산업 리서치 신입 채용", "NAVER 1784", sales, naver);
+        addStages(p20,
+                stage("서류 전형", 1, LocalDate.of(2026, 8, 7), 22),
+                stage("직무 인터뷰", 2, LocalDate.of(2026, 8, 20), 76));
+
+        // =====================================================================
+        // 21. 토스 - Security Research Specialist (4~5월, 2026 가정)
+        // =====================================================================
+        Posting p21 = posting("Security Research Specialist 신입 채용", "강남", dev, toss);
+        List<PostingStage> s21 = addStages(p21,
+                stage("서류 전형", 1, LocalDate.of(2026, 4, 23), 69),
+                stage("직무 인터뷰", 2, LocalDate.of(2026, 5, 1), 43),
+                stage("문화적합성 인터뷰", 3, LocalDate.of(2026, 5, 9), 56));
+        register(users, p21, s21.get(0), 21, RegistrationResult.PASS);
+        register(users, p21, s21.get(1), 12, RegistrationResult.PASS);
+        register(users, p21, s21.get(2), 7, RegistrationResult.PASS);
+
+        // =====================================================================
+        // 22. 토스 - 여신 상품 Manager (6월, 2026 가정)
+        // =====================================================================
+        Posting p22 = posting("여신 상품 Manager 신입 채용", "강남", sales, toss);
+        List<PostingStage> s22 = addStages(p22,
+                stage("서류 전형", 1, LocalDate.of(2026, 6, 5), 45),
+                stage("직무 인터뷰", 2, LocalDate.of(2026, 6, 13), 63),
+                stage("문화적합성 인터뷰", 3, LocalDate.of(2026, 6, 20), 24),
+                stage("레퍼런스 체크", 4, LocalDate.of(2026, 6, 29), 87));
+        registerResults(users, p22, s22.get(0), 18, RegistrationResult.PASS, 0);
+        registerResults(users, p22, s22.get(0), 5, RegistrationResult.PENDING, 18);
+        register(users, p22, s22.get(1), 11, RegistrationResult.PASS);
+        register(users, p22, s22.get(2), 7, RegistrationResult.PASS);
+        register(users, p22, s22.get(3), 5, RegistrationResult.PASS);
 
         pushTokenRepository.save(
                 PushToken.create(users.get(0), "device-001", "token-001", DeviceType.ANDROID));
