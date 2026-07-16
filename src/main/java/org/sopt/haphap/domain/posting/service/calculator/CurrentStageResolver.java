@@ -43,4 +43,20 @@ public class CurrentStageResolver {
         }
         return current.getName() + " 진행 중";
     }
+    public String resolveCurrentStageName(Long postingId) {
+        List<PostingStageFlatProjection> stages =
+                postingStageRepository.findFlatByPostingIds(List.of(postingId));
+        stages.sort(Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex));
+
+        Map<Long, Long> counts = stageResultCountRepository
+                .findTotalsByPostingIds(List.of(postingId)).stream()
+                .collect(Collectors.toMap(
+                        StageRegistrationCountProjection::getStageId,
+                        StageRegistrationCountProjection::getCnt));
+
+        if (nextStageCalculator.isClosed(stages, counts)) return null;   // 마감 → 알람 없음
+
+        PostingStageFlatProjection current = nextStageCalculator.currentStage(stages, counts);
+        return current == null ? null : current.getName();
+    }
 }

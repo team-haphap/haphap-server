@@ -44,7 +44,7 @@ public class AlramService {
     @Transactional
     public AlramDispatch prepareAlrams(RegistrationCreatedEvent event) {
 
-        String currentStage = currentStageResolver.resolveCurrentState(event.postingId());
+        String currentStage = currentStageResolver.resolveCurrentStageName(event.postingId());
 
         if (currentStage == null) {
             log.info("알람 스킵(진행 전형 없음) - postingId={}", event.postingId());
