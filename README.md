@@ -8,11 +8,12 @@
 카카오 소셜 로그인 기반 인증부터 전형 결과 등록, 공고별 통계 집계, FCM 푸시 알림, 무중단 배포까지 서비스 운영에 필요한 백엔드 기능 전반을 다룹니다.
 <br/>
 
+
 ## **✨ Contributors**
 
-| <a href="https://github.com/byunhm02"><img src="https://github.com/byunhm02.png" width="180" height="180" style="border-radius: 8px;" /></a> | <a href="https://github.com/sophie-24"><img src="https://github.com/sophie-24.png" width="180" height="180" style="border-radius: 8px;" /></a> |
+| <a href="https://github.com/byunhm02"><img width="117" height="116" alt="변희민 프로필" src="https://github.com/user-attachments/assets/29e1d541-ba30-4033-bd28-b5ddff6a39fc" /></a> | <a href="https://github.com/sophie-24"><img width="95" height="119" alt="김규리 프로필" src="https://github.com/user-attachments/assets/b91a45b7-ae11-4a59-9702-9a0775d31c59" /></a> |
 | :---: | :---: |
-| **변희민** <br> (LEAD) <br><br> <a href="https://github.com/byunhm02"><img width="117" height="116" alt="image" src="https://github.com/user-attachments/assets/29e1d541-ba30-4033-bd28-b5ddff6a39fc" /></a> | **김규리** <br> (MEMBER) <br><br> <a href="https://github.com/sophie-24"><img width="95" height="119" alt="image" src="https://github.com/user-attachments/assets/b91a45b7-ae11-4a59-9702-9a0775d31c59" /></a> |
+| **변희민** <br> (LEAD) <br><br> [@byunhm02](https://github.com/byunhm02) | **김규리** <br> (MEMBER) <br><br> [@sophie-24](https://github.com/sophie-24) |
 
 
 <br/>
