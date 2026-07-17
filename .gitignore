@@ -55,7 +55,6 @@ users.yml
 *.yaml
 .postman/
 postman
-users.yml
 *.webp
 *.png
 urls.csv
@@ -65,3 +64,4 @@ tmp.png
 final.webp
 check.tmp
 webp_convert.py
+firebase/*
