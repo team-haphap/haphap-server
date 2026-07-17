@@ -55,7 +55,7 @@ public class DataInitializer implements CommandLineRunner {
     private static final int THRESHOLD = 15;
 
     /** 시트 기준 "오늘". 발표 여부 / 등록 여부 판단 기준일 */
-    private static final LocalDate TODAY = LocalDate.of(2026, 7, 17);
+    private static final LocalDate TODAY = LocalDate.of(2026, 7, 18);
 
     /** 발표된 전형이 보장받는 최소 등록 건수 */
     private static final int MIN_REGISTRATIONS = 5;
@@ -113,35 +113,35 @@ public class DataInitializer implements CommandLineRunner {
         Company lgHnh = company("LG생활건강");   // ★ company 테이블에 미리 추가 필요
 
         // ===== 현대자동차 =====
-        seed("자율주행개발 - 2026 3월 신입 채용", "남양, 판교", dev, hyundai,
+        seed("자율주행개발 - 2026 신입 채용", "남양, 판교", dev, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 87),
                 stage("인적성검사", 2, d(2026, 6, 19), 23),
-                stage("직무면접", 3, d(2026, 7, 17), 44), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 18), 44), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 3), 65));
 
-        seed("차량개발 - 2026 3월 신입 채용", "남양", dev, hyundai,
+        seed("차량개발 - 2026 신입 채용", "남양", dev, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 34),
                 stage("인적성검사", 2, d(2026, 6, 24), 80),
                 stage("코딩테스트", 3, d(2026, 7, 7), 54),
-                stage("직무면접", 4, d(2026, 7, 17), 23),
+                stage("직무면접", 4, d(2026, 7, 18), 23),
                 stage("임원면접 (최종)", 5, d(2026, 8, 7), 65));  //Todo: 7/18로
 
-        seed("경영기획 - 2026 3월 신입 채용", "양재", pm, hyundai,
+        seed("경영기획 - 2026 신입 채용", "양재", pm, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 66),
                 stage("인적성검사", 2, d(2026, 6, 29), 23),
-                stage("직무면접", 3, d(2026, 7, 17), 19), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 18), 19), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 7), 70));
 
-        seed("신사업 전략 기획 - 2026 3월 신입 채용", "양재", pm, hyundai,
+        seed("신사업 전략 기획 - 2026 신입 채용", "양재", pm, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 86),
                 stage("인적성검사", 2, d(2026, 6, 29), 58),
-                stage("직무면접", 3, d(2026, 7, 17), 34), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 18), 34), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 7), 91));
 
-        seed("HR - 2026 3월 신입 채용", "양재, 울산", hr, hyundai,
+        seed("HR - 2026 신입 채용", "양재, 울산", hr, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 10),
                 stage("인적성검사", 2, d(2026, 6, 29), 45),
-                stage("직무면접", 3, d(2026, 7, 17), 76), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 18), 76), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 7), 34));
 
         // ===== 네이버 / 카카오 / 아모레 (기존) =====
@@ -207,7 +207,7 @@ public class DataInitializer implements CommandLineRunner {
                 stage("챌린지 전형 & 종합 역량 인터뷰 (최종)", 3, d(2025, 8, 3), 94));
 
         seed("백엔드 서버 개발 신입 채용", "NAVER 1784", dev, naver,
-                stage("서류", 1, d(2026, 7, 17), 38),
+                stage("서류", 1, d(2026, 7, 18), 38),
                 stage("코딩테스트", 2, d(2026, 8, 4), 56),
                 stage("프리 인터뷰", 3, d(2026, 8, 20), 87),
                 stage("Culture-Fit 인터뷰", 4, d(2026, 9, 3), 34),
@@ -276,7 +276,7 @@ public class DataInitializer implements CommandLineRunner {
 
         seed("ML Data Assistant 신입 채용", "강남", dev, toss,  // 전부 미래
                 stage("서류 전형", 1, d(2026, 7, 2), 56),
-                stage("코딩 테스트", 2, d(2026, 7, 17), 87),
+                stage("코딩 테스트", 2, d(2026, 7, 16), 87),
                 stage("직무 인터뷰", 3, d(2026, 8, 10), 45),
                 stage("문화적합성 인터뷰 (최종)", 4, d(2026, 8, 28), 63));
 
@@ -293,7 +293,7 @@ public class DataInitializer implements CommandLineRunner {
 
         seed("이용자보호 업무 신입 채용", "판교 오피스", dev, kakao,  // 1~2번 발표 / 3~4번 미발표
                 stage("서류", 1, d(2026, 7, 7), 44),
-                stage("코딩 테스트", 2, d(2026, 7, 17), 45),
+                stage("코딩 테스트", 2, d(2026, 7, 18), 45),
                 stage("직무 적합성 평가", 3, d(2026, 8, 3), 64),
                 stage("직무 적성 검사", 4, d(2026, 8, 24), 21),
                 stage("면접 (최종)", 5, d(2026, 8, 30), 34));//TODO. 수정함
@@ -346,7 +346,7 @@ public class DataInitializer implements CommandLineRunner {
         seed("려(呂)BM팀 디자이너 신입 채용", "용산구", design, amore,  // 1~2번 발표 / 3번 미발표
                 stage("서류 전형", 1, d(2026, 7, 3), 51),
                 stage("1차 면접", 2, d(2026, 7, 10), 42),
-                stage("2차 면접 (최종)", 3, d(2026, 7, 17), 69));
+                stage("2차 면접 (최종)", 3, d(2026, 7, 18), 69));
 
         seed("백엔드 개발자 신입 채용", "용산구", dev, amore,  // 1~3번 발표 / 4번 미발표
                 stage("서류 전형", 1, d(2026, 7, 2), 22),
@@ -362,7 +362,7 @@ public class DataInitializer implements CommandLineRunner {
 
         seed("디지털컨텐츠 제작 신입 채용", "용산구", pm, amore,
                 stage("서류 전형", 1, d(2026, 7, 4), 34),
-                stage("1차 면접", 2, d(2026, 7, 17), 21),
+                stage("1차 면접", 2, d(2026, 7, 18), 21),
                 stage("2차 면접 (최종)", 3, d(2026, 8, 20), 65));
 
         // ===== LG생활건강 (추가) =====
@@ -374,7 +374,7 @@ public class DataInitializer implements CommandLineRunner {
         seed("AX 신입 채용", "화성", dev, lgHnh,  // 전부 미래
                 stage("서류 접수", 1, d(2026, 6, 19), 43),
                 stage("인성 검사", 2, d(2026, 7, 3), 24),
-                stage("코딩 테스트", 3, d(2026, 7, 17), 27),
+                stage("코딩 테스트", 3, d(2026, 7, 18), 27),
                 stage("1차 면접", 4, d(2026, 7, 31), 15),
                 stage("2차 면접 (최종)", 5, d(2026, 8, 14), 62));
 
@@ -397,12 +397,12 @@ public class DataInitializer implements CommandLineRunner {
         seed("모빌리티 기술인력 신입 채용", "화성", dev, hyundai,  // 1~2번 발표 / 3번 미발표
                 stage("서류 전형", 1, d(2026, 7, 1), 54),
                 stage("인적성 검사", 2, d(2026, 7, 9), 24),
-                stage("면접 (최종)", 3, d(2026, 7, 17), 67));
+                stage("면접 (최종)", 3, d(2026, 7, 18), 67));
 
         seed("연구소 배터리 기술인력 신입 채용", "화성", dev, hyundai,  // 1~2번 발표 / 3~4번 미발표
                 stage("서류 접수", 1, d(2026, 7, 3), 41),
                 stage("인적성 검사", 2, d(2026, 7, 10), 32),
-                stage("1차 면접", 3, d(2026, 7, 17), 68),
+                stage("1차 면접", 3, d(2026, 7, 18), 68),
                 stage("2차 면접 (최종)", 4, d(2026, 7, 23), 15));
 
         pushTokenRepository.save(
