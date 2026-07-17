@@ -60,6 +60,8 @@ public class DataInitializer implements CommandLineRunner {
     /** 발표된 전형이 보장받는 최소 등록 건수 */
     private static final int MIN_REGISTRATIONS = 5;
 
+    private static final int TODAY_PASS_FAIL_TOTAL = 4;
+
     private static final int USER_COUNT = 40;
 
     private final UserRepository userRepository;
@@ -146,20 +148,20 @@ public class DataInitializer implements CommandLineRunner {
 
         // ===== 네이버 / 카카오 / 아모레 (기존) =====
         seed("Product Design - 2026 신입 공채", "NAVER 1784", design, naver,   // 공고명 "2025" → 2025
-                stage("서류", 1, d(2025, 4, 8), 90),
-                stage("1차 면접", 2, d(2025, 4, 30), 45),
-                stage("챌린지", 3, d(2025, 5, 29), 12),
-                stage("2차 면접 (최종)", 4, d(2025, 6, 27), 45));
+                stage("서류", 1, d(2026, 4, 8), 90),
+                stage("1차 면접", 2, d(2026, 4, 30), 45),
+                stage("챌린지", 3, d(2026, 5, 29), 12),
+                stage("2차 면접 (최종)", 4, d(2026, 6, 27), 45));
 
-        seed("AI 서비스 개발 - 2026 신입크루 공채", "판교 오피스", dev, kakao,   // 11~12월 → 2025 가정
-                stage("서류", 1, d(2025, 11, 10), 67),
-                stage("1차 면접", 2, d(2025, 11, 24), 23),
-                stage("2차 면접 (최종)", 3, d(2025, 12, 17), 12));
+        seed("AI 서비스 개발 - 2026 신입크루 공채", "판교 오피스", dev, kakao,   // 11~12월 → it add2025 가정
+                stage("서류", 1, d(2026, 11, 10), 67),
+                stage("1차 면접", 2, d(2026, 11, 24), 23),
+                stage("2차 면접 (최종)", 3, d(2026, 12, 17), 12));
 
         seed("AI 서비스 운영 - 2026 신입크루 공채", "판교 오피스", dev, kakao,
-                stage("서류", 1, d(2025, 11, 10), 67),
-                stage("1차 면접", 2, d(2025, 11, 24), 34),
-                stage("2차 면접 (최종)", 3, d(2025, 12, 17), 23));
+                stage("서류", 1, d(2026, 11, 10), 67),
+                stage("1차 면접", 2, d(2026, 11, 24), 34),
+                stage("2차 면접 (최종)", 3, d(2026, 12, 17), 23));
 
         seed("공간디자인 - 2026 상반기 신입사원 수시채용", "본사", design, amore,
                 stage("서류", 1, d(2026, 4, 20), 15),
@@ -182,11 +184,11 @@ public class DataInitializer implements CommandLineRunner {
                 stage("면접 (최종)", 4, d(2026, 5, 10), 88));
 
         seed("2026년 하반기 신입사원 채용 (마케팅 / 영업)", "종로구", sales, lgHnh,  // 공고명 "2025년" → 2025
-                stage("서류", 1, d(2025, 5, 27), 22),
-                stage("인적성 검사", 2, d(2025, 6, 11), 46),
-                stage("1차 면접", 3, d(2025, 6, 20), 39),
-                stage("2차 면접", 4, d(2025, 7, 1), 65),
-                stage("인턴십 전형 (최종)", 5, d(2025, 7, 14), 43));
+                stage("서류", 1, d(2026, 5, 27), 22),
+                stage("인적성 검사", 2, d(2026, 6, 11), 46),
+                stage("1차 면접", 3, d(2026, 6, 20), 39),
+                stage("2차 면접", 4, d(2026, 7, 1), 65),
+                stage("인턴십 전형 (최종)", 5, d(2026, 7, 14), 43));
 
         // ===== 카카오 (신규) =====
         seed("LLM Research Engineer (Pre-training) 신입 채용", "판교 오피스", dev, kakao,  // 전부 미래
@@ -202,9 +204,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // ===== 네이버 (신규) =====
         seed("검색 서비스 기획 - 2026 팀네이버 신입 공채", "NAVER 1784", pm, naver,
-                stage("서류", 1, d(2025, 7, 9), 65),
-                stage("프로덕트 디벨롭 인터뷰", 2, d(2025, 7, 18), 77),
-                stage("챌린지 전형 & 종합 역량 인터뷰 (최종)", 3, d(2025, 8, 3), 94));
+                stage("서류", 1, d(2026, 7, 9), 65),
+                stage("프로덕트 디벨롭 인터뷰", 2, d(2026, 7, 18), 77),
+                stage("챌린지 전형 & 종합 역량 인터뷰 (최종)", 3, d(2026, 8, 3), 94));
 
         seed("백엔드 서버 개발 신입 채용", "NAVER 1784", dev, naver,
                 stage("서류", 1, d(2026, 7, 18), 38),
@@ -482,7 +484,34 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void autoRegister(Posting posting, List<PostingStage> stages) {
         int base = 18 + Math.floorMod(posting.getTitle().hashCode(), 15);   // 18 ~ 32
+        for (PostingStage stage : stages) {
 
+            // 1) 오늘 발표 예정 → PASS + FAIL = 4건 고정
+            if (TODAY.equals(stage.getExpectedAnnouncementDate())) {
+                int fail = 1 + Math.floorMod(posting.getTitle().hashCode(), 2);   // 1 또는 2
+                int pass = TODAY_PASS_FAIL_TOTAL - fail;
+                registerResults(posting, stage, pass, RegistrationResult.PASS, 0);
+                registerResults(posting, stage, fail, RegistrationResult.FAIL, pass);
+                continue;
+            }
+
+            // 3) 미발표(오늘 이후) → 등록 없음
+            if (stage.getAnnouncedDate() == null) {
+                continue;
+            }
+
+            // 2) 발표 완료 → 최소 5건 이상
+            int count = Math.max(MIN_REGISTRATIONS, base - (stage.getOrderIndex() - 1) * 6);
+            int fail = count >= 10 ? count / 5 : 0;
+            int pending = count >= 15 ? count / 6 : 0;
+            int pass = count - fail - pending;
+
+            registerResults(posting, stage, pass, RegistrationResult.PASS, 0);
+            registerResults(posting, stage, fail, RegistrationResult.FAIL, pass);
+            registerResults(posting, stage, pending, RegistrationResult.PENDING, pass + fail);
+        }
+
+        /*
         for (PostingStage stage : stages) {
             if (stage.getAnnouncedDate() == null) {
                 continue;   // 미발표 전형 → 등록 없음
@@ -497,6 +526,8 @@ public class DataInitializer implements CommandLineRunner {
             registerResults(posting, stage, fail, RegistrationResult.FAIL, pass);
             registerResults(posting, stage, pending, RegistrationResult.PENDING, pass + fail);
         }
+
+         */
     }
 
     private void registerResults(Posting posting, PostingStage stage,
