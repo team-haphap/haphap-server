@@ -19,4 +19,4 @@ SELECT id, 'AUTOCOMPLETE', 'https://haphap-images-654801597877-ap-northeast-2-an
 FROM company WHERE name = '현대자동차'
 UNION ALL
 SELECT id, 'AUTOCOMPLETE', 'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/logo-images/30874443-fd88-411b-acf4-8b4984f5c471-auto_logo_lg.png', NOW(), NOW()
-FROM company WHERE name = 'LG';
+FROM company WHERE name = 'LG생활건강';
