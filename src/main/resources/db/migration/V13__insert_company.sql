@@ -48,7 +48,7 @@ VALUES
         NOW()
     ),
     (
-        'LG',
+        'LG생활건강',
         NULL,
         NULL,
         'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/card-logos/e9831cda-a4bb-4db5-8be6-0513e164464a-pass_logo_lg.png',
