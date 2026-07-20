@@ -60,6 +60,8 @@ jobs:
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
+            GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
             ADMIN_LOGIN_ID=${{ secrets.ADMIN_LOGIN_ID }}
             ADMIN_PASSWORD_HASH=${{ secrets.ADMIN_PASSWORD_HASH }}
             ADMIN_NAME=${{ secrets.ADMIN_NAME }}
