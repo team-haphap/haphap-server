@@ -34,11 +34,10 @@ public class RegistrationService {
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
-        validateResultConsistency(request);
 
+        validateResultConsistency(request);
         RegistrationTargetValidator.RegistrationTarget target =
                 registrationTargetValidator.validate(userId, request.postingId(), request.stageId());
-
 
         Optional<Registration> existing = registrationRepository
                 .findByUserIdAndPostingIdAndStageId(userId, request.postingId(), request.stageId());
