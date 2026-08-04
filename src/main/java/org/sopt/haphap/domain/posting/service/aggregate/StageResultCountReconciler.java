@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.domain.StageResultCount;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.registration.projection.StageResultAggProjection;
-import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,7 +19,7 @@ import java.util.*;
 @Slf4j
 public class StageResultCountReconciler {
 
-    private final RegistrationRepository registrationRepository;
+    private final RegistrationQueryService registrationQueryService;
     private final StageResultCountRepository stageResultCountRepository;
 
     // 매일 새벽 4시 — 이벤트 유실로 인한 드리프트 보정
@@ -76,7 +76,7 @@ public class StageResultCountReconciler {
     }
     private Map<String, long[]> aggregateActual() {
         Map<String, long[]> actual = new HashMap<>();
-        for (StageResultAggProjection agg : registrationRepository.aggregateAllForRebuild()) {
+        for (StageResultAggProjection agg : registrationQueryService.aggregateAllForRebuild()) {
             String key = key(agg.getPostingId(), agg.getStageId());
             long[] arr = actual.computeIfAbsent(key, k -> new long[3]);
             switch (agg.getResult()) {

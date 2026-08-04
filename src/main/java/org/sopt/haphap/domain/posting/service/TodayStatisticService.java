@@ -13,7 +13,7 @@ import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
 import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class TodayStatisticService {
 
-    private final RegistrationRepository registrationRepository;
+    private final RegistrationQueryService registrationQueryService;
     private final PostingStageRepository postingStageRepository;
     private final StageResultCountRepository stageResultCountRepository;
     private final NextStageCalculator nextStageCalculator;
@@ -38,7 +38,7 @@ public class TodayStatisticService {
     private long cumulatedCount() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime startOfTomorrow = startOfDay.plusDays(1);
-        Long count = registrationRepository.countTodayEvents(startOfDay, startOfTomorrow);
+        Long count = registrationQueryService.countTodayEvents(startOfDay, startOfTomorrow);
         return count == null ? 0L : count;
     }
 
