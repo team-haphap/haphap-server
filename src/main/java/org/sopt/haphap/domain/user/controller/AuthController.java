@@ -12,6 +12,7 @@ import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.jwt.BearerTokenExtractor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.sopt.haphap.domain.user.dto.AppleLoginRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -23,6 +24,11 @@ public class AuthController implements AuthApiDocs {
     @PostMapping("/kakao")
     public ResponseEntity<SuccessResponse<AuthResponse>> kakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
         return ResponseEntity.ok(SuccessResponse.of(AuthSuccessCode.KAKAO_LOGIN_SUCCESS, authService.kakaoLogin(request.accessToken())));
+    }
+
+    @PostMapping("/apple")
+    public ResponseEntity<SuccessResponse<AuthResponse>> appleLogin(@Valid @RequestBody AppleLoginRequest request) {
+        return ResponseEntity.ok(SuccessResponse.of(AuthSuccessCode.APPLE_LOGIN_SUCCESS, authService.appleLogin(request.identityToken(), request.name())));
     }
 
     @PostMapping("/reissue")
