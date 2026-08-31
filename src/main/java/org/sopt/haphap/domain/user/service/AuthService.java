@@ -1,9 +1,11 @@
 package org.sopt.haphap.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
+import org.sopt.haphap.global.client.AppleOAuthClient;
 import org.sopt.haphap.global.client.OAuthClient;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.exception.CustomException;
@@ -21,12 +23,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+
 public class AuthService {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final TokenService tokenService;
     private final List<OAuthClient> oAuthClientList;
+    private final AppleOAuthClient appleOAuthClient;
 
     private Map<Provider, OAuthClient> oAuthClients;
     @PostConstruct
@@ -51,7 +56,7 @@ public class AuthService {
         );
     }
 
-    public AuthResponse appleLogin(String identityToken, String name) {
+    public AuthResponse appleLogin(String identityToken, String authorizationCode, String name) {
         OAuthUserInfo userInfo = oAuthClients.get(Provider.APPLE).getUserInfo(identityToken);
 
         if (userInfo.name() == null && name != null) {
@@ -63,6 +68,14 @@ public class AuthService {
 
         UserService.FindOrCreateResult result = userService.findOrCreate(Provider.APPLE, userInfo.providerId(), userInfo);
         User user = result.user();
+
+        try {
+            String appleRefreshToken = appleOAuthClient.exchangeAuthorizationCode(authorizationCode);
+            userService.updateAppleRefreshToken(user.getId(), appleRefreshToken);
+        } catch (Exception e) {
+            log.warn("애플 refresh token 교환 실패 - 로그인은 계속 진행합니다. userId={}", user.getId(), e);
+        }
+
         String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
         return new AuthResponse(
                 jwtProvider.createAccessToken(user.getId()),

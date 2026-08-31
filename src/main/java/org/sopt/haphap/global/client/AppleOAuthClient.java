@@ -11,8 +11,13 @@ import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import org.sopt.haphap.global.client.dto.AppleTokenResponse;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -31,6 +36,7 @@ public class AppleOAuthClient implements OAuthClient {
 
     private final WebClient webClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final AppleClientSecretGenerator clientSecretGenerator;
 
     @Value("${apple.client-id:}")
     private String appleClientId;
@@ -70,6 +76,41 @@ public class AppleOAuthClient implements OAuthClient {
         }
 
         return new OAuthUserInfo(providerId, null, email, null, null, null, null);
+    }
+
+    public String exchangeAuthorizationCode(String authorizationCode) {
+        AppleTokenResponse response = webClient.post()
+                .uri("https://appleid.apple.com/auth/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("client_id", appleClientId)
+                        .with("client_secret", clientSecretGenerator.generate())
+                        .with("code", authorizationCode)
+                        .with("grant_type", "authorization_code"))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        r -> Mono.error(new CustomException(AuthErrorCode.APPLE_INVALID_TOKEN)))
+                .bodyToMono(AppleTokenResponse.class)
+                .block();
+
+        if (response == null || response.refreshToken() == null) {
+            throw new CustomException(AuthErrorCode.APPLE_INVALID_TOKEN);
+        }
+        return response.refreshToken();
+    }
+
+    public void revoke(String appleRefreshToken) {
+        webClient.post()
+                .uri("https://appleid.apple.com/auth/revoke")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("client_id", appleClientId)
+                        .with("client_secret", clientSecretGenerator.generate())
+                        .with("token", appleRefreshToken)
+                        .with("token_type_hint", "refresh_token"))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        r -> Mono.error(new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE)))
+                .toBodilessEntity()
+                .block();
     }
 
     private String extractKid(String jwt) {

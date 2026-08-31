@@ -37,6 +37,9 @@ aws:
 
 apple:
   client-id: ${APPLE_CLIENT_ID:}
+  team-id: ${APPLE_TEAM_ID:}
+  key-id: ${APPLE_KEY_ID:}
+  private-key-path: ${APPLE_PRIVATE_KEY_PATH:}
 
 admin:
   login-id: ${ADMIN_LOGIN_ID:}
