@@ -47,7 +47,9 @@ for i in $(seq 1 15); do
     break
   fi
   if [ "$i" -eq 15 ]; then
-    echo "Health check 실패. 롤백합니다."
+    echo "Health check 실패. 최근 로그:"
+    docker logs "haphap-$NEXT" --tail 200
+    echo "위 로그 확인 후 롤백합니다."
     docker stop "haphap-$NEXT" || true
     docker rm   "haphap-$NEXT" || true
     exit 1
