@@ -64,6 +64,7 @@ jobs:
             ADMIN_PASSWORD_HASH=${{ secrets.ADMIN_PASSWORD_HASH }}
             ADMIN_NAME=${{ secrets.ADMIN_NAME }}
             APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
+            KAKAO_ADMIN_KEY=${{ secrets.KAKAO_ADMIN_KEY }}
             ENVEOF
 
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json

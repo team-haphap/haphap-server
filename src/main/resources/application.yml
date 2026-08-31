@@ -41,6 +41,9 @@ apple:
   key-id: ${APPLE_KEY_ID:}
   private-key-path: ${APPLE_PRIVATE_KEY_PATH:}
 
+kakao:
+  admin-key: ${KAKAO_ADMIN_KEY:}
+
 admin:
   login-id: ${ADMIN_LOGIN_ID:}
   password-hash: ${ADMIN_PASSWORD_HASH:}

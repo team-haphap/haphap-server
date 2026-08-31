@@ -8,13 +8,16 @@ import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import org.sopt.haphap.global.util.PhoneNumberMasker;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import org.springframework.beans.factory.annotation.Value;
 
 @Slf4j
 @Component
@@ -78,5 +81,22 @@ public class KakaoOAuthClient implements OAuthClient {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Value("${kakao.admin-key:}")
+    private String kakaoAdminKey;
+
+    public void unlink(String kakaoUserId) {
+        webClient.post()
+                .uri("https://kapi.kakao.com/v1/user/unlink")
+                .header("Authorization", "KakaoAK " + kakaoAdminKey)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData("target_id_type", "user_id")
+                        .with("target_id", kakaoUserId))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        r -> Mono.error(new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE)))
+                .toBodilessEntity()
+                .block();
     }
 }
