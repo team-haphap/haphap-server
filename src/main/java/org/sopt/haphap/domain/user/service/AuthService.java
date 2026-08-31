@@ -56,9 +56,9 @@ public class AuthService {
         );
     }
 
-    public AuthResponse appleLogin(String identityToken, String authorizationCode, String name) {
+    @Transactional
+    public AuthResponse appleLogin(String authorizationCode, String identityToken, String name) {
         OAuthUserInfo userInfo = oAuthClients.get(Provider.APPLE).getUserInfo(identityToken);
-
         if (userInfo.name() == null && name != null) {
             userInfo = new OAuthUserInfo(
                     userInfo.providerId(), name, userInfo.email(),
@@ -66,24 +66,16 @@ public class AuthService {
             );
         }
 
+        String appleRefreshToken = appleOAuthClient.exchangeAuthorizationCode(authorizationCode);
+
         UserService.FindOrCreateResult result = userService.findOrCreate(Provider.APPLE, userInfo.providerId(), userInfo);
         User user = result.user();
 
-        try {
-            String appleRefreshToken = appleOAuthClient.exchangeAuthorizationCode(authorizationCode);
-            userService.updateAppleRefreshToken(user.getId(), appleRefreshToken);
-        } catch (Exception e) {
-            log.warn("애플 refresh token 교환 실패 - 로그인은 계속 진행합니다. userId={}", user.getId(), e);
-        }
+        userService.updateAppleRefreshToken(user.getId(), appleRefreshToken);
 
         String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
-        return new AuthResponse(
-                jwtProvider.createAccessToken(user.getId()),
-                newRefreshToken,
-                user.getName(),
-                user.getAnonymousName(),
-                user.getProfileImageUrl()
-        );
+        return new AuthResponse(jwtProvider.createAccessToken(user.getId()), newRefreshToken,
+                user.getName(), user.getAnonymousName(), user.getProfileImageUrl());
     }
 
     @Transactional

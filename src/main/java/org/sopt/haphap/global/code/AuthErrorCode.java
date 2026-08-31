@@ -19,6 +19,7 @@ public enum AuthErrorCode implements ErrorResultCode {
     APPLE_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 애플 ID 토큰입니다."),
     APPLE_ACCOUNT_NOT_FOUND(HttpStatus.BAD_REQUEST, "애플 계정 정보를 가져올 수 없습니다."),
     APPLE_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "애플 서버 응답이 원활하지 않습니다. 잠시 후 다시 시도해주세요."),
+    WITHDRAWAL_IN_PROGRESS(HttpStatus.FORBIDDEN, "탈퇴 처리 중인 계정입니다. 잠시 후 다시 시도해주세요."),
     ;
 
     private final HttpStatus status;
