@@ -33,22 +33,28 @@ public class AppleClientSecretGenerator {
     private PrivateKey privateKey;
 
     @PostConstruct
-    private void loadPrivateKey() {
+    public void init() {
         if (privateKeyPath == null || privateKeyPath.isBlank()) {
             log.warn("apple.private-key-path가 설정되지 않아, 애플 연동 해제(revoke) 기능은 비활성 상태입니다.");
             return;
         }
         try {
-            String pem = Files.readString(Path.of(privateKeyPath))
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
-            byte[] decoded = Base64.getDecoder().decode(pem);
-            KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            this.privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decoded));
+            this.privateKey = loadPrivateKey(privateKeyPath);
         } catch (Exception e) {
-            log.error("애플 Private Key(.p8) 로딩 실패", e);
+            throw new IllegalStateException(
+                    "apple.private-key-path가 설정되어 있는데 Apple private key 로드에 실패했습니다 - "
+                            + "설정이 잘못된 환경에서는 서버가 기동되면 안 됩니다.", e);
         }
+    }
+
+    private PrivateKey loadPrivateKey(String path) throws Exception {
+        String pem = Files.readString(Path.of(path))
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+        byte[] decoded = Base64.getDecoder().decode(pem);
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decoded));
     }
 
     /* 호출 시점마다 5분짜리 client_secret을 새로 생성*/
