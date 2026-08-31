@@ -13,6 +13,7 @@ import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "회원", description = "마이페이지 등 회원 정보 조회를 위한 API")
 public interface MemberApiDocs {
@@ -46,4 +47,15 @@ public interface MemberApiDocs {
                     """)
     ResponseEntity<SuccessResponse<MemberResponse>> getMyInfo(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId);
+
+    @Operation(summary = "회원 탈퇴",
+            description = """
+                본인 계정을 탈퇴 처리합니다. 개인정보는 익명화되고, 지원 내역 등 기존 데이터는 통계 목적으로 보존됩니다.
+                애플 계정으로 가입한 경우, 애플 로그인 연동도 함께 해제됩니다.
+                - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                """)
+    @ApiResponse(responseCode = "204", description = "탈퇴 성공")
+    ResponseEntity<Void> withdraw(
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
+            @RequestHeader("Authorization") String authorization);
 }

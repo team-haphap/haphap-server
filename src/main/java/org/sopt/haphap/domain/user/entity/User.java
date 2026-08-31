@@ -3,7 +3,7 @@ package org.sopt.haphap.domain.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.sopt.haphap.global.common.BaseEntity;
-
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 @Entity
@@ -45,4 +45,25 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String providerId;
+
+    private LocalDateTime withdrawnAt;
+
+    private String appleRefreshToken;
+
+    public void updateAppleRefreshToken(String refreshToken) {
+        this.appleRefreshToken = refreshToken;
+    }
+
+    public void withdraw() {
+        this.name = "탈퇴한 사용자";
+        this.email = "withdrawn+" + this.id + "@haphap.local";
+        this.phoneNumber = null;
+        this.birthDate = null;
+        this.gender = null;
+        this.ageRange = null;
+        this.profileImageUrl = null;
+        this.providerId = "WITHDRAWN_" + this.providerId + "_" + System.currentTimeMillis();
+        this.appleRefreshToken = null;
+        this.withdrawnAt = LocalDateTime.now();
+    }
 }

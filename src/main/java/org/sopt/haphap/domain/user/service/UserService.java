@@ -68,4 +68,16 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
     }
+
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = findById(userId);
+        user.withdraw();
+    }
+
+    @Transactional
+    public void updateAppleRefreshToken(Long userId, String refreshToken) {
+        User user = findById(userId);
+        user.updateAppleRefreshToken(refreshToken);
+    }
 }
