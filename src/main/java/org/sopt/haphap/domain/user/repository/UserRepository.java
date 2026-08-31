@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.user.repository;
 
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
+import org.sopt.haphap.domain.user.entity.WithdrawalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +15,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.anonymousName FROM User u WHERE u.anonymousName IN :names")
     List<String> findAnonymousNamesIn(@Param("names") List<String> names);
+    List<User> findTop50ByWithdrawalStatusOrderByWithdrawalRequestedAtAsc(WithdrawalStatus withdrawalStatus);
 }

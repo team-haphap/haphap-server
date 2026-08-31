@@ -28,7 +28,7 @@ public class MemberController implements MemberApiDocs {
             @AuthenticationPrincipal Long userId,
             @RequestHeader("Authorization") String authorization) {
         String token = BearerTokenExtractor.extract(authorization);
-        memberService.withdraw(userId, token);
+        memberService.requestWithdraw(userId, token);
         return ResponseEntity.noContent().build();
     }
 }
