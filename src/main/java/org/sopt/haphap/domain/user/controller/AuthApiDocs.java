@@ -15,8 +15,9 @@ import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.sopt.haphap.domain.user.dto.AppleLoginRequest;
 
-@Tag(name = "인증", description = "카카오 소셜 로그인 및 토큰 관리를 위한 API")
+@Tag(name = "인증", description = "카카오/애플 소셜 로그인 및 토큰 관리를 위한 API")
 public interface AuthApiDocs {
 
     @Operation(summary = "카카오 소셜 로그인",
@@ -100,4 +101,36 @@ public interface AuthApiDocs {
                     """)
     @ApiResponse(responseCode = "204", description = "로그아웃 성공")
     ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization);
+
+    @Operation(summary = "애플 소셜 로그인",
+            description = """
+                애플 identityToken(JWT)으로 로그인합니다.
+                - iOS에서 발급받은 identityToken을 requestBody에 넣어주세요.
+                - name은 해당 기기에서 최초 로그인일 때만 iOS가 내려주는 값입니다. 그 외에는 생략(null) 가능합니다.
+                """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class),
+                            examples = @ExampleObject(value = """
+                        {
+                          "status": 200,
+                          "code": "APPLE_LOGIN_SUCCESS",
+                          "message": "애플 로그인에 성공했습니다.",
+                          "data": {
+                            "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                            "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                            "name": "김소프트",
+                            "anonymousName": "익명의 판다",
+                            "profileImageUrl": "https://.../profile.png"
+                          }
+                        }
+                        """))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class))),
+            @ApiResponse(responseCode = "401", description = "유효하지 않은 애플 ID 토큰",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class))),
+            @ApiResponse(responseCode = "503", description = "애플 서버 응답 지연/오류",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<AuthResponse>> appleLogin(@Valid @RequestBody AppleLoginRequest request);
 }

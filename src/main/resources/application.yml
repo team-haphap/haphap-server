@@ -35,6 +35,9 @@ aws:
     bucket: ${AWS_S3_BUCKET}
     region: ap-northeast-2
 
+apple:
+  client-id: ${APPLE_CLIENT_ID:}
+
 admin:
   login-id: ${ADMIN_LOGIN_ID:}
   password-hash: ${ADMIN_PASSWORD_HASH:}

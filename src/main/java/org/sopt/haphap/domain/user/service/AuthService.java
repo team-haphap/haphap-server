@@ -51,6 +51,28 @@ public class AuthService {
         );
     }
 
+    public AuthResponse appleLogin(String identityToken, String name) {
+        OAuthUserInfo userInfo = oAuthClients.get(Provider.APPLE).getUserInfo(identityToken);
+
+        if (userInfo.name() == null && name != null) {
+            userInfo = new OAuthUserInfo(
+                    userInfo.providerId(), name, userInfo.email(),
+                    userInfo.birthDate(), userInfo.gender(), userInfo.ageRange(), userInfo.phoneNumber()
+            );
+        }
+
+        UserService.FindOrCreateResult result = userService.findOrCreate(Provider.APPLE, userInfo.providerId(), userInfo);
+        User user = result.user();
+        String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
+        return new AuthResponse(
+                jwtProvider.createAccessToken(user.getId()),
+                newRefreshToken,
+                user.getName(),
+                user.getAnonymousName(),
+                user.getProfileImageUrl()
+        );
+    }
+
     @Transactional
     public AuthResponse reissue(String refreshToken) {
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
