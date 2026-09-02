@@ -59,11 +59,15 @@ jobs:
             RDS_USERNAME=${{ secrets.RDS_USERNAME }}
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}
+            APPLE_KEY_ID=${{ secrets.APPLE_KEY_ID }}
+            APPLE_PRIVATE_KEY_BASE64=${{ secrets.APPLE_PRIVATE_KEY_BASE64 }}
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             ADMIN_LOGIN_ID=${{ secrets.ADMIN_LOGIN_ID }}
             ADMIN_PASSWORD_HASH=${{ secrets.ADMIN_PASSWORD_HASH }}
             ADMIN_NAME=${{ secrets.ADMIN_NAME }}
             APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
+            KAKAO_ADMIN_KEY=${{ secrets.KAKAO_ADMIN_KEY }}
             ENVEOF
 
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json

@@ -3,6 +3,7 @@ package org.sopt.haphap.domain.user.service;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
+import org.sopt.haphap.domain.user.entity.WithdrawalStatus;
 import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
@@ -29,7 +30,12 @@ public class UserService {
     @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
         return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> new FindOrCreateResult(user, false))
+                .map(user -> {
+                    if (user.getWithdrawalStatus() != WithdrawalStatus.ACTIVE) {
+                        throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
+                    }
+                    return new FindOrCreateResult(user, false);
+                })
                 .orElseGet(() -> createNewUser(provider, providerId, userInfo));
     }
 
@@ -67,5 +73,11 @@ public class UserService {
     public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public void updateAppleRefreshToken(Long userId, String refreshToken) {
+        User user = findById(userId);
+        user.updateAppleRefreshToken(refreshToken);
     }
 }

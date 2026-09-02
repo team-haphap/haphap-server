@@ -1,9 +1,11 @@
 package org.sopt.haphap.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
+import org.sopt.haphap.global.client.AppleOAuthClient;
 import org.sopt.haphap.global.client.OAuthClient;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.exception.CustomException;
@@ -21,12 +23,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+
 public class AuthService {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final TokenService tokenService;
     private final List<OAuthClient> oAuthClientList;
+    private final AppleOAuthClient appleOAuthClient;
 
     private Map<Provider, OAuthClient> oAuthClients;
     @PostConstruct
@@ -51,9 +56,9 @@ public class AuthService {
         );
     }
 
-    public AuthResponse appleLogin(String identityToken, String name) {
+    @Transactional
+    public AuthResponse appleLogin(String authorizationCode, String identityToken, String name) {
         OAuthUserInfo userInfo = oAuthClients.get(Provider.APPLE).getUserInfo(identityToken);
-
         if (userInfo.name() == null && name != null) {
             userInfo = new OAuthUserInfo(
                     userInfo.providerId(), name, userInfo.email(),
@@ -61,16 +66,16 @@ public class AuthService {
             );
         }
 
+        String appleRefreshToken = appleOAuthClient.exchangeAuthorizationCode(authorizationCode);
+
         UserService.FindOrCreateResult result = userService.findOrCreate(Provider.APPLE, userInfo.providerId(), userInfo);
         User user = result.user();
+
+        userService.updateAppleRefreshToken(user.getId(), appleRefreshToken);
+
         String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
-        return new AuthResponse(
-                jwtProvider.createAccessToken(user.getId()),
-                newRefreshToken,
-                user.getName(),
-                user.getAnonymousName(),
-                user.getProfileImageUrl()
-        );
+        return new AuthResponse(jwtProvider.createAccessToken(user.getId()), newRefreshToken,
+                user.getName(), user.getAnonymousName(), user.getProfileImageUrl());
     }
 
     @Transactional
