@@ -62,6 +62,9 @@ dependencies {
     // actuator (블루그린 헬스체크)
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Prometheus 메트릭 노출 (Micrometer → Prometheus 텍스트 포맷 변환)
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
     // Fcm
     implementation 'com.google.firebase:firebase-admin:9.4.1'
 
