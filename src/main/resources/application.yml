@@ -39,7 +39,7 @@ apple:
   client-id: ${APPLE_CLIENT_ID:}
   team-id: ${APPLE_TEAM_ID:}
   key-id: ${APPLE_KEY_ID:}
-  private-key-path: ${APPLE_PRIVATE_KEY_PATH:}
+  private-key-base64: ${APPLE_PRIVATE_KEY_BASE64:}
 
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY:}
