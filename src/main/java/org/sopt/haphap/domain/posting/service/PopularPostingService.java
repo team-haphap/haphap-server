@@ -16,7 +16,7 @@ import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.sopt.haphap.domain.posting.service.support.PostingResponseAssembler;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
-import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +31,11 @@ public class PopularPostingService {
             List.of(RegistrationResult.PASS, RegistrationResult.FAIL);
     private static final int MAX_POPULAR = 8;
 
-    private final RegistrationRepository registrationRepository;
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
     private final NextStageCalculator nextStageCalculator;
     private final CategoryParser categoryParser;
+    private final RegistrationQueryService registrationQueryService;
 
     public PopularPostingListResponse getPopularPostings(List<String> category) {
         List<String> categoryNames = categoryParser.parse(category);
@@ -47,8 +47,7 @@ public class PopularPostingService {
         log.info("Popular postings since={}", since);
 
         // 1) 48h 내 PASS/FAIL 결과 있는 공고 id목록
-        List<Long> candidateIds = registrationRepository
-                .findRecentlyActivePostingIds(COUNTED_RESULTS, since, filter);
+        List<Long> candidateIds = registrationQueryService.findRecentlyActivePostingIds(COUNTED_RESULTS, since, filter);
         if (candidateIds.isEmpty()) {
             return PopularPostingListResponse.from(List.of());
         }
@@ -56,7 +55,7 @@ public class PopularPostingService {
         PostingAggregate agg = aggregateLoader.load(candidateIds, CompanyImageType.POPULAR);
 
         // 3) 48h (공고,전형)별 등록수 — 필터 겸 정렬 기준
-        Map<Long, Map<Long, Long>> recentCounts = registrationRepository
+        Map<Long, Map<Long, Long>> recentCounts = registrationQueryService
                 .countRecentActiveByPostingAndStage(COUNTED_RESULTS, since, candidateIds).stream()
                 .collect(Collectors.groupingBy(
                         StageRegistrationCountProjection::getPostingId,

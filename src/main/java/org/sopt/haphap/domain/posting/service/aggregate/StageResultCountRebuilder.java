@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.StageResultCount;
 import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
 import org.sopt.haphap.domain.registration.projection.StageResultAggProjection;
-import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
+import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StageResultCountRebuilder {
 
-    private final RegistrationRepository registrationRepository;
+    private final RegistrationQueryService registrationQueryService;
     private final StageResultCountRepository stageResultCountRepository;
 
     /** 원본(Registration)에서 모두 재집계해 StageResultCount를 재구성.. */
@@ -25,7 +25,7 @@ public class StageResultCountRebuilder {
         // (postingId, stageId) -> StageResultCount 누적
         Map<String, StageResultCount> map = new HashMap<>();
 
-        for (StageResultAggProjection agg : registrationRepository.aggregateAllForRebuild()) {
+        for (StageResultAggProjection agg : registrationQueryService.aggregateAllForRebuild()) {
             String key = agg.getPostingId() + ":" + agg.getStageId();
             StageResultCount row = map.computeIfAbsent(key,
                     k -> StageResultCount.empty(agg.getPostingId(), agg.getStageId()));
