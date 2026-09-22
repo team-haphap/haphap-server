@@ -42,6 +42,21 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("since") LocalDateTime since,
             @Param("postingIds") List<Long> postingIds);
 
+    // (posting,stage) 단건 확정(PASS/FAIL) 건수 — 전형 이동 "1시간 내 5건" 롤링 윈도우 판정용.
+    // idx_reg_posting_stage(posting_id, stage_id)로 커버되어 해당 전형의 등록 건만 스캔한다.
+    @Query("""
+        SELECT COUNT(r)
+        FROM Registration r
+        WHERE r.posting.id = :postingId
+          AND r.stage.id = :stageId
+          AND r.result IN :results
+          AND r.updatedAt >= :since
+        """)
+    long countConfirmedByPostingAndStageSince(@Param("postingId") Long postingId,
+                                              @Param("stageId") Long stageId,
+                                              @Param("results") List<RegistrationResult> results,
+                                              @Param("since") LocalDateTime since);
+
     // 테스트용
     @Query("""
         SELECT r.posting.id AS postingId, r.stage.id AS stageId,

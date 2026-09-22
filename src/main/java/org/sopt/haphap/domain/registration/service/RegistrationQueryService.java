@@ -19,6 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RegistrationQueryService {
 
+    // "확정" = PASS/FAIL (PENDING 제외). 전형 이동 판정에서 항상 이 정의를 쓰므로 여기서 고정한다.
+    private static final List<RegistrationResult> CONFIRMED_RESULTS =
+            List.of(RegistrationResult.PASS, RegistrationResult.FAIL);
+
     private final RegistrationRepository registrationRepository;
 
     // 참여 요약: 유저 수 + 최근 참여자 프로필
@@ -49,6 +53,11 @@ public class RegistrationQueryService {
     public List<StageRegistrationCountProjection> countRecentActiveByPostingAndStage(
             List<RegistrationResult> results, LocalDateTime since, List<Long> postingIds) {
         return registrationRepository.countRecentActiveByPostingAndStage(results, since, postingIds);
+    }
+
+    // (posting,stage) since 이후 확정(PASS/FAIL) 건수 — 전형 이동 "1시간 내 5건" 판정용
+    public long countConfirmedSince(Long postingId, Long stageId, LocalDateTime since) {
+        return registrationRepository.countConfirmedByPostingAndStageSince(postingId, stageId, CONFIRMED_RESULTS, since);
     }
 
     // (공고,전형,결과)별 전체 집계 — StageResultCount 재구성/정합성 보정용
