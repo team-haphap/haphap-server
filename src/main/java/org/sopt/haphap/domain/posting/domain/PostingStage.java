@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -33,6 +34,14 @@ public class PostingStage {
     private Posting posting;
 
     private LocalDate announcedDate;
+
+    // 전형 이동 새로운 정책용 (당장은 미사용, 아래 두 필드로 순차 전환 예정)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stage_type", length = 30)
+    private StageType stageType;
+
+    // 이 전형이 "현재 전형"이 된 시각. 최소 시차·마감 판정의 기산점.
+    private LocalDateTime movedAt;
 
     private PostingStage(String name, int orderIndex, LocalDate expectedAnnouncementDate,
                          int expectedScore, Posting posting) {
