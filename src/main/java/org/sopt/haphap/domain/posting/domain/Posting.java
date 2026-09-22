@@ -33,6 +33,12 @@ public class Posting extends BaseEntity {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    // 전형 이동 새로운 정책용. 공고 등록 시 첫 전형으로 초기화되고
+    // 이동 조건 충족 시에만 한 단계씩 전진하는 영속 상태 포인터.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_stage_id")
+    private PostingStage currentStage;
+
     private String location;
 
     private String position;
