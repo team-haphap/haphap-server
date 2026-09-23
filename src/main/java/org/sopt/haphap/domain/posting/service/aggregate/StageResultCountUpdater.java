@@ -51,8 +51,11 @@ public class StageResultCountUpdater {
         Long confirmed = repository.findConfirmedCount(postingId, stageId);
         if (confirmed != null && confirmed >= THRESHOLD) {
             // 정확히 THRESHOLD가 된 순간 = 방금 돌파 → 오늘로 기록
+            //postingStageRepository.findById(stageId)
+            //.ifPresent(stage -> stage.markAnnouncedIfAbsent(LocalDate.now()));
+            // 발표는 예정일에 났다고 가정 → 예정일로 기록 (입력만 늦을 수 있음)
             postingStageRepository.findById(stageId)
-                    .ifPresent(stage -> stage.markAnnouncedIfAbsent(LocalDate.now()));
+                    .ifPresent(stage -> stage.markAnnouncedIfAbsent(stage.getExpectedAnnouncementDate()));
         }
     }
 }
