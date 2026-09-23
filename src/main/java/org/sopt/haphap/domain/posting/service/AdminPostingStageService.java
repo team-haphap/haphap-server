@@ -26,9 +26,12 @@ public class AdminPostingStageService {
         if (postingStageRepository.existsByPostingIdAndOrderIndex(postingId, request.orderIndex())) {
             throw new CustomException(PostingErrorCode.DUPLICATE_STAGE_ORDER);
         }
+        if (postingStageRepository.existsByPostingIdAndStageType(postingId, request.stageType())) {
+            throw new CustomException(PostingErrorCode.DUPLICATE_STAGE_TYPE);
+        }
         PostingStage stage = postingStageRepository.save(PostingStage.create(
                 request.name(), request.orderIndex(), request.expectedAnnouncementDate(),
-                request.expectedScore(), posting));
+                request.expectedScore(), request.stageType(), posting));
         return PostingStageAdminResponse.from(stage);
     }
 }

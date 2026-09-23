@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
+import org.sopt.haphap.domain.posting.domain.StageType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -99,4 +100,7 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     """)
     List<PostingStageFlatProjection> findAllStages();
     boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
+
+    // 같은 공고 안에서 canonical 전형 유형이 중복되지 않게 방지 (최소 시차표는 유형당 1개를 전제로 함)
+    boolean existsByPostingIdAndStageType(Long postingId, StageType stageType);
 }
