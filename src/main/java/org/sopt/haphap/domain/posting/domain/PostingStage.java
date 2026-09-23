@@ -80,4 +80,9 @@ public class PostingStage {
             this.announcedDate = date;
         }
     }
+
+    // 이 전형이 현재 전형이 된 시각 기록 (신정책 최소 시차 기산점)
+    public void markMoved(LocalDateTime movedAt) {
+        this.movedAt = movedAt;
+    }
 }

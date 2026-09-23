@@ -65,4 +65,9 @@ public class Posting extends BaseEntity {
         this.category = category;
         this.company = company;
     }
+
+    // 전형 이동 신정책: 이동 조건 충족 시 현재 전형 포인터를 한 단계 전진
+    public void moveCurrentStageTo(PostingStage nextStage) {
+        this.currentStage = nextStage;
+    }
 }
