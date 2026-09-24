@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.posting.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,9 @@ import org.sopt.haphap.global.common.BaseEntity;
 @Table(name = "posting", indexes = @Index(name = "idx_posting_title", columnList = "title"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Posting extends BaseEntity {
+
+    // 마감 정책(transfer_new_new.md): 최종합격 전형 이동일 + 4일이 되는 날 00:00에 자동 마감.
+    private static final int CLOSE_AFTER_DAYS = 4;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,5 +73,18 @@ public class Posting extends BaseEntity {
     // 전형 이동 신정책: 이동 조건 충족 시 현재 전형 포인터를 한 단계 전진
     public void moveCurrentStageTo(PostingStage nextStage) {
         this.currentStage = nextStage;
+    }
+
+    // (예: 9/23 최종합격 이동 → 9/27 00:00 마감)
+    public boolean isClosed() {
+        if (currentStage == null || currentStage.getStageType() != StageType.FINAL_PASS) {
+            return false;
+        }
+        LocalDateTime movedAt = currentStage.getMovedAt();
+        if (movedAt == null) {
+            return false;   // 이동 시각 미기록 → 안전하게 유예
+        }
+        LocalDateTime closesAt = movedAt.toLocalDate().plusDays(CLOSE_AFTER_DAYS).atStartOfDay();
+        return !LocalDateTime.now().isBefore(closesAt);
     }
 }
