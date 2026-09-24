@@ -3,6 +3,7 @@ package org.sopt.haphap.domain.posting.domain;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,12 @@ public class Posting extends BaseEntity {
 
     // 마감 정책(transfer_new_new.md): 최종합격 전형 이동일 + 4일이 되는 날 00:00에 자동 마감.
     private static final int CLOSE_AFTER_DAYS = 4;
+
+    // D-day 칩 라벨
+    private static final String D_DAY_LABEL = "D-day";
+    private static final String CHECKING_LABEL = "발표 확인 중";
+    private static final String CLOSED_LABEL = "마감";
+    private static final String UPCOMING_LABEL = "진행 예정";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -87,4 +94,32 @@ public class Posting extends BaseEntity {
         LocalDateTime closesAt = movedAt.toLocalDate().plusDays(CLOSE_AFTER_DAYS).atStartOfDay();
         return !LocalDateTime.now().isBefore(closesAt);
     }
+
+    // D-day 칩 정책: 현재 전형의 예상 발표일 기준으로 라벨을 정한다.
+    // 전형이 바뀌면 이동된 전형을 다시 읽으므로 재계산은 별도 로직 없이 항상 최신 기준으로 이루어진다.
+    public StageDisplay resolveDisplay() {
+        if (isClosed()) {
+            return new StageDisplay(null, CLOSED_LABEL, true);
+        }
+        if (currentStage == null) {
+            return new StageDisplay(null, UPCOMING_LABEL, false);   // 아직 전형 미등록 → 초기화 전
+        }
+
+        LocalDate expected = currentStage.getExpectedAnnouncementDate();
+        if (expected == null) {
+            return new StageDisplay(currentStage, null, false);   // 예정일 미입력
+        }
+
+        LocalDate today = LocalDate.now();
+        if (today.isBefore(expected)) {
+            long daysUntil = ChronoUnit.DAYS.between(today, expected);
+            return new StageDisplay(currentStage, "D-" + daysUntil, false);
+        }
+        if (today.isEqual(expected)) {
+            return new StageDisplay(currentStage, D_DAY_LABEL, false);
+        }
+        return new StageDisplay(currentStage, CHECKING_LABEL, false);   // 예정일은 지났는데 아직 이동 전
+    }
+
+    public record StageDisplay(PostingStage stage, String label, boolean closed) {}
 }
