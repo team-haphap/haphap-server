@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingSuccessCode;
+import org.sopt.haphap.domain.posting.dto.request.AdminMoveCurrentStageRequest;
 import org.sopt.haphap.domain.posting.dto.request.PostingCreateRequest;
 import org.sopt.haphap.domain.posting.dto.request.PostingUpdateRequest;
 import org.sopt.haphap.domain.posting.dto.response.PostingAdminResponse;
+import org.sopt.haphap.domain.posting.dto.response.PostingCurrentStageResponse;
 import org.sopt.haphap.domain.posting.service.AdminPostingService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
@@ -37,5 +39,13 @@ public class AdminPostingController {
             @PathVariable Long postingId, @Valid @RequestBody PostingUpdateRequest request) {
         PostingAdminResponse response = adminPostingService.updatePosting(postingId, request);
         return ResponseEntity.ok(ApiResponse.success(PostingSuccessCode.POSTING_UPDATED, response));
+    }
+
+    // 운영진 수동 전형 이동. 자동 이동(합격 인증 1건 승인)과 무관하게 언제든 임의 전형으로 이동 가능.
+    @PatchMapping("/{postingId}/current-stage")
+    public ResponseEntity<SuccessResponse<PostingCurrentStageResponse>> moveCurrentStage(
+            @PathVariable Long postingId, @Valid @RequestBody AdminMoveCurrentStageRequest request) {
+        PostingCurrentStageResponse response = adminPostingService.moveCurrentStage(postingId, request.stageId());
+        return ResponseEntity.ok(ApiResponse.success(PostingSuccessCode.POSTING_CURRENT_STAGE_MOVED, response));
     }
 }
