@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.alram.repository;
 
 import org.sopt.haphap.domain.alram.domain.AlramSetting;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,4 +22,8 @@ public interface AlramSettingRepository extends JpaRepository<AlramSetting, Long
     """)
     List<AlramSetting> findActiveSubscribers(@Param("postingId") Long postingId,
                                              @Param("registrantId") Long registrantId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from PushToken p where p.user.id = :userId")
+    int deleteAllByUserId(@Param("userId") Long userId);
 }
