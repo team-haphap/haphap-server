@@ -1,5 +1,5 @@
 package org.sopt.haphap.domain.posting.service.aggregate;
-
+/*
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -22,7 +22,7 @@ import org.sopt.haphap.domain.posting.service.PostingViewTracker;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.test.util.ReflectionTestUtils;
-/*
+
 @ExtendWith(MockitoExtension.class)
 class ViewCountCleanupSchedulerTest {
 

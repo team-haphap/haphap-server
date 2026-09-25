@@ -1,5 +1,5 @@
 package org.sopt.haphap.domain.posting.service;
-
+/*
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -18,7 +18,7 @@ import org.sopt.haphap.domain.posting.domain.StageType;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
-/*
+
 @ExtendWith(MockitoExtension.class)
 class TodayStatisticServiceTest {
 
