@@ -2,7 +2,10 @@ package org.sopt.haphap.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.common.BaseEntity;
+import org.sopt.haphap.global.exception.CustomException;
+
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -76,9 +79,18 @@ public class User extends BaseEntity {
     }
 
     public void withdraw() {
+        if (this.withdrawalStatus == WithdrawalStatus.WITHDRAWN) {
+            throw new CustomException(GlobalErrorCode.USER_NOT_FOUND); // 이미 탈퇴한 회원
+        }
+        //개인정보 파기 코드
         this.name = "탈퇴한 사용자";
         this.email = "withdrawn+" + UUID.randomUUID() + "@deleted.local";
+        this.anonymousName = "탈퇴한 사용자";
+        this.birthDate = null;
+        this.gender = null;
+        this.ageRange = null;
         this.phoneNumber = null;
+        //소셜 식별정보도 파기해서 같은 카카오 계정으로 다시 가입하면 새 회원으로 생성될 수 있도록 함
         this.providerId = "WITHDRAWN_" + UUID.randomUUID();
         this.appleRefreshToken = null;
         this.withdrawalStatus = WithdrawalStatus.WITHDRAWN;
