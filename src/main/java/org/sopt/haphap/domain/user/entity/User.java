@@ -65,6 +65,10 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
 
+    public boolean isWithdrawn(){
+        return this.withdrawalStatus == WithdrawalStatus.WITHDRAWN;
+    }
+
     public void withdraw() {
         if (this.withdrawalStatus == WithdrawalStatus.WITHDRAWN) {
             throw new CustomException(GlobalErrorCode.USER_NOT_FOUND); // 이미 탈퇴한 회원

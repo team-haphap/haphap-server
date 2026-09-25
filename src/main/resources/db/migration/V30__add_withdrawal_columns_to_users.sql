@@ -1,2 +1,0 @@
-ALTER TABLE users ADD COLUMN withdrawn_at TIMESTAMP NULL;
-ALTER TABLE users ADD COLUMN apple_refresh_token VARCHAR(255) NULL;

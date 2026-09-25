@@ -110,6 +110,10 @@ public class AppleOAuthClient implements OAuthClient {
                 .onStatus(HttpStatusCode::isError,
                         r -> Mono.error(new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE)))
                 .toBodilessEntity()
+                .onErrorMap(ex -> !(ex instanceof CustomException), ex -> {
+                    log.error("애플 revoke 호출 실패", ex);
+                    return new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE);
+                })
                 .block();
     }
 

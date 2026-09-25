@@ -3,6 +3,7 @@ package org.sopt.haphap.global.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.entity.Provider;
+import org.sopt.haphap.global.client.dto.KakaoErrorResponse;
 import org.sopt.haphap.global.client.dto.KakaoUserResponse;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
@@ -26,6 +27,7 @@ public class KakaoOAuthClient implements OAuthClient {
 
     private final WebClient webClient;
     private final PhoneNumberMasker phoneNumberMasker;
+    private static final int KAKAO_NOT_REGISTERED_USER = -101;  // 앱과 연결되지 않은 사용자
 
     @Override
     public Provider getProvider() {
@@ -94,9 +96,27 @@ public class KakaoOAuthClient implements OAuthClient {
                 .body(BodyInserters.fromFormData("target_id_type", "user_id")
                         .with("target_id", kakaoUserId))
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        r -> Mono.error(new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE)))
+                // 4xx: 응답 본문을 읽어서 "이미 연결 끊김"이면 성공으로 처리
+                .onStatus(HttpStatusCode::is4xxClientError, response -> response
+                        .bodyToMono(KakaoErrorResponse.class)
+                        .defaultIfEmpty(new KakaoErrorResponse(null, null))
+                        .flatMap(error -> {
+                            if (Integer.valueOf(KAKAO_NOT_REGISTERED_USER).equals(error.code())) {
+                                log.info("이미 연결 해제된 카카오 사용자 → 성공으로 처리. kakaoUserId={}", kakaoUserId);
+                                return Mono.empty();   // ← empty를 반환하면 WebClient가 "에러 아님"으로 취급
+                            }
+                            log.error("카카오 unlink 실패 code={}, msg={}", error.code(), error.msg());
+                            return Mono.error(new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE));
+                        }))
+                // 5xx: 카카오 서버 문제
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        response -> Mono.error(new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE)))
                 .toBodilessEntity()
+                // (2) 타임아웃·네트워크 에러도 503으로 변환
+                .onErrorMap(ex -> !(ex instanceof CustomException), ex -> {
+                    log.error("카카오 unlink 호출 실패", ex);
+                    return new CustomException(AuthErrorCode.KAKAO_SERVER_UNAVAILABLE);
+                })
                 .block();
     }
 }

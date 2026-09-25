@@ -29,36 +29,36 @@ public interface AuthApiDocs {
             @ApiResponse(responseCode = "200", description = "로그인 성공",
                     content = @Content(schema = @Schema(implementation = AuthResponse.class),
                             examples = @ExampleObject(value = """
-                            {
-                              "status": 200,
-                              "code": "KAKAO_LOGIN_SUCCESS",
-                              "message": "카카오 로그인에 성공했습니다.",
-                              "data": {
-                                "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-                                "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-                                "name": "김소프트",
-                                "anonymousName": "익명의 판다",
-                                "profileImageUrl": "https://.../profile.png"
-                              }
-                            }
-                            """))),
+                                    {
+                                      "status": 200,
+                                      "code": "KAKAO_LOGIN_SUCCESS",
+                                      "message": "카카오 로그인에 성공했습니다.",
+                                      "data": {
+                                        "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                        "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                        "name": "김소프트",
+                                        "anonymousName": "익명의 판다",
+                                        "profileImageUrl": "https://.../profile.png"
+                                      }
+                                    }
+                                    """))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = {
                                     @ExampleObject(name = "카카오 계정 정보를 가져올 수 없음", value = """
-                                    {
-                                      "status": 400,
-                                      "code": "KAKAO_ACCOUNT_NOT_FOUND",
-                                      "message": "카카오 계정 정보를 가져올 수 없습니다."
-                                    }
-                                    """),
+                                            {
+                                              "status": 400,
+                                              "code": "KAKAO_ACCOUNT_NOT_FOUND",
+                                              "message": "카카오 계정 정보를 가져올 수 없습니다."
+                                            }
+                                            """),
                                     @ExampleObject(name = "요청값 검증 실패 (accessToken 누락)", value = """
-                                    {
-                                      "status": 400,
-                                      "code": "INVALID_INPUT_VALUE",
-                                      "message": "must not be blank"
-                                    }
-                                    """)
+                                            {
+                                              "status": 400,
+                                              "code": "INVALID_INPUT_VALUE",
+                                              "message": "must not be blank"
+                                            }
+                                            """)
                             })),
             @ApiResponse(responseCode = "401", description = "유효하지 않은 카카오 액세스 토큰",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))),
@@ -76,19 +76,19 @@ public interface AuthApiDocs {
             @ApiResponse(responseCode = "200", description = "재발급 성공",
                     content = @Content(schema = @Schema(implementation = AuthResponse.class),
                             examples = @ExampleObject(value = """
-                            {
-                              "status": 200,
-                              "code": "REISSUE_SUCCESS",
-                              "message": "토큰 재발급에 성공했습니다.",
-                              "data": {
-                                "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-                                "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-                                "name": "김소프트",
-                                "anonymousName": "익명의 판다",
-                                "profileImageUrl": "https://.../profile.png"
-                              }
-                            }
-                            """))),
+                                    {
+                                      "status": 200,
+                                      "code": "REISSUE_SUCCESS",
+                                      "message": "토큰 재발급에 성공했습니다.",
+                                      "data": {
+                                        "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                        "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                        "name": "김소프트",
+                                        "anonymousName": "익명의 판다",
+                                        "profileImageUrl": "https://.../profile.png"
+                                      }
+                                    }
+                                    """))),
             @ApiResponse(responseCode = "401", description = "유효하지 않거나 저장된 값과 불일치하는 리프레시 토큰",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class)))
     })
@@ -96,52 +96,60 @@ public interface AuthApiDocs {
 
     @Operation(summary = "로그아웃",
             description = """
-                현재 기기의 로그인을 종료합니다.
-                - 액세스 토큰을 블랙리스트에 등록하고, 서버에 저장된 리프레시 토큰을 삭제합니다.
-                - 만료된 액세스 토큰으로도 호출 가능합니다. (서명이 유효하면 리프레시 토큰만 삭제)
-                - 여러 번 호출해도 항상 204를 반환합니다.
-                - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
-                """)
+                    현재 기기의 로그인을 종료합니다.
+                    - 액세스 토큰을 블랙리스트에 등록하고, 서버에 저장된 리프레시 토큰을 삭제합니다.
+                    - 만료된 액세스 토큰으로도 호출 가능합니다. (서명이 유효하면 리프레시 토큰만 삭제)
+                    - 여러 번 호출해도 항상 204를 반환합니다.
+                    - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                    """)
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "로그아웃 성공 (응답 본문 없음)"),
             @ApiResponse(responseCode = "400", description = "Authorization 헤더 누락",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = @ExampleObject(value = """
-                                { "status": 400, "code": "MISSING_REQUEST_HEADER", "message": "필수 요청 헤더가 누락되었습니다." }
-                                """))),
+                                    { "status": 400, "code": "MISSING_REQUEST_HEADER", "message": "필수 요청 헤더가 누락되었습니다." }
+                                    """))),
             @ApiResponse(responseCode = "401", description = "위조되었거나 형식이 잘못된 토큰",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = @ExampleObject(value = """
-                                { "status": 401, "code": "INVALID_ACCESS_TOKEN", "message": "유효하지 않은 액세스 토큰입니다." }
-                                """)))
+                                    { "status": 401, "code": "INVALID_ACCESS_TOKEN", "message": "유효하지 않은 액세스 토큰입니다." }
+                                    """)))
     })
     ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization);
 
     @Operation(summary = "애플 소셜 로그인",
             description = """
-                애플 identityToken(JWT)으로 로그인합니다.
-                - iOS에서 발급받은 identityToken을 requestBody에 넣어주세요.
-                - name은 해당 기기에서 최초 로그인일 때만 iOS가 내려주는 값입니다. 그 외에는 생략(null) 가능합니다.
-                """)
+                    애플 identityToken(JWT)으로 로그인합니다.
+                    - iOS에서 발급받은 identityToken을 requestBody에 넣어주세요.
+                    - name은 해당 기기에서 최초 로그인일 때만 iOS가 내려주는 값입니다. 그 외에는 생략(null) 가능합니다.
+                    """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공",
                     content = @Content(schema = @Schema(implementation = AuthResponse.class),
                             examples = @ExampleObject(value = """
-                        {
-                          "status": 200,
-                          "code": "APPLE_LOGIN_SUCCESS",
-                          "message": "애플 로그인에 성공했습니다.",
-                          "data": {
-                            "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-                            "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-                            "name": "김소프트",
-                            "anonymousName": "익명의 판다",
-                            "profileImageUrl": "https://.../profile.png"
-                          }
-                        }
-                        """))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = FailureResponse.class))),
+                                    {
+                                      "status": 200,
+                                      "code": "APPLE_LOGIN_SUCCESS",
+                                      "message": "애플 로그인에 성공했습니다.",
+                                      "data": {
+                                        "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                        "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                        "name": "김소프트",
+                                        "anonymousName": "익명의 판다",
+                                        "profileImageUrl": "https://.../profile.png"
+                                      }
+                                    }
+                                    """))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 / 필수 동의항목 미동의",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "신규 가입 시 이메일 제공 미동의", value = """
+                                            { "status": 400, "code": "EMAIL_REQUIRED", "message": "이메일 동의가 필요합니다." }
+                                            """),
+                                    @ExampleObject(name = "신규 가입 시 이름 제공 미동의", value = """
+                                            { "status": 400, "code": "NAME_REQUIRED", "message": "이름 동의가 필요합니다." }
+                                            """)
+                            })),
             @ApiResponse(responseCode = "401", description = "유효하지 않은 애플 ID 토큰",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))),
             @ApiResponse(responseCode = "503", description = "애플 서버 응답 지연/오류",

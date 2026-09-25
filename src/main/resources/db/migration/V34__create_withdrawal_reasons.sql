@@ -1,3 +1,4 @@
+-- 탈퇴 사유 (비식별 통계용)
 CREATE TABLE withdrawal_reasons (
                                     id          BIGSERIAL PRIMARY KEY,
                                     reason      VARCHAR(30)  NOT NULL,
