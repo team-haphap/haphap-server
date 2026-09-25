@@ -30,12 +30,7 @@ public class UserService {
     @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
         return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> {
-                    if (user.getWithdrawalStatus() != WithdrawalStatus.ACTIVE) {
-                        throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
-                    }
-                    return new FindOrCreateResult(user, false);
-                })
+                .map(user -> new FindOrCreateResult(user, false))
                 .orElseGet(() -> createNewUser(provider, providerId, userInfo));
     }
 

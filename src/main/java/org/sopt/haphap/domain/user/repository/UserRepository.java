@@ -15,5 +15,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.anonymousName FROM User u WHERE u.anonymousName IN :names")
     List<String> findAnonymousNamesIn(@Param("names") List<String> names);
-    List<User> findTop50ByWithdrawalStatusOrderByWithdrawalRequestedAtAsc(WithdrawalStatus withdrawalStatus);
 }

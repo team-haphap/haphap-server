@@ -96,10 +96,25 @@ public interface AuthApiDocs {
 
     @Operation(summary = "로그아웃",
             description = """
-                    액세스 토큰을 블랙리스트 처리하여 로그아웃합니다.
-                    - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
-                    """)
-    @ApiResponse(responseCode = "204", description = "로그아웃 성공")
+                현재 기기의 로그인을 종료합니다.
+                - 액세스 토큰을 블랙리스트에 등록하고, 서버에 저장된 리프레시 토큰을 삭제합니다.
+                - 만료된 액세스 토큰으로도 호출 가능합니다. (서명이 유효하면 리프레시 토큰만 삭제)
+                - 여러 번 호출해도 항상 204를 반환합니다.
+                - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "로그아웃 성공 (응답 본문 없음)"),
+            @ApiResponse(responseCode = "400", description = "Authorization 헤더 누락",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                { "status": 400, "code": "MISSING_REQUEST_HEADER", "message": "필수 요청 헤더가 누락되었습니다." }
+                                """))),
+            @ApiResponse(responseCode = "401", description = "위조되었거나 형식이 잘못된 토큰",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                { "status": 401, "code": "INVALID_ACCESS_TOKEN", "message": "유효하지 않은 액세스 토큰입니다." }
+                                """)))
+    })
     ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization);
 
     @Operation(summary = "애플 소셜 로그인",

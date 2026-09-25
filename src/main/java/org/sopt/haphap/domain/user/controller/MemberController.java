@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
 import org.sopt.haphap.domain.user.dto.WithdrawRequest;
 import org.sopt.haphap.domain.user.service.MemberService;
+import org.sopt.haphap.domain.user.service.MemberWithdrawalService;
 import org.sopt.haphap.global.code.MemberSuccessCode;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.sopt.haphap.global.jwt.BearerTokenExtractor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController implements MemberApiDocs {
 
     private final MemberService memberService;
+    private final MemberWithdrawalService memberWithdrawalService;
 
     @GetMapping("/me")
     public ResponseEntity<SuccessResponse<MemberResponse>> getMyInfo(
@@ -31,7 +33,7 @@ public class MemberController implements MemberApiDocs {
             @RequestHeader("Authorization") String authorization,
             @Valid @RequestBody WithdrawRequest request) {
         String token = BearerTokenExtractor.extract(authorization);
-        memberService.requestWithdraw(userId, token, request);
+        memberWithdrawalService.withdraw(userId, token, request);
         return ResponseEntity.noContent().build();
     }
 }

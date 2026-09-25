@@ -63,20 +63,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private WithdrawalStatus withdrawalStatus = WithdrawalStatus.ACTIVE;
 
-    @Builder.Default
     @Column(nullable = false)
-    private int withdrawalRetryCount = 0;
-
-    private LocalDateTime withdrawalRequestedAt;
-
-    public void markPendingUnlink() {
-        this.withdrawalStatus = WithdrawalStatus.PENDING_UNLINK;
-        this.withdrawalRequestedAt = LocalDateTime.now();
-    }
-
-    public void incrementWithdrawalRetryCount() {
-        this.withdrawalRetryCount++;
-    }
 
     public void withdraw() {
         if (this.withdrawalStatus == WithdrawalStatus.WITHDRAWN) {

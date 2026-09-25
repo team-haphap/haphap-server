@@ -24,6 +24,6 @@ public interface AlramSettingRepository extends JpaRepository<AlramSetting, Long
                                              @Param("registrantId") Long registrantId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("delete from PushToken p where p.user.id = :userId")
+    @Query("delete from AlramSetting s where s.user.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
 }

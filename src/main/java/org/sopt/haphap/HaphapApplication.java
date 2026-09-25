@@ -3,6 +3,7 @@ package org.sopt.haphap;
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -11,6 +12,7 @@ import java.util.TimeZone;
 @EnableScheduling
 @EnableAsync
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class HaphapApplication {
     @PostConstruct
     public void init() {
