@@ -42,6 +42,17 @@ public interface StageResultCountRepository extends JpaRepository<StageResultCou
                                @Param("stageId") Long stageId,
                                @Param("newResult") String newResult);
 
+    // PENDING → PASS: 합격 인증 승인 전까지 집계 보류라 pass로는 안 옮기고 pending에서만 뺀다.
+    // 승인되면 onApproved가 increment(..., "PASS")로 따로 반영한다.
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            UPDATE StageResultCount c SET
+              c.pendingCount = c.pendingCount - 1,
+              c.version      = c.version + 1
+            WHERE c.postingId = :postingId AND c.stageId = :stageId
+            """)
+    int decrementPending(@Param("postingId") Long postingId, @Param("stageId") Long stageId);
+
     @Query("""
         SELECT c.postingId AS postingId, c.stageId AS stageId,
                (c.passCount + c.failCount ) AS cnt
@@ -56,12 +67,4 @@ public interface StageResultCountRepository extends JpaRepository<StageResultCou
         WHERE c.postingId = :postingId AND c.stageId = :stageId
         """)
     Long findConfirmedCount(@Param("postingId") Long postingId, @Param("stageId") Long stageId);
-
-    // 전체 (posting,stage) 카운트 (PASS+FAIL)
-    @Query("""
-        SELECT c.postingId AS postingId, c.stageId AS stageId,
-               (c.passCount + c.failCount) AS cnt
-        FROM StageResultCount c
-        """)
-    List<StageRegistrationCountProjection> findAllTotals();
 }

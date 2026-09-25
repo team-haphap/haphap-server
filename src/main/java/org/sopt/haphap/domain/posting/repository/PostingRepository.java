@@ -22,9 +22,18 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             SELECT p FROM Posting p
             JOIN FETCH p.company
             JOIN FETCH p.category
+            LEFT JOIN FETCH p.currentStage
             WHERE p.id IN :ids
             """)
     List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+
+    // 온고잉 카운트/조회수 정리 스케줄러처럼 회사·카테고리 없이 마감 여부만 보면 되는 배치용
+    @Query("""
+            SELECT p FROM Posting p
+            LEFT JOIN FETCH p.currentStage
+            WHERE p.id IN :ids
+            """)
+    List<Posting> findAllWithCurrentStageByIds(@Param("ids") List<Long> ids);
 
     @Query("""
             SELECT p FROM Posting p

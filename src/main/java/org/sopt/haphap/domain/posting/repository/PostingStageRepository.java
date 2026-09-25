@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
+import org.sopt.haphap.domain.posting.domain.StageType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -88,15 +89,12 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
         """)
     long countPostingsAnnouncedToday(@Param("today") LocalDate today);
 
-    // 전체 전형 (공고별 그룹핑용)
-    @Query("""
-    SELECT s.posting.id AS postingId, s.id AS stageId,
-           s.name AS name, s.orderIndex AS orderIndex,
-           s.expectedAnnouncementDate AS expectedAnnouncementDate,
-           s.announcedDate AS announcedDate
-    FROM PostingStage s
-    ORDER BY s.posting.id ASC, s.orderIndex ASC
-    """)
-    List<PostingStageFlatProjection> findAllStages();
+    // 전형이 1개라도 있는 공고 id (온고잉 카운트/조회수 정리 스케줄러가 대상 추리는 용도)
+    @Query("SELECT DISTINCT s.posting.id FROM PostingStage s")
+    List<Long> findDistinctPostingIds();
+
     boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
+
+    // 같은 공고 안에서 canonical 전형 유형이 중복되지 않게 방지 (최소 시차표는 유형당 1개를 전제로 함)
+    boolean existsByPostingIdAndStageType(Long postingId, StageType stageType);
 }

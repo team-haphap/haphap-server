@@ -51,7 +51,7 @@ public class PostingSearchQueryService {
         PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.LISTING);
 
         List<Scored> sorted = postingIds.stream()
-                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
+                .map(id -> assembler.assemble(agg.posting(id), agg.companyImageUrl(id)))
                 .sorted(PostingSortComparators.byAnnounceDate())
                 .toList();
 
