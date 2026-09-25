@@ -13,7 +13,9 @@ public enum RegistrationErrorCode implements ErrorResultCode {
     REGISTRATION_NOT_FOUND(HttpStatus.NOT_FOUND,"존재하지 않는 등록입니다."),
     PENDING_MUST_NOT_HAVE_CONTACT(HttpStatus.BAD_REQUEST, "대기 상태에서는 연락 정보를 보낼 수 없습니다."),
     CONFIRMED_MUST_HAVE_CONTACT(HttpStatus.BAD_REQUEST, "합격/불합격 결과에는 연락 정보가 필요합니다."),
-    INVALID_CONTACT_METHOD(HttpStatus.BAD_REQUEST,"유효하지 않은 연락 수단입니다.");
+    INVALID_CONTACT_METHOD(HttpStatus.BAD_REQUEST,"유효하지 않은 연락 수단입니다."),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 검토 항목입니다."),
+    REVIEW_ALREADY_RESOLVED(HttpStatus.CONFLICT, "이미 처리된 검토 항목입니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -119,4 +119,26 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     Long countTodayEvents(@Param("startOfDay") LocalDateTime startOfDay,
                           @Param("startOfTomorrow") LocalDateTime startOfTomorrow);
+
+    // 운영진 검토 트리거: 오늘(자정~) 이 (공고,전형)에 등록된 불합격 건수
+    @Query("""
+        SELECT COUNT(r)
+        FROM Registration r
+        WHERE r.posting.id = :postingId AND r.stage.id = :stageId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.FAIL
+          AND r.updatedAt >= :startOfDay AND r.updatedAt < :startOfTomorrow
+        """)
+    long countFailToday(@Param("postingId") Long postingId, @Param("stageId") Long stageId,
+                        @Param("startOfDay") LocalDateTime startOfDay,
+                        @Param("startOfTomorrow") LocalDateTime startOfTomorrow);
+
+    // 운영진 검토 트리거: 이 (공고,전형)에 승인된 합격이 이미 있는지 ("합격 인증 없이" 조건)
+    @Query("""
+        SELECT COUNT(r) > 0
+        FROM Registration r
+        WHERE r.posting.id = :postingId AND r.stage.id = :stageId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+          AND r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED
+        """)
+    boolean existsApprovedPass(@Param("postingId") Long postingId, @Param("stageId") Long stageId);
 }
