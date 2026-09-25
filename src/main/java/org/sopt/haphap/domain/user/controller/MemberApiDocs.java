@@ -8,11 +8,14 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
+import org.sopt.haphap.domain.user.dto.WithdrawRequest;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "회원", description = "마이페이지 등 회원 정보 조회를 위한 API")
@@ -58,5 +61,6 @@ public interface MemberApiDocs {
     @ApiResponse(responseCode = "204", description = "탈퇴 성공")
     ResponseEntity<Void> withdraw(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
-            @RequestHeader("Authorization") String authorization);
+            @RequestHeader("Authorization") String authorization,
+            @Valid @RequestBody WithdrawRequest request);
 }

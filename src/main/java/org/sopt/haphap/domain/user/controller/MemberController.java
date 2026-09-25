@@ -1,7 +1,9 @@
 package org.sopt.haphap.domain.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
+import org.sopt.haphap.domain.user.dto.WithdrawRequest;
 import org.sopt.haphap.domain.user.service.MemberService;
 import org.sopt.haphap.global.code.MemberSuccessCode;
 import org.sopt.haphap.global.dto.SuccessResponse;
@@ -26,9 +28,10 @@ public class MemberController implements MemberApiDocs {
     @DeleteMapping("/me")
     public ResponseEntity<Void> withdraw(
             @AuthenticationPrincipal Long userId,
-            @RequestHeader("Authorization") String authorization) {
+            @RequestHeader("Authorization") String authorization,
+            @Valid @RequestBody WithdrawRequest request) {
         String token = BearerTokenExtractor.extract(authorization);
-        memberService.requestWithdraw(userId, token);
+        memberService.requestWithdraw(userId, token, request);
         return ResponseEntity.noContent().build();
     }
 }
