@@ -2,6 +2,7 @@ package org.sopt.haphap.global.s3;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class S3Uploader {
@@ -56,10 +58,14 @@ public class S3Uploader {
         return "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
     }
 
-    public String uploadPrivate(MultipartFile file, String dirName) {
-        String key = dirName + "/" + UUID.randomUUID() + ".webp";   // 원본 파일명 사용 X
+    // 비공개 파일용 key 생성 (원본 파일명 사용 X)
+    public String newPrivateKey(String dirName) {
+        return dirName + "/" + UUID.randomUUID() + ".webp";
+    }
+
+    // 정해진 key로 비공개 업로드
+    public void uploadPrivate(MultipartFile file, String key) {
         putObject(privateBucket, key, toWebp(file), PRIVATE_CACHE);
-        return key;
     }
 
     public void delete(String key) {
@@ -80,7 +86,8 @@ public class S3Uploader {
         BufferedImage image = readImage(file);
         try {
             return convertToWebp(image, WEBP_QUALITY);
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
+            log.error("webp 변환 실패", e);
             throw new CustomException(GlobalErrorCode.IMAGE_UPLOAD_FAILED);   // 변환 실패 → 서버 문제
         }
     }

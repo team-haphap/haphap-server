@@ -31,22 +31,34 @@ public class VerificationImageService {
     public VerificationImageUploadResponse upload(Long userId, List<MultipartFile> files) {
         validateCount(files);
         User user = userService.findById(userId);
+        String dirName = DIR_NAME + "/" + userId;
 
-        List<String> uploadedKeys = new ArrayList<>();
+        //DB에 먼저 예약한 다음에 S3 업로드하는 걸로 구현
+        List<VerificationImage> reserved = verificationImageRepository.saveAll(
+                files.stream()
+                        .map(file -> VerificationImage.uploadedBy(user, s3Uploader.newPrivateKey(dirName)))
+                        .toList());
+
         try {
-            // S3 업로드 (외부 I/O — 트랜잭션 밖)
-            for (MultipartFile file : files) {
-                uploadedKeys.add(s3Uploader.uploadPrivate(file, DIR_NAME + "/" + userId));
+            for (int i = 0; i < files.size(); i++) {
+                s3Uploader.uploadPrivate(files.get(i), reserved.get(i).getS3Key());
             }
-            // DB 저장 (saveAll은 자체 트랜잭션으로 짧게)
-            List<VerificationImage> saved = verificationImageRepository.saveAll(
-                    uploadedKeys.stream().map(key -> VerificationImage.uploadedBy(user, key)).toList());
-            return VerificationImageUploadResponse.from(saved);
+            return VerificationImageUploadResponse.from(reserved);
 
         } catch (RuntimeException e) {
-            // 보상: 중간에 실패하면 이미 올라간 파일을 지우기
-            uploadedKeys.forEach(this::deleteQuietly);
+            // 보상 - 여기서 또 실패해도 행이 남아 있으면 정리 배치가 치우도록
+            reserved.forEach(image -> deleteQuietly(image.getS3Key()));
+            deleteRowsQuietly(reserved);
             throw e;
+        }
+    }
+
+    private void deleteRowsQuietly(List<VerificationImage> images) {
+        try {
+            verificationImageRepository.deleteAll(images);
+        } catch (Exception e) {
+            log.warn("업로드 보상 행 삭제 실패(정리 배치에서 재처리됨) ids={}",
+                    images.stream().map(VerificationImage::getId).toList(), e);
         }
     }
 
