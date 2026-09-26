@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface AlramRepository extends JpaRepository<Alram, Long> {
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("delete from Alram p where a.user.id = :userId")
+    @Modifying(flushAutomatically = true)
+    @Query("delete from Alram a where a.receiver.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
 }

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.global.client.dto.AppleJwksResponse;
+import org.sopt.haphap.global.client.dto.AppleTokenExchangeResult;
+import org.sopt.haphap.global.client.dto.AppleTokenResponse;
 import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import org.sopt.haphap.global.client.dto.AppleTokenResponse;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -25,6 +26,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Map;
+import java.time.Duration;
 
 @Slf4j
 @Component
@@ -33,6 +35,7 @@ public class AppleOAuthClient implements OAuthClient {
 
     private static final String APPLE_ISSUER = "https://appleid.apple.com";
     private static final String APPLE_JWKS_URI = "https://appleid.apple.com/auth/keys";
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);   // ← 이 줄 추가
 
     private final WebClient webClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -78,7 +81,7 @@ public class AppleOAuthClient implements OAuthClient {
         return new OAuthUserInfo(providerId, null, email, null, null, null, null);
     }
 
-    public String exchangeAuthorizationCode(String authorizationCode) {
+    public AppleTokenExchangeResult exchangeAuthorizationCode(String authorizationCode) {
         AppleTokenResponse response = webClient.post()
                 .uri("https://appleid.apple.com/auth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -90,12 +93,17 @@ public class AppleOAuthClient implements OAuthClient {
                 .onStatus(HttpStatusCode::isError,
                         r -> Mono.error(new CustomException(AuthErrorCode.APPLE_INVALID_TOKEN)))
                 .bodyToMono(AppleTokenResponse.class)
+                .timeout(REQUEST_TIMEOUT)
+                .onErrorMap(ex -> !(ex instanceof CustomException), ex -> {
+                    log.error("애플 토큰 교환 호출 실패", ex);
+                    return new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE);
+                })
                 .block();
 
-        if (response == null || response.refreshToken() == null) {
+        if (response == null || response.refreshToken() == null || response.idToken() == null) {
             throw new CustomException(AuthErrorCode.APPLE_INVALID_TOKEN);
         }
-        return response.refreshToken();
+        return new AppleTokenExchangeResult(response.refreshToken(), response.idToken());
     }
 
     public void revoke(String appleRefreshToken) {

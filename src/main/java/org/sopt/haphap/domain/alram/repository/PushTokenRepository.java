@@ -14,9 +14,8 @@ public interface PushTokenRepository extends JpaRepository<PushToken, Long> {
     List<PushToken> findByUserIdAndActiveTrue(Long userId);
     Optional<PushToken> findByUserIdAndDeviceId(Long userId, String deviceId);
     List<PushToken> findAllByUserIdInAndActiveTrue(List<Long> userIds);
-    List<PushToken> findAllByUserIdInAndActiveTrue(Collection<Long> userIds);
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("delete from PushToken p where p.user.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
 }

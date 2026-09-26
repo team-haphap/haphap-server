@@ -20,24 +20,39 @@ import java.util.List;
 @Slf4j
 public class WithdrawalTransactionService {
 
+    private static final int MAX_UNLINK_RETRY = 5;
+
     private final UserRepository userRepository;
     private final List<WithdrawalCleaner> cleaners;
     private final WithdrawalReasonLogRepository withdrawalReasonLogRepository;
 
-    private void alertOps(User user) {
-        log.error("[탈퇴 연동해제 실패] userId={}, provider={} - {}회 재시도 후에도 실패, 수동 확인 필요",
-                user.getId(), user.getProvider());
-        // TODO: 슬랙이나 디스코드로 알림 붙일 때 여기서 호출
+    /**  잠금 → 상태 확인 → 데이터 삭제 → 개인정보 파기 */
+    @Transactional
+    public void start(Long userId, WithdrawRequest request) {
+        User user = userRepository.findByIdForUpdate(userId)      // 같은 유저의 동시 요청은 여기서 줄을 섬
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+        if (!user.isActive()) {
+            throw new CustomException(GlobalErrorCode.USER_NOT_FOUND);   // 두 번째 요청은 여기서 막힘
+        }
+        cleaners.forEach(cleaner -> cleaner.clean(userId));
+        user.startWithdrawal();
+        withdrawalReasonLogRepository.save(
+                WithdrawalReasonLog.of(request.reason(), request.normalizedEtcReason()));
     }
 
     @Transactional
-    public void withdraw(Long userId, WithdrawRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+    public void complete(Long userId) {
+        userRepository.findByIdForUpdate(userId).ifPresent(User::completeWithdrawal);
+    }
 
-        cleaners.forEach(cleaner -> cleaner.clean(userId));
-        user.withdraw();   // 더티 체킹으로 - 트랜잭션 커밋 시 UPDATE 자동 실행
-        withdrawalReasonLogRepository.save(
-                WithdrawalReasonLog.of(request.reason(), request.normalizedEtcReason()));
+    @Transactional
+    public void recordFailure(Long userId) {
+        userRepository.findByIdForUpdate(userId).ifPresent(user -> {
+            if (user.recordUnlinkFailure(MAX_UNLINK_RETRY)) {
+                log.error("[탈퇴 연동해제 최종 실패] userId={}, provider={} - 수동 처리 필요",
+                        user.getId(), user.getProvider());
+                // TODO: 슬랙/디스코드 알림
+            }
+        });
     }
 }

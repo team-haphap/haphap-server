@@ -51,6 +51,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             set -e
+            umask 077
             cd /home/ubuntu/haphap
             git pull origin main
 
@@ -69,6 +70,7 @@ jobs:
             APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
             KAKAO_ADMIN_KEY=${{ secrets.KAKAO_ADMIN_KEY }}
             ENVEOF
+            chmod 600 .env
 
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json
             chmod 644 firebase-service-account.json

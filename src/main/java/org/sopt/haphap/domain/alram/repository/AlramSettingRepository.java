@@ -23,7 +23,7 @@ public interface AlramSettingRepository extends JpaRepository<AlramSetting, Long
     List<AlramSetting> findActiveSubscribers(@Param("postingId") Long postingId,
                                              @Param("registrantId") Long registrantId);
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("delete from AlramSetting s where s.user.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
 }
