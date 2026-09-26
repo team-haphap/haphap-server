@@ -28,7 +28,8 @@ public class AuthController implements AuthApiDocs {
 
     @PostMapping("/apple")
     public ResponseEntity<SuccessResponse<AuthResponse>> appleLogin(@Valid @RequestBody AppleLoginRequest request) {
-        return ResponseEntity.ok(SuccessResponse.of(AuthSuccessCode.APPLE_LOGIN_SUCCESS, authService.appleLogin(request.identityToken(), request.name())));
+        return ResponseEntity.ok(SuccessResponse.of(AuthSuccessCode.APPLE_LOGIN_SUCCESS,
+                authService.appleLogin(request.authorizationCode(), request.identityToken(), request.name())));
     }
 
     @PostMapping("/reissue")

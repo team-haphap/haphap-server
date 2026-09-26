@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-//@Profile("prod")   // 운영에서만 FCM
-@Profile({"local", "prod"})
+@Profile("prod")
 public class FcmNotificationSender implements NotificationSender {
 
     @Override

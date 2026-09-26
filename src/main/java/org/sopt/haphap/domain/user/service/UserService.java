@@ -8,7 +8,6 @@ import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
-import org.sopt.haphap.global.util.AnonymousNameGenerator;
 import org.sopt.haphap.global.util.NicknameAssigner;
 import org.sopt.haphap.global.util.ProfileImageAssigner;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,7 +28,14 @@ public class UserService {
     @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
         return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> new FindOrCreateResult(user, false))
+                .map(user -> {
+                    // 탈퇴 처리 중·해제 실패 계정은 원래 providerId가 남아 있어 검색됨 -> 로그인 차단
+                    // 탈퇴 완료면 providerId가 바뀌어 여기까지 오지 않고, 아래 createNewUser로 새로 가입됨
+                    if (!user.isActive()) {
+                        throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
+                    }
+                    return new FindOrCreateResult(user, false);
+                })
                 .orElseGet(() -> createNewUser(provider, providerId, userInfo));
     }
 
@@ -67,5 +73,11 @@ public class UserService {
     public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public void updateAppleRefreshToken(Long userId, String refreshToken) {
+        User user = findById(userId);
+        user.updateAppleRefreshToken(refreshToken);
     }
 }
