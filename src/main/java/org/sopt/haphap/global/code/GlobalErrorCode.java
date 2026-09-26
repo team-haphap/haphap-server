@@ -22,6 +22,8 @@ public enum GlobalErrorCode implements ErrorResultCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 미디어 타입입니다."),
     NOT_ACCEPTABLE(HttpStatus.NOT_ACCEPTABLE, "응답할 수 없는 미디어 타입입니다."),
+    INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, "이미지 파일을 읽을 수 없습니다. JPG 또는 PNG 파일을 올려주세요."),
+    IMAGE_UPLOAD_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요."),
     ;
 
     private final HttpStatus status;

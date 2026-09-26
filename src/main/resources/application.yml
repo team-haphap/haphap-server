@@ -33,6 +33,7 @@ jwt:
 aws:
   s3:
     bucket: ${AWS_S3_BUCKET}
+    private-bucket: ${AWS_S3_PRIVATE_BUCKET}
     region: ap-northeast-2
 
 apple:
