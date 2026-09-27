@@ -35,7 +35,7 @@ public class AppleOAuthClient implements OAuthClient {
 
     private static final String APPLE_ISSUER = "https://appleid.apple.com";
     private static final String APPLE_JWKS_URI = "https://appleid.apple.com/auth/keys";
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);   // ← 이 줄 추가
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
 
     private final WebClient webClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -118,6 +118,7 @@ public class AppleOAuthClient implements OAuthClient {
                 .onStatus(HttpStatusCode::isError,
                         r -> Mono.error(new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE)))
                 .toBodilessEntity()
+                .timeout(REQUEST_TIMEOUT)
                 .onErrorMap(ex -> !(ex instanceof CustomException), ex -> {
                     log.error("애플 revoke 호출 실패", ex);
                     return new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE);
@@ -141,6 +142,7 @@ public class AppleOAuthClient implements OAuthClient {
                 .uri(APPLE_JWKS_URI)
                 .retrieve()
                 .bodyToMono(AppleJwksResponse.class)
+                .timeout(REQUEST_TIMEOUT)
                 .onErrorMap(ex -> {
                     log.error("Apple JWKS 조회 실패", ex);
                     return new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE);
