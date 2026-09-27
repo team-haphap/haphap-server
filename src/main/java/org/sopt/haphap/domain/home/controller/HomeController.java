@@ -3,7 +3,9 @@ package org.sopt.haphap.domain.home.controller;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.home.code.HomeSuccessCode;
 import org.sopt.haphap.domain.home.dto.response.MyApplicationListResponse;
+import org.sopt.haphap.domain.home.dto.response.RecentViewListResponse;
 import org.sopt.haphap.domain.home.service.MyApplicationService;
+import org.sopt.haphap.domain.home.service.RecentViewService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     private final MyApplicationService myApplicationService;
+    private final RecentViewService recentViewService;
 
     @GetMapping("/my-applications")
     public ResponseEntity<SuccessResponse<MyApplicationListResponse>> getMyApplications(
             @AuthenticationPrincipal Long userId) {
         MyApplicationListResponse response = myApplicationService.getMyApplications(userId);
         return ResponseEntity.ok(ApiResponse.success(HomeSuccessCode.MY_APPLICATIONS_FETCHED, response));
+    }
+
+    @GetMapping("/recent-views")
+    public ResponseEntity<SuccessResponse<RecentViewListResponse>> getRecentViews(
+            @AuthenticationPrincipal Long userId) {
+        RecentViewListResponse response = recentViewService.getRecentViews(userId);
+        return ResponseEntity.ok(ApiResponse.success(HomeSuccessCode.RECENT_VIEWS_FETCHED, response));
     }
 }

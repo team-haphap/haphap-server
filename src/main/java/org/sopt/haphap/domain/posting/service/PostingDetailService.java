@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.posting.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.alram.service.AlramSettingService;
+import org.sopt.haphap.domain.home.service.RecentViewRecorder;
 import org.sopt.haphap.domain.posting.code.PostingErrorCode;
 import org.sopt.haphap.domain.posting.domain.CompanyImage;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
@@ -30,11 +31,15 @@ public class PostingDetailService {
     private final CurrentStageResolver currentStageResolver;
     private final CompanyImageRepository companyImageRepository;
     private final AlramSettingService alramSettingService;
+    private final RecentViewRecorder recentViewRecorder;
 
     public PostingDetailResponse getDetail(Long userId,Long postingId) {
         // 공고 + 회사 + 카테고리
         Posting posting = postingRepository.findWithCompanyAndCategory(postingId)
                 .orElseThrow(() -> new CustomException(PostingErrorCode.POSTING_NOT_FOUND));
+
+        // 상세 정상 진입 → 홈 [최근 조회한 공고] 기록
+        recentViewRecorder.record(userId, posting);
 
         // currentState 계산 (집계 테이블 재사용)
         String currentState = currentStageResolver.resolveCurrentState(postingId);
