@@ -14,6 +14,7 @@ import org.sopt.haphap.domain.posting.domain.StageType;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface PostingStageRepository extends JpaRepository<PostingStage, Long> {
     @Query("""
@@ -94,6 +95,9 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     List<Long> findDistinctPostingIds();
 
     boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
+
+    // 전형 이동: 현재 전형의 바로 다음 전형 조회
+    Optional<PostingStage> findByPostingIdAndOrderIndex(Long postingId, int orderIndex);
 
     // 같은 공고 안에서 canonical 전형 유형이 중복되지 않게 방지 (최소 시차표는 유형당 1개를 전제로 함)
     boolean existsByPostingIdAndStageType(Long postingId, StageType stageType);

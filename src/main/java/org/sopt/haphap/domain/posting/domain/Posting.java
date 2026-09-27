@@ -44,8 +44,9 @@ public class Posting extends BaseEntity {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    // 전형 이동 새로운 정책용. 공고 등록 시 첫 전형으로 초기화되고
-    // 이동 조건 충족 시에만 한 단계씩 전진하는 영속 상태 포인터.
+    // "발표를 기다리는 중인 전형"을 가리키는 영속 상태 포인터 (아직 확정 안 됨).
+    // 공고 등록 시 첫 전형으로 초기화되고, 이 전형 자신의 합격 인증이 승인되면 다음 전형으로 전진한다
+    // (StageTransitionAdvancer). movedAt은 "그 전형을 기다리기 시작한 시각".
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_stage_id")
     private PostingStage currentStage;
@@ -82,7 +83,8 @@ public class Posting extends BaseEntity {
         this.currentStage = nextStage;
     }
 
-    // (예: 9/23 최종합격 이동 → 9/27 00:00 마감)
+    // 최종합격 자신의 합격 인증이 승인된 시각(movedAt, StageTransitionAdvancer가 재기록) 기준 +4일.
+    // (예: 9/23 최종합격 확정 → 9/27 00:00 마감)
     public boolean isClosed() {
         if (currentStage == null || currentStage.getStageType() != StageType.FINAL_PASS) {
             return false;

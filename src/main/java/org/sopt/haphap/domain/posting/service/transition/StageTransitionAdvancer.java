@@ -13,13 +13,15 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 전형 이동 정책: 다음 전형의 합격 인증이 1건 이상 승인되면 즉시 그 전형으로 전진한다.
- * 최소 시차·건수/시간창 조건은 폐지됨. 건너뛰기·역행은 orderIndex 인접성 체크로 막는다
- * (후속 전형 결과는 운영진이 직접 수동 이동 — 자동 이동 대상이 아님).
+ * 전형 이동 정책: currentStage는 "발표를 기다리는 중인 전형"을 뜻한다.
+ * 현재 전형 자신의 합격 인증이 승인되면(=그 전형 결과가 실제로 나왔다는 뜻) 바로 다음 전형으로 전진한다
+ * (건너뛰기·역행은 orderIndex 인접성으로 막음 — 이전/후속 전형에 대한 승인은 무시하고 운영진 수동 이동 대상으로 남긴다).
+ *
+ * 최종합격(FINAL_PASS)은 그 다음이 없어서 "전진"할 곳이 없다. 대신 FINAL_PASS 자신의 합격이 승인되는
+ * 순간을 "진짜 최종합격 확정 시각"으로 movedAt에 다시 찍어둔다 — Posting.isClosed()의 +4일 마감 카운트다운이
+ * 이 시각을 기준으로 도니까, 여기서 놓치면 아무도 최종합격 안 났는데 마감돼버리는 문제가 생긴다.
  *
  * currentStage가 아직 없는 공고(초기화 전)는 건드리지 않는다.
- * 동일 공고에 동시 요청이 들어와도, 이미 전진한 뒤에는 candidate가 더 이상 "바로 다음 전형"이 아니게 되어
- * 재이동이 자연스럽게 막힌다(최초 1회만 반영).
  */
 @Slf4j
 @Component
@@ -35,27 +37,37 @@ public class StageTransitionAdvancer {
                 .orElseThrow(() -> new IllegalStateException("존재하지 않는 공고입니다: " + e.postingId()));
 
         PostingStage current = posting.getCurrentStage();
-        if (current == null || current.getStageType() == StageType.FINAL_PASS) {
-            return;   // 미초기화 상태거나 이미 마지막 전형 → 더 이동할 곳 없음
+        if (current == null) {
+            return;   // 미초기화 상태 → 더 판단할 기준이 없음
         }
 
-        PostingStage candidate = postingStageRepository.findById(e.stageId())
-                .orElseThrow(() -> new IllegalStateException("존재하지 않는 전형입니다: " + e.stageId()));
-
-        if (!isImmediateNext(current, candidate)) {
-            return;   // 이전/후속 전형이면 무시 — 후속은 운영진 수동 이동 대상
+        if (!e.stageId().equals(current.getId())) {
+            return;   // 현재(발표 대기 중인) 전형 자신의 승인이 아니면 무시 — 이전/후속 전형은 운영진 수동 이동 대상
         }
 
-        advance(posting, candidate);
-    }
+        if (current.getStageType() == StageType.FINAL_PASS) {
+            confirmFinalPass(posting, current);
+            return;
+        }
 
-    private boolean isImmediateNext(PostingStage current, PostingStage candidate) {
-        return candidate.getOrderIndex() == current.getOrderIndex() + 1;
+        PostingStage next = postingStageRepository
+                .findByPostingIdAndOrderIndex(posting.getId(), current.getOrderIndex() + 1)
+                .orElse(null);
+        if (next == null) {
+            return;   // 다음 전형이 아직 등록 안 됨 → 이동 보류
+        }
+
+        advance(posting, next);
     }
 
     private void advance(Posting posting, PostingStage next) {
         next.markMoved(LocalDateTime.now());
         posting.moveCurrentStageTo(next);
         log.info("전형 이동: postingId={}, nextStageId={}({})", posting.getId(), next.getId(), next.getStageType());
+    }
+
+    private void confirmFinalPass(Posting posting, PostingStage finalStage) {
+        finalStage.markMoved(LocalDateTime.now());
+        log.info("최종합격 확정: postingId={}, stageId={}", posting.getId(), finalStage.getId());
     }
 }
