@@ -18,11 +18,11 @@ import org.sopt.haphap.domain.alram.notification.NotificationSender;
 import org.sopt.haphap.domain.alram.repository.AlramRepository;
 import org.sopt.haphap.domain.alram.repository.AlramSettingRepository;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
-import org.sopt.haphap.domain.posting.service.calculator.CurrentStageResolver;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
+import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.registration.event.RegistrationCreatedEvent;
 import org.springframework.stereotype.Service;
@@ -38,25 +38,31 @@ public class AlramService {
     private final AlramRepository alramRepository;
     private final PushTokenRepository pushTokenRepository;
     private final NotificationSender notificationSender;
-    private final CurrentStageResolver currentStageResolver;
 
     // 트랜잭션 안: 구독자 조회 + 알람 내역 저장 + 발송 대상(토큰) 수집까지
     @Transactional
     public AlramDispatch prepareAlrams(RegistrationCreatedEvent event) {
 
-        String currentStage = currentStageResolver.resolveCurrentStageName(event.postingId());
+        Posting posting = postingRepository.findById(event.postingId())
+                .orElseThrow(() -> new CustomException(AlramErrorCode.POSTING_NOT_FOUND));
 
+        if (posting.isClosed()) {
+            log.info("알람 스킵(마감) - postingId={}", event.postingId());
+            return AlramDispatch.empty();
+        }
+
+        PostingStage currentStage = posting.getCurrentStage();
         if (currentStage == null) {
             log.info("알람 스킵(진행 전형 없음) - postingId={}", event.postingId());
             return AlramDispatch.empty();
         }
 
-        if (!currentStage.equals(event.stage())) {
+        if (!currentStage.getName().equals(event.stage())) {
             log.info(
                     "현재 진행 전형이 아니므로 알람 미발송 - postingId={}, stage={}, currentStage={}",
                     event.postingId(),
                     event.stage(),
-                    currentStage
+                    currentStage.getName()
             );
 
             return AlramDispatch.empty();
@@ -70,8 +76,6 @@ public class AlramService {
             return AlramDispatch.empty();
         }
 
-        Posting posting = postingRepository.findById(event.postingId())
-                .orElseThrow(() -> new CustomException(AlramErrorCode.POSTING_NOT_FOUND));
         NotificationMessage message = createMessage(posting, event.stage(),event.result());
 
         // 알람 여부 동의한 userId 수집

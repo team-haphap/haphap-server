@@ -42,11 +42,24 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("since") LocalDateTime since,
             @Param("postingIds") List<Long> postingIds);
 
-    // 테스트용
+    // 정합성 보정/재구성(StageResultCountReconciler, StageResultCountRebuilder)용 원본 재집계.
+    // 실시간 집계(StageResultCountUpdater)가 보류하는 것과 반드시 같은 기준으로 걸러야 한다 —
+    // 안 그러면 배치가 돌 때마다 보류해둔 값을 무시하고 원본으로 덮어써버린다.
+    // PENDING은 항상 집계. PASS는 인증 승인된 것만. FAIL은 "후속 전형 불합격" 검토가 승인 안 된 건 제외.
     @Query("""
         SELECT r.posting.id AS postingId, r.stage.id AS stageId,
                r.result AS result, COUNT(r) AS cnt
         FROM Registration r
+        WHERE r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PENDING
+           OR (r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+               AND r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED)
+           OR (r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.FAIL
+               AND NOT EXISTS (
+                   SELECT 1 FROM RegistrationReview rv
+                   WHERE rv.registration = r
+                     AND rv.reason = org.sopt.haphap.domain.registration.domain.RegistrationReviewReason.SUBSEQUENT_STAGE_FAIL
+                     AND rv.status <> org.sopt.haphap.domain.registration.domain.RegistrationReviewStatus.ACCEPTED
+               ))
         GROUP BY r.posting.id, r.stage.id, r.result
         """)
     List<StageResultAggProjection> aggregateAllForRebuild();
@@ -119,4 +132,26 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     Long countTodayEvents(@Param("startOfDay") LocalDateTime startOfDay,
                           @Param("startOfTomorrow") LocalDateTime startOfTomorrow);
+
+    // 운영진 검토 트리거: 오늘(자정~) 이 (공고,전형)에 등록된 불합격 건수
+    @Query("""
+        SELECT COUNT(r)
+        FROM Registration r
+        WHERE r.posting.id = :postingId AND r.stage.id = :stageId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.FAIL
+          AND r.updatedAt >= :startOfDay AND r.updatedAt < :startOfTomorrow
+        """)
+    long countFailToday(@Param("postingId") Long postingId, @Param("stageId") Long stageId,
+                        @Param("startOfDay") LocalDateTime startOfDay,
+                        @Param("startOfTomorrow") LocalDateTime startOfTomorrow);
+
+    // 운영진 검토 트리거: 이 (공고,전형)에 승인된 합격이 이미 있는지 ("합격 인증 없이" 조건)
+    @Query("""
+        SELECT COUNT(r) > 0
+        FROM Registration r
+        WHERE r.posting.id = :postingId AND r.stage.id = :stageId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+          AND r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED
+        """)
+    boolean existsApprovedPass(@Param("postingId") Long postingId, @Param("stageId") Long stageId);
 }

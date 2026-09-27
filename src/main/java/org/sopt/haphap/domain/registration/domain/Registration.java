@@ -37,6 +37,12 @@ public class Registration extends BaseEntity {
     @Column(nullable = false, length = 20)
     private RegistrationResult result;  // 합격 / 불합격 / 대기
 
+    // 합격 인증(인증샷 검토) 상태. 실제 승인/반려 플로우는 별도 파트에서 연결 예정이라
+    // 지금은 전형 이동 트리거가 참조할 상태값만 갖고 있다.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status", nullable = false, length = 20)
+    private RegistrationVerificationStatus verificationStatus;
+
     @Convert(converter = ContactMethodListConverter.class)
     @Column(name = "contact_methods")
     private List<ContactMethod> contactMethods;
@@ -63,6 +69,14 @@ public class Registration extends BaseEntity {
         this.contactMethods = contactMethods;
         this.contactedAt = contactedAt;
         this.anonymous = anonymous;
+        this.verificationStatus = deriveVerificationStatus(result);
+    }
+
+    // PASS만 인증 대상. FAIL/PENDING은 애초에 검토할 게 없어 NOT_REQUIRED로 바로 확정.
+    private static RegistrationVerificationStatus deriveVerificationStatus(RegistrationResult result) {
+        return result == RegistrationResult.PASS
+                ? RegistrationVerificationStatus.PENDING
+                : RegistrationVerificationStatus.NOT_REQUIRED;
     }
 
     public boolean isPending() {
@@ -91,5 +105,25 @@ public class Registration extends BaseEntity {
         this.contactMethods = contactMethods;
         this.contactedAt = contactedAt;
         this.anonymous = anonymous;
+        this.verificationStatus = deriveVerificationStatus(result);
+    }
+
+    // 운영진 승인/반려 — 실제 트리거(인증샷 검토 UI 등)는 별도 파트에서 연결 예정
+    public void approve() {
+        if (this.verificationStatus != RegistrationVerificationStatus.PENDING) {
+            throw new IllegalStateException("승인 대기 상태가 아닙니다: " + this.verificationStatus);
+        }
+        this.verificationStatus = RegistrationVerificationStatus.APPROVED;
+    }
+
+    public void reject() {
+        if (this.verificationStatus != RegistrationVerificationStatus.PENDING) {
+            throw new IllegalStateException("승인 대기 상태가 아닙니다: " + this.verificationStatus);
+        }
+        this.verificationStatus = RegistrationVerificationStatus.REJECTED;
+    }
+
+    public boolean isApproved() {
+        return this.verificationStatus == RegistrationVerificationStatus.APPROVED;
     }
 }
