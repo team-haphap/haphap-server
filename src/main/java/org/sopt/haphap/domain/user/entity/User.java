@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.common.BaseEntity;
+import org.sopt.haphap.global.crypto.AppleRefreshTokenConverter;
 import org.sopt.haphap.global.exception.CustomException;
 
 import java.time.LocalDateTime;
@@ -96,9 +97,14 @@ public class User extends BaseEntity {
         this.gender = null;
         this.ageRange = null;
         this.phoneNumber = null;
-        this.withdrawalStatus = WithdrawalStatus.PENDING_UNLINK;
         this.withdrawalRequestedAt = LocalDateTime.now();
         this.withdrawalRetryCount = 0;
+
+        if (this.provider == Provider.LOCAL) {   // [리뷰 B]
+            markWithdrawn();
+            return;
+        }
+        this.withdrawalStatus = WithdrawalStatus.PENDING_UNLINK;
     }
 
     /** 2단계: 외부 연동 해제 성공 후 식별정보까지 파기. 여러 번 불려도 결과가 같도록 */
@@ -106,14 +112,14 @@ public class User extends BaseEntity {
         if (this.withdrawalStatus != WithdrawalStatus.PENDING_UNLINK) {
             return;
         }
-        this.providerId = "WITHDRAWN_" + UUID.randomUUID();   // 원래 ID와 연결 불가능한 값
-        this.appleRefreshToken = null;
-        this.withdrawalStatus = WithdrawalStatus.WITHDRAWN;
-        this.withdrawnAt = LocalDateTime.now();
+        markWithdrawn();
     }
 
     /** 연동 해제 실패 기록. 최대 횟수에 도달하면 종료 상태로 */
     public boolean recordUnlinkFailure(int maxRetry) {
+        if (this.withdrawalStatus != WithdrawalStatus.PENDING_UNLINK) {
+            return false;   // 이미 완료/종료됨 → 카운트도 알림도 없음
+        }
         this.withdrawalRetryCount++;
         if (this.withdrawalRetryCount >= maxRetry) {
             this.withdrawalStatus = WithdrawalStatus.UNLINK_FAILED;
@@ -129,5 +135,12 @@ public class User extends BaseEntity {
         }
         this.withdrawalStatus = WithdrawalStatus.PENDING_UNLINK;
         this.withdrawalRetryCount = 0;
+    }
+
+    private void markWithdrawn() {
+        this.providerId = "WITHDRAWN_" + UUID.randomUUID();   // 원래 ID와 연결 불가능한 값
+        this.appleRefreshToken = null;
+        this.withdrawalStatus = WithdrawalStatus.WITHDRAWN;
+        this.withdrawnAt = LocalDateTime.now();
     }
 }
