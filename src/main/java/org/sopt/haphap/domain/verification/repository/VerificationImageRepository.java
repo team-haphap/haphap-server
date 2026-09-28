@@ -28,4 +28,6 @@ public interface VerificationImageRepository extends JpaRepository<VerificationI
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select v from VerificationImage v where v.id = :id")
     Optional<VerificationImage> findByIdForUpdate(@Param("id") Long id);
+
+    List<VerificationImage> findByRegistrationId(Long registrationId);
 }

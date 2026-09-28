@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.sopt.haphap.domain.registration.domain.Registration;   // ← 추가
-import org.sopt.haphap.domain.user.entity.User;                   // ← 추가
+import org.sopt.haphap.domain.registration.domain.Registration;
+import org.sopt.haphap.domain.user.entity.User;
+import org.sopt.haphap.domain.verification.code.VerificationErrorCode;
 import org.sopt.haphap.global.common.BaseEntity;
+import org.sopt.haphap.global.exception.CustomException;
 
 @Entity
 @Table(name = "verification_image")
@@ -48,10 +50,9 @@ public class VerificationImage extends BaseEntity {
         return this.registration != null;
     }
 
-    /** TODO. #209 하면서 이거 결과 등록에 연결 */
     public void attachTo(Registration registration, int sortOrder) {
         if (isAttached()) {
-            throw new IllegalStateException("이미 다른 등록에 연결된 이미지입니다. id=" + id);
+            throw new CustomException(VerificationErrorCode.IMAGE_ALREADY_ATTACHED);
         }
         this.registration = registration;
         this.sortOrder = sortOrder;

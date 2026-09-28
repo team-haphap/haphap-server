@@ -35,7 +35,10 @@ public record RegistrationCreateRequest(
         Boolean anonymous,
 
         @NotNull(message = "알람 수신 여부는 필수입니다.")
-        Boolean alarmEnabled
+        Boolean alarmEnabled,
+
+        @Schema(description = "합격 인증 이미지 id 목록 (PASS일 때만 1~3개 필수, 그 외엔 비워야 함)")
+                List<Long> verificationImageIds
 ) {
         // 서버에서 하나로 합치는 편의 메서드
         public LocalDateTime contactedAt() {
@@ -43,5 +46,10 @@ public record RegistrationCreateRequest(
                         return null;
                 }
                 return LocalDateTime.of(contactedDate, contactedTime);
+        }
+
+        // 서비스 쪽 null 체크하는 편의 메서드
+        public boolean hasVerificationImages(){
+                return verificationImageIds != null && !verificationImageIds.isEmpty();
         }
 }

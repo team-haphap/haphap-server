@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.service.UserService;
 import org.sopt.haphap.domain.verification.code.VerificationErrorCode;
+import org.sopt.haphap.domain.verification.code.VerificationImagePolicy;
 import org.sopt.haphap.domain.verification.dto.response.VerificationImageUploadResponse;
 import org.sopt.haphap.domain.verification.entity.VerificationImage;
 import org.sopt.haphap.domain.verification.repository.VerificationImageRepository;
@@ -20,8 +21,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class VerificationImageService {
-    private static final int MIN_IMAGE_COUNT = 1;
-    private static final int MAX_IMAGE_COUNT = 3;
     private static final String DIR_NAME = "pass-verifications";
 
     private final S3Uploader s3Uploader;
@@ -33,7 +32,6 @@ public class VerificationImageService {
         User user = userService.findById(userId);
         String dirName = DIR_NAME + "/" + userId;
 
-        //DB에 먼저 예약한 다음에 S3 업로드하는 걸로 구현
         List<VerificationImage> reserved = verificationImageRepository.saveAll(
                 files.stream()
                         .map(file -> VerificationImage.uploadedBy(user, s3Uploader.newPrivateKey(dirName)))
@@ -46,9 +44,21 @@ public class VerificationImageService {
             return VerificationImageUploadResponse.from(reserved);
 
         } catch (RuntimeException e) {
-            // 보상 - 여기서 또 실패해도 행이 남아 있으면 정리 배치가 치우도록
-            reserved.forEach(image -> deleteQuietly(image.getS3Key()));
-            deleteRowsQuietly(reserved);
+            List<VerificationImage> successfullyDeletedImages = new ArrayList<>();
+
+            for (VerificationImage image : reserved) {
+                try {
+                    s3Uploader.deletePrivate(image.getS3Key());
+                    successfullyDeletedImages.add(image);
+                } catch (Exception ex) {
+                    log.warn("업로드 보상 삭제 실패(고아 정리 배치에서 재처리됨) key={}", image.getS3Key(), ex);
+                }
+            }
+
+            if (!successfullyDeletedImages.isEmpty()) {
+                deleteRowsQuietly(successfullyDeletedImages);
+            }
+
             throw e;
         }
     }
@@ -63,9 +73,14 @@ public class VerificationImageService {
     }
 
     private void validateCount(List<MultipartFile> files) {
-        int count = (files == null) ? 0 : files.size();
-        if (count < MIN_IMAGE_COUNT || count > MAX_IMAGE_COUNT) {
-            throw new CustomException(VerificationErrorCode.IMAGE_COUNT_INVALID);
+        int size = files != null ? files.size() : 0;
+
+        if (size < VerificationImagePolicy.MIN_IMAGE_COUNT || size > VerificationImagePolicy.MAX_IMAGE_COUNT) {
+            throw new IllegalArgumentException(
+                    String.format("이미지 개수는 최소 %d장, 최대 %d장이어야 합니다.",
+                            VerificationImagePolicy.MIN_IMAGE_COUNT,
+                            VerificationImagePolicy.MAX_IMAGE_COUNT)
+            );
         }
     }
 
