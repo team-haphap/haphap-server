@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.registration.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.registration.security.VerificationDecisionToken;
 import org.sopt.haphap.domain.registration.security.VerificationDecisionType;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/admin/registrations/verification")
 @RequiredArgsConstructor
+@Hidden
 public class RegistrationVerificationDecisionController {
 
     private final VerificationLinkSigner linkSigner;

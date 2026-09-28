@@ -66,29 +66,46 @@ public interface RegistrationApiDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = """
-                - PENDING_MUST_NOT_HAVE_CONTACT : 대기 상태에서는 연락 정보를 보낼 수 없습니다.
-                - CONFIRMED_MUST_HAVE_CONTACT : 합격/불합격 결과에는 연락 정보가 필요합니다.
-                - INVALID_CONTACT_METHOD: 유효하지 않은 연락 수단입니다.)
-                - 요청값 검증 실패 (필수 필드 누락)
-                """,
+            - PENDING_MUST_NOT_HAVE_CONTACT : 대기 상태에서는 연락 정보를 보낼 수 없습니다.
+            - CONFIRMED_MUST_HAVE_CONTACT : 합격/불합격 결과에는 연락 정보가 필요합니다.
+            - INVALID_CONTACT_METHOD: 유효하지 않은 연락 수단입니다.
+            - IMAGE_REQUIRED : 합격 등록에는 인증 이미지가 필요합니다. (PASS인데 verificationImageIds 없음)
+            - IMAGE_NOT_ALLOWED : 합격이 아닌 경우 인증 이미지를 첨부할 수 없습니다.
+            - IMAGE_COUNT_INVALID : 인증 이미지는 1장 이상 3장 이하로 등록해주세요.
+            - 요청값 검증 실패 (필수 필드 누락)
+            """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = {
                                     @ExampleObject(name = "CONFIRMED_MUST_HAVE_CONTACT", value = """
-                                    { "status": 400, "code": "CONFIRMED_MUST_HAVE_CONTACT", "message": "합격/불합격 결과에는 연락 정보가 필요합니다." }
-                                    """),
+                                { "status": 400, "code": "CONFIRMED_MUST_HAVE_CONTACT", "message": "합격/불합격 결과에는 연락 정보가 필요합니다." }
+                                """),
+                                    @ExampleObject(name = "IMAGE_REQUIRED", value = """
+                                { "status": 400, "code": "IMAGE_REQUIRED", "message": "합격 등록에는 인증 이미지가 필요합니다." }
+                                """),
+                                    @ExampleObject(name = "IMAGE_NOT_ALLOWED", value = """
+                                { "status": 400, "code": "IMAGE_NOT_ALLOWED", "message": "합격이 아닌 경우 인증 이미지를 첨부할 수 없습니다." }
+                                """),
+                                    @ExampleObject(name = "IMAGE_COUNT_INVALID", value = """
+                                { "status": 400, "code": "IMAGE_COUNT_INVALID", "message": "인증 이미지는 1장 이상 3장 이하로 등록해주세요." }
+                                """),
                                     @ExampleObject(name = "요청값 검증 실패 (필수 필드 누락)", value = """
-                                    { "status": 400, "code": "INVALID_INPUT_VALUE", "message": "공고 ID는 필수입니다." }
-                                    """),
+                                { "status": 400, "code": "INVALID_INPUT_VALUE", "message": "공고 ID는 필수입니다." }
+                                """),
                                     @ExampleObject(name = "INVALID_CONTACT_METHOD", value = """
-                                    { "status": 400, "code": "INVALID_CONTACT_METHOD", "message": "유효하지 않은 연락 수단입니다." }
-                                    """)
+                                { "status": 400, "code": "INVALID_CONTACT_METHOD", "message": "유효하지 않은 연락 수단입니다." }
+                                """)
                             })
             ),
+            @ApiResponse(responseCode = "403", description = "IMAGE_NOT_OWNED : 본인이 업로드한 이미지가 아닙니다.",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class))),
+            @ApiResponse(responseCode = "404", description = "IMAGE_NOT_FOUND : 존재하지 않는 인증 이미지입니다.",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class))),
             @ApiResponse(
                     responseCode = "409",
                     description = """
-                - DUPLICATE_REGISTRATION : 이미 입력한 전형입니다.
-                """,
+            - DUPLICATE_REGISTRATION : 이미 입력한 전형입니다.
+            - IMAGE_ALREADY_ATTACHED : 이미 다른 등록에 연결된 이미지입니다.
+            """,
                     content = @Content(schema = @Schema(implementation = FailureResponse.class))
             )
     })
@@ -96,6 +113,8 @@ public interface RegistrationApiDocs {
             description = """
                 공고 . 전형 별 사용자의 상태를 등록하고 알람 여부를 설정합니다.
                 - PENDING 상태 인 경우 contactMethod와 contactedDate/contactedTime 필드를 null로 해주세요
+                - PASS인 경우 verificationImageIds에 [합격 인증 이미지 업로드 API]에서 받은 imageIds를 1~3개 넣어주세요.
+                - PASS가 아닌 경우 verificationImageIds는 비워주세요.    
                 - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
                 - EMAIL(이메일),SMS(문자),PAGE(기업 홈페이지),PHONE_CALL(전화)
                 """)
