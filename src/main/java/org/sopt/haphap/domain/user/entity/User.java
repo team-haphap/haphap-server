@@ -52,6 +52,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String providerId;
 
+    //DB에 AES-GCM 암호문으로 자격 증명 저장하기
+    @Convert(converter = AppleRefreshTokenConverter.class)
+    @Column(length = 512)
     private String appleRefreshToken;
 
     // 회원 탈퇴
@@ -117,5 +120,14 @@ public class User extends BaseEntity {
             return true;   // "이번에 종료 상태가 됐다" → 운영 알림은 이때 한 번만
         }
         return false;
+    }
+
+    // 관리자 수동 복구 : Unlink_failed 에서 Pending_unlink로..
+    public void resetUnlinkRetry() {
+        if (this.withdrawalStatus != WithdrawalStatus.UNLINK_FAILED) {
+            return;
+        }
+        this.withdrawalStatus = WithdrawalStatus.PENDING_UNLINK;
+        this.withdrawalRetryCount = 0;
     }
 }

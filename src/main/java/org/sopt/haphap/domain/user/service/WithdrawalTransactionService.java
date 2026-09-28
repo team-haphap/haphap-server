@@ -55,4 +55,13 @@ public class WithdrawalTransactionService {
             }
         });
     }
+
+    //관리자 수동 복구용
+    @Transactional
+    public void resetUnlinkRetry(Long userId) {
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+        user.resetUnlinkRetry();
+        log.info("[탈퇴] 연동 해제 재시도 상태로 복구 userId={}", userId);
+    }
 }

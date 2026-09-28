@@ -77,7 +77,11 @@ public class UserService {
 
     @Transactional
     public void updateAppleRefreshToken(Long userId, String refreshToken) {
-        User user = findById(userId);
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+        if (!user.isActive()) {
+            throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
+        }
         user.updateAppleRefreshToken(refreshToken);
     }
 }

@@ -24,12 +24,23 @@ public class WithdrawalUnlinkProcessor {
         if (user == null || user.getWithdrawalStatus() != WithdrawalStatus.PENDING_UNLINK) {
             return;   // 이미 완료됐거나 종료 상태면 할 일 없음
         }
+
+        // 외부 연동 해제 — 실패만 "연동 해제 실패"로 카운트
         try {
-            socialUnlinker.unlink(user);                        // 외부 API (트랜잭션 밖)
-            withdrawalTransactionService.complete(userId);     // 성공 → WITHDRAWN
+            socialUnlinker.unlink(user);   //외부 API                      // 외부 API (트랜잭션 밖)
         } catch (Exception e) {
-            log.warn("탈퇴 연동 해제 실패(재시도 예정) userId={}", userId, e);
-            withdrawalTransactionService.recordFailure(userId); // 실패 → 횟수 +1, 5회면 UNLINK_FAILED
+            log.warn("[탈퇴] 외부 연동 해제 실패(재시도 예정) userId={}, provider={}",
+                    userId, user.getProvider(), e);
+            withdrawalTransactionService.recordFailure(userId); // 횟수 +1, 5회면 UNLINK_FAILED
+            return;
+        }
+
+        // 완료 처리 - 해제는 성공했으므로 실패 횟수로 세지 않고
+        // 상태가 pending_unlink로 남아 스케줄러가 다시 시도하고, 연동 해제는 멱등이라 결과는 같다
+        try {
+            withdrawalTransactionService.complete(userId);
+        } catch (Exception e) {
+            log.error("[탈퇴] 연동 해제 성공, 완료 처리(DB) 실패 - 스케줄러 재시도 예정 userId={}", userId, e);
         }
     }
 }

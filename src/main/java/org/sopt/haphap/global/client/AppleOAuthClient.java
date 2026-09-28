@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -90,8 +91,12 @@ public class AppleOAuthClient implements OAuthClient {
                         .with("code", authorizationCode)
                         .with("grant_type", "authorization_code"))
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        r -> Mono.error(new CustomException(AuthErrorCode.APPLE_INVALID_TOKEN)))
+                // 4xx(invalid_grant 등: 만료·재사용된 인가 코드) → 클라이언트 토큰 문제
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        r -> logAndError(r, "애플 토큰 교환 4xx", AuthErrorCode.APPLE_INVALID_TOKEN))
+                // 5xx → 애플 서버 장애 (클라이언트가 재시도하면 되는 상황)
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        r -> logAndError(r, "애플 토큰 교환 5xx", AuthErrorCode.APPLE_SERVER_UNAVAILABLE))
                 .bodyToMono(AppleTokenResponse.class)
                 .timeout(REQUEST_TIMEOUT)
                 .onErrorMap(ex -> !(ex instanceof CustomException), ex -> {
@@ -115,8 +120,10 @@ public class AppleOAuthClient implements OAuthClient {
                         .with("token", appleRefreshToken)
                         .with("token_type_hint", "refresh_token"))
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        r -> Mono.error(new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE)))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        r -> logAndError(r, "애플 revoke 4xx(요청/자격 문제)", AuthErrorCode.APPLE_SERVER_UNAVAILABLE))
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        r -> logAndError(r, "애플 revoke 5xx(애플 서버 장애)", AuthErrorCode.APPLE_SERVER_UNAVAILABLE))
                 .toBodilessEntity()
                 .timeout(REQUEST_TIMEOUT)
                 .onErrorMap(ex -> !(ex instanceof CustomException), ex -> {
@@ -124,6 +131,15 @@ public class AppleOAuthClient implements OAuthClient {
                     return new CustomException(AuthErrorCode.APPLE_SERVER_UNAVAILABLE);
                 })
                 .block();
+    }
+
+    private Mono<CustomException> logAndError(ClientResponse response, String message, AuthErrorCode errorCode) {
+        return response.bodyToMono(String.class)
+                .defaultIfEmpty("")
+                .map(body -> {
+                    log.warn("{} status={}, body={}", message, response.statusCode().value(), body);
+                    return new CustomException(errorCode);
+                });
     }
 
     private String extractKid(String jwt) {
