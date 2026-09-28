@@ -9,9 +9,6 @@ import org.sopt.haphap.domain.home.dto.response.RecentViewResponse;
 import org.sopt.haphap.domain.home.repository.PostingViewHistoryRepository;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.domain.Posting;
-import org.sopt.haphap.domain.posting.domain.PostingStage;
-import org.sopt.haphap.domain.posting.domain.StageType;
-import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
 import org.springframework.data.domain.PageRequest;
@@ -29,11 +26,10 @@ public class RecentViewService {
 
     private static final int MAX_RECENT_VIEWS = 10;
     private static final int RETENTION_DAYS = 30;
-    private static final String CLOSED_LABEL = "마감";
 
     private final PostingViewHistoryRepository postingViewHistoryRepository;
-    private final PostingStageRepository postingStageRepository;
     private final PostingAggregateLoader aggregateLoader;
+    private final HomeCardAssembler homeCardAssembler;
 
     public RecentViewListResponse getRecentViews(Long userId) {
         LocalDateTime since = LocalDateTime.now().minusDays(RETENTION_DAYS);
@@ -55,26 +51,6 @@ public class RecentViewService {
     }
 
     private RecentViewResponse toResponse(Posting posting, PostingAggregate agg) {
-        String nextStageName = null;
-        String dDayLabel = null;
-
-        if (posting.isClosed()) {
-            dDayLabel = CLOSED_LABEL;
-        } else {
-            PostingStage current = posting.getCurrentStage();
-            if (current != null && current.getStageType() != StageType.FINAL_PASS) {
-                PostingStage next = postingStageRepository
-                        .findByPostingIdAndOrderIndex(posting.getId(), current.getOrderIndex() + 1)
-                        .orElse(null);
-                if (next != null) {
-                    nextStageName = next.getName();
-                    dDayLabel = Posting.dDayLabelFor(next.getExpectedAnnouncementDate());
-                }
-            }
-        }
-
-        return new RecentViewResponse(
-                posting.getId(), posting.getCompany().getName(), posting.getTitle(), posting.getPosition(),
-                nextStageName, dDayLabel, agg.companyImageUrl(posting.getId()));
+        return homeCardAssembler.assemble(posting, agg.companyImageUrl(posting.getId()));
     }
 }
