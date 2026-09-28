@@ -3,6 +3,8 @@ package org.sopt.haphap.domain.user.service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sopt.haphap.domain.alram.domain.PushToken;
+import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
 import org.sopt.haphap.domain.user.entity.User;
@@ -33,6 +35,7 @@ public class AuthService {
     private final TokenService tokenService;
     private final List<OAuthClient> oAuthClientList;
     private final AppleOAuthClient appleOAuthClient;
+    private final PushTokenRepository pushTokenRepository;
 
     private Map<Provider, OAuthClient> oAuthClients;
     @PostConstruct
@@ -110,7 +113,7 @@ public class AuthService {
         );
     }
 
-    public void logout(String accessToken) {
+    public void logout(String accessToken, String deviceId) {
         boolean expired = jwtProvider.isExpiredAccessToken(accessToken);
         if (!expired && !jwtProvider.validateAccessToken(accessToken)) {
             throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
@@ -120,5 +123,10 @@ public class AuthService {
             tokenService.blacklistAccessToken(accessToken);
         }
         tokenService.deleteRefreshToken(userId, Role.USER);
+
+        if (deviceId != null && !deviceId.isBlank()) {
+            pushTokenRepository.findByUserIdAndDeviceId(userId, deviceId)
+                    .ifPresent(PushToken::deactivate);
+        }
     }
 }

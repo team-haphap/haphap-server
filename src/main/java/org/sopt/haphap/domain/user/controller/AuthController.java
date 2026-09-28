@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.dto.KakaoLoginRequest;
+import org.sopt.haphap.domain.user.dto.LogoutRequest;
 import org.sopt.haphap.global.code.AuthSuccessCode;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.sopt.haphap.domain.user.service.AuthService;
@@ -40,10 +41,11 @@ public class AuthController implements AuthApiDocs {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization,
+                                       @RequestBody(required = false) LogoutRequest request) {
         String token = BearerTokenExtractor.extract(authorization);
         if (token == null) { throw new CustomException(GlobalErrorCode.BAD_REQUEST); }
-        authService.logout(token);
+        authService.logout(token, request == null ? null : request.deviceId());
         return ResponseEntity.noContent().build();
     }
 }

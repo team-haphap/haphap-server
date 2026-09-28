@@ -1,6 +1,10 @@
 spring:
   application:
     name: haphap
+  task:
+    scheduling:
+      pool:
+        size: 4
 
   jpa:
     hibernate:

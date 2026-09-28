@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.dto.WithdrawRequest;
 import org.sopt.haphap.domain.user.service.withdrawal.WithdrawalUnlinkProcessor;
+import org.sopt.haphap.global.jwt.JwtProperties;
 import org.sopt.haphap.global.jwt.Role;
 import org.sopt.haphap.global.jwt.TokenService;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class MemberWithdrawalService {
     private final WithdrawalTransactionService withdrawalTransactionService;
     private final WithdrawalUnlinkProcessor withdrawalUnlinkProcessor;
     private final TokenService tokenService;
+    private final JwtProperties jwtProperties;
 
     public void withdraw(Long userId, String accessToken, WithdrawRequest request) {
         withdrawalTransactionService.start(userId, request);   // 커밋되면 개인정보는 이미 파기됨
@@ -27,6 +29,7 @@ public class MemberWithdrawalService {
         try {
             tokenService.blacklistAccessToken(accessToken);
             tokenService.deleteRefreshToken(userId, Role.USER);
+            tokenService.markWithdrawn(userId, jwtProperties.accessTokenExpiry());
         } catch (Exception e) {
             log.warn("탈퇴 토큰 폐기 실패 userId={}", userId, e);
         }

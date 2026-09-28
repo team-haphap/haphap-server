@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.sopt.haphap.domain.user.dto.AppleLoginRequest;
+import org.sopt.haphap.domain.user.dto.LogoutRequest;
 
 @Tag(name = "인증", description = "카카오/애플 소셜 로그인 및 토큰 관리를 위한 API")
 public interface AuthApiDocs {
@@ -115,7 +116,8 @@ public interface AuthApiDocs {
                                     { "status": 401, "code": "INVALID_ACCESS_TOKEN", "message": "유효하지 않은 액세스 토큰입니다." }
                                     """)))
     })
-    ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization);
+    ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization,
+                                 @RequestBody(required = false) LogoutRequest request);
 
     @Operation(summary = "애플 소셜 로그인",
             description = """

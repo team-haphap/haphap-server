@@ -27,7 +27,7 @@ public class WithdrawalUnlinkProcessor {
 
         // 외부 연동 해제 — 실패만 "연동 해제 실패"로 카운트
         try {
-            socialUnlinker.unlink(user);   //외부 API                      // 외부 API (트랜잭션 밖)
+            socialUnlinker.unlink(user);   //외부 API
         } catch (Exception e) {
             log.warn("[탈퇴] 외부 연동 해제 실패(재시도 예정) userId={}, provider={}",
                     userId, user.getProvider(), e);

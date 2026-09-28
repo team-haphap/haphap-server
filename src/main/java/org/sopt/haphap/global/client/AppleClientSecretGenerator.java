@@ -29,9 +29,6 @@ public class AppleClientSecretGenerator {
     @Value("${apple.client-id:}")
     private String clientId;
 
-    @Value("${apple.private-key-path:}")
-    private String privateKeyPath;
-
     private PrivateKey privateKey;
     @Value("${apple.private-key-base64:}")
     private String privateKeyBase64;

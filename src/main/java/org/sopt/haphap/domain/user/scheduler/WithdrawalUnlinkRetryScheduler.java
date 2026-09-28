@@ -37,6 +37,13 @@ public class WithdrawalUnlinkRetryScheduler {
             return;
         }
         log.info("탈퇴 연동 해제 재시도 대상 {}건", ids.size());
-        ids.forEach(processor::process);
+
+        ids.forEach(id -> {
+            try {
+                processor.process(id);
+            } catch (Exception e) {
+                log.error("[탈퇴] 재시도 처리 중 예외 - 다음 건 계속 진행 userId={}", id, e);
+            }
+        });
     }
 }
