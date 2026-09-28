@@ -41,7 +41,9 @@ public class PostingDetailService {
                 .orElseThrow(() -> new CustomException(PostingErrorCode.POSTING_NOT_FOUND));
 
         // 상세 정상 진입 → 홈 [최근 조회한 공고] 기록 + 홈 [지금 많이 보는 공고] 집계
-        recentViewRecorder.record(userId, posting);
+        if (userId != null) {
+            recentViewRecorder.record(userId, posting);
+        }
         homePopularViewTracker.record(postingId);
 
         // currentState 계산 (집계 테이블 재사용)
