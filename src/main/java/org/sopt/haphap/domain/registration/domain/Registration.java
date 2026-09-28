@@ -8,9 +8,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
+import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.global.common.BaseEntity;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
+import org.sopt.haphap.global.exception.CustomException;
 
 @Getter
 @Entity
@@ -108,22 +110,25 @@ public class Registration extends BaseEntity {
         this.verificationStatus = deriveVerificationStatus(result);
     }
 
-    // 운영진 승인/반려 — 실제 트리거(인증샷 검토 UI 등)는 별도 파트에서 연결 예정
     public void approve() {
         if (this.verificationStatus != RegistrationVerificationStatus.PENDING) {
-            throw new IllegalStateException("승인 대기 상태가 아닙니다: " + this.verificationStatus);
+            throw new CustomException(RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
         }
         this.verificationStatus = RegistrationVerificationStatus.APPROVED;
     }
 
     public void reject() {
         if (this.verificationStatus != RegistrationVerificationStatus.PENDING) {
-            throw new IllegalStateException("승인 대기 상태가 아닙니다: " + this.verificationStatus);
+            throw new CustomException(RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
         }
         this.verificationStatus = RegistrationVerificationStatus.REJECTED;
     }
 
     public boolean isApproved() {
         return this.verificationStatus == RegistrationVerificationStatus.APPROVED;
+    }
+
+    public boolean isRejected() {
+        return this.verificationStatus == RegistrationVerificationStatus.REJECTED;
     }
 }

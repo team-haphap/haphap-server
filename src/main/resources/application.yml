@@ -46,3 +46,7 @@ admin:
 
 logging:
   config: classpath:logback-spring.xml
+
+verification:
+  link:
+    secret: ${VERIFICATION_LINK_SECRET}

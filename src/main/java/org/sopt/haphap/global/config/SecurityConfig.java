@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/search/**",
                                 "/api/v1/banners/**",
-                                "/api/v1/admin/auth/**"
+                                "/api/v1/admin/auth/**",
+                                "/admin/registrations/verification/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/postings/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH,
