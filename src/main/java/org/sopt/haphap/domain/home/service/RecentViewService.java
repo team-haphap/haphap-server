@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.home.dto.response.RecentViewListResponse;
-import org.sopt.haphap.domain.home.dto.response.RecentViewResponse;
 import org.sopt.haphap.domain.home.repository.PostingViewHistoryRepository;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.domain.Posting;
@@ -41,16 +40,11 @@ public class RecentViewService {
 
         PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.POPULAR);
 
-        List<RecentViewResponse> result = postingIds.stream()
+        List<Posting> postings = postingIds.stream()
                 .map(agg::posting)
                 .filter(Objects::nonNull)
-                .map(posting -> toResponse(posting, agg))
                 .toList();
 
-        return RecentViewListResponse.from(result);
-    }
-
-    private RecentViewResponse toResponse(Posting posting, PostingAggregate agg) {
-        return homeCardAssembler.assemble(posting, agg.companyImageUrl(posting.getId()));
+        return RecentViewListResponse.from(homeCardAssembler.assemble(postings, agg));
     }
 }

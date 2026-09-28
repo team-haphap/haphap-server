@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.home.dto.response.RecentViewListResponse;
-import org.sopt.haphap.domain.home.dto.response.RecentViewResponse;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.service.support.CategoryParser;
@@ -52,7 +51,7 @@ public class HomePopularPostingService {
         List<Long> candidateIds = List.copyOf(scoreByPostingId.keySet());
         PostingAggregate agg = aggregateLoader.load(candidateIds, CompanyImageType.POPULAR);
 
-        List<RecentViewResponse> result = candidateIds.stream()
+        List<Posting> postings = candidateIds.stream()
                 .map(agg::posting)
                 .filter(Objects::nonNull)
                 .filter(posting -> matchesCategory(posting, categories))
@@ -60,10 +59,9 @@ public class HomePopularPostingService {
                         .comparingDouble((Posting posting) -> scoreByPostingId.get(posting.getId())).reversed()
                         .thenComparing(Posting::getTitle, TITLE_COMPARATOR))
                 .limit(MAX_POPULAR)
-                .map(posting -> homeCardAssembler.assemble(posting, agg.companyImageUrl(posting.getId())))
                 .toList();
 
-        return RecentViewListResponse.from(result);
+        return RecentViewListResponse.from(homeCardAssembler.assemble(postings, agg));
     }
 
     private boolean matchesCategory(Posting posting, List<String> categories) {
