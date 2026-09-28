@@ -35,7 +35,7 @@ public class PostingListingService {
         PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.LISTING);
 
         List<PopularPostingResponse> result = postingIds.stream()
-                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
+                .map(id -> assembler.assemble(agg.posting(id), agg.companyImageUrl(id)))
                 .sorted(PostingSortComparators.byAnnounceDate())
                 .map(PostingResponseAssembler.Scored::response)
                 .toList();

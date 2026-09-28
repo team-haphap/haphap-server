@@ -1,18 +1,12 @@
 package org.sopt.haphap.domain.posting.service;
 
-import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.posting.dto.response.TodayStatisticResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.sopt.haphap.domain.posting.dto.projection.PostingStageFlatProjection;
+import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.posting.dto.response.TodayStatisticResponse;
+import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
-import org.sopt.haphap.domain.posting.repository.StageResultCountRepository;
-import org.sopt.haphap.domain.posting.service.calculator.NextStageCalculator;
-import org.sopt.haphap.domain.registration.projection.StageRegistrationCountProjection;
 import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +18,7 @@ public class TodayStatisticService {
 
     private final RegistrationQueryService registrationQueryService;
     private final PostingStageRepository postingStageRepository;
-    private final StageResultCountRepository stageResultCountRepository;
-    private final NextStageCalculator nextStageCalculator;
+    private final PostingRepository postingRepository;
 
     public TodayStatisticResponse getTodayStatistics() {
         long cumulated = cumulatedCount();
@@ -42,30 +35,14 @@ public class TodayStatisticService {
         return count == null ? 0L : count;
     }
 
-    // 2. 진행 중(마감 안 된) 공고 수 = nextStage가 null이 아닌 공고
+    // 2. 진행 중(마감 안 된) 공고 수 = 전형이 1개 이상 있는 공고 중 Posting.isClosed()가 false인 것
     private long onGoingCount() {
-
-        Map<Long, List<PostingStageFlatProjection>> stagesByPosting = postingStageRepository
-                .findAllStages().stream()
-                .collect(Collectors.groupingBy(PostingStageFlatProjection::getPostingId));
-        stagesByPosting.values()
-                .forEach(list -> list.sort(
-                        Comparator.comparingInt(PostingStageFlatProjection::getOrderIndex)));
-
-        Map<Long, Map<Long, Long>> countsByPosting = stageResultCountRepository
-                .findAllTotals().stream()
-                .collect(Collectors.groupingBy(
-                        StageRegistrationCountProjection::getPostingId,
-                        Collectors.toMap(
-                                StageRegistrationCountProjection::getStageId,
-                                StageRegistrationCountProjection::getCnt)));
-
-        return stagesByPosting.entrySet().stream()
-                .filter(entry -> {
-                    List<PostingStageFlatProjection> stages = entry.getValue();
-                    Map<Long, Long> counts = countsByPosting.getOrDefault(entry.getKey(), Map.of());
-                    return !nextStageCalculator.isClosed(stages, counts);  // 마감 안 됨 = 진행 중
-                })
+        List<Long> postingIdsWithStages = postingStageRepository.findDistinctPostingIds();
+        if (postingIdsWithStages.isEmpty()) {
+            return 0L;
+        }
+        return postingRepository.findAllWithCurrentStageByIds(postingIdsWithStages).stream()
+                .filter(posting -> !posting.isClosed())
                 .count();
     }
 
