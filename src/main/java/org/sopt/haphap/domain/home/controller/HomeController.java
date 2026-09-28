@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/home")
 @RequiredArgsConstructor
-public class HomeController {
+public class HomeController implements HomeApiDocs {
 
     private final MyApplicationService myApplicationService;
     private final RecentViewService recentViewService;
