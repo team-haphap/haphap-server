@@ -11,14 +11,13 @@ import java.util.concurrent.TimeUnit;
 public class RefreshTokenStore {
 
     private static final String KEY_PREFIX = "refresh:";
-    //TODO. 토큰을 바꾸어요
-    private static final long REFRESH_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 90;
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final JwtProperties jwtProperties;
 
     public void save(Long id, Role role, String token) {
         redisTemplate.opsForValue().set(
-                key(id, role), token, REFRESH_TOKEN_EXPIRY, TimeUnit.MILLISECONDS
+                key(id, role), token, jwtProperties.refreshTokenExpiry().toMillis(), TimeUnit.MILLISECONDS
         );
     }
 
