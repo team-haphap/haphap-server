@@ -1,10 +1,8 @@
 package org.sopt.haphap.domain.home.service;
 
-import java.text.Collator;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -34,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class HomePopularPostingService {
 
     private static final int MAX_POPULAR = 10;
-    private static final Collator TITLE_COLLATOR = Collator.getInstance(Locale.KOREAN);
-    private static final Comparator<String> TITLE_COMPARATOR = HomePopularPostingService::compareTitle;
 
     private final RedisTemplate<String, String> redisTemplate;
     private final PostingAggregateLoader aggregateLoader;
@@ -60,7 +56,7 @@ public class HomePopularPostingService {
                 .filter(Objects::nonNull)
                 .sorted(Comparator
                         .comparingDouble((Posting posting) -> scoreByPostingId.get(posting.getId())).reversed()
-                        .thenComparing(Posting::getTitle, TITLE_COMPARATOR))
+                        .thenComparing(Posting::getTitle, PopularPostingTitleTieBreaker.COMPARATOR))
                 .limit(MAX_POPULAR)
                 .toList();
 
@@ -90,49 +86,5 @@ public class HomePopularPostingService {
             scoreByPostingId.put(Long.valueOf(tuple.getValue()), tuple.getScore());
         }
         return scoreByPostingId;
-    }
-
-    private static int compareTitle(String a, String b) {
-        TitleGroup groupA = TitleGroup.of(firstChar(a));
-        TitleGroup groupB = TitleGroup.of(firstChar(b));
-        if (groupA != groupB) {
-            return Integer.compare(groupA.ordinal(), groupB.ordinal());
-        }
-        return TITLE_COLLATOR.compare(a, b);
-    }
-
-    private static char firstChar(String value) {
-        return (value == null || value.isEmpty()) ? Character.MAX_VALUE : value.charAt(0);
-    }
-
-    // 동점 정렬 우선순위: 숫자 → 한글 → 영문 → 그 외
-    private enum TitleGroup {
-        DIGIT, HANGUL, LATIN, OTHER;
-
-        static TitleGroup of(char c) {
-            if (Character.isDigit(c)) {
-                return DIGIT;
-            }
-            if (isHangul(c)) {
-                return HANGUL;
-            }
-            if (isLatin(c)) {
-                return LATIN;
-            }
-            return OTHER;
-        }
-
-        private static boolean isHangul(char c) {
-            Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
-            return block == Character.UnicodeBlock.HANGUL_SYLLABLES
-                    || block == Character.UnicodeBlock.HANGUL_JAMO
-                    || block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
-                    || block == Character.UnicodeBlock.HANGUL_JAMO_EXTENDED_A
-                    || block == Character.UnicodeBlock.HANGUL_JAMO_EXTENDED_B;
-        }
-
-        private static boolean isLatin(char c) {
-            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-        }
     }
 }

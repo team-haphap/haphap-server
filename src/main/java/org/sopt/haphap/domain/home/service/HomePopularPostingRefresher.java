@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.home.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 매 정각, 직전 59분간의 home:popular:hour:{yyyyMMddHH} 버킷 전체를 카테고리별로 나눠 미리 순위를 매겨 캐싱한다.
+ *
  * 직전 시간대에 조회 기록이 전혀 없으면 아무 키도 갱신하지 않고 기존 캐시를 그대로 유지한다(빈 상태 노출 방지).
  * 이 규칙은 카테고리 단위로도 동일하게 적용된다 - 이번 시간대에 조회가 없었던 카테고리는 그 카테고리 키만
  * 건드리지 않고 넘어간다.
@@ -30,8 +32,6 @@ public class HomePopularPostingRefresher {
 
     private static final String CACHE_KEY_PREFIX = "home:popular:cache:";
     private static final String ALL_CATEGORIES_KEY_SUFFIX = "ALL";
-    // 최종 응답은 상위 10개지만, Redis 자체 동점 처리(멤버 문자열 사전식)가 우리 정렬 규칙(제목 가나다순)과
-    // 달라서 경계값 근처 동점자를 놓치지 않도록 여유를 두고 캐싱한다.
     private static final int TOP_N_PER_KEY = 20;
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -53,38 +53,30 @@ public class HomePopularPostingRefresher {
         }
 
         Map<Long, Double> scoreByPostingId = toScoreMap(scored);
-        Map<String, Map<Long, Double>> scoresByCategory = groupByCategory(scoreByPostingId);
-
-        writeTopN(cacheKeyFor(null), scoreByPostingId);
-        scoresByCategory.forEach((category, scores) -> writeTopN(cacheKeyFor(category), scores));
-
-        log.info("홈 인기 공고 캐시 갱신 완료 - 전체 {}건, {}개 카테고리",
-                scoreByPostingId.size(), scoresByCategory.size());
-    }
-
-    private Map<String, Map<Long, Double>> groupByCategory(Map<Long, Double> scoreByPostingId) {
         List<Long> postingIds = List.copyOf(scoreByPostingId.keySet());
-        Map<Long, String> categoryByPostingId = postingRepository.findCategoryNamesByIds(postingIds).stream()
-                .collect(Collectors.toMap(
-                        PostingCategoryProjection::getPostingId, PostingCategoryProjection::getCategoryName));
 
-        Map<String, Map<Long, Double>> scoresByCategory = new HashMap<>();
-        scoreByPostingId.forEach((postingId, score) -> {
-            String category = categoryByPostingId.get(postingId);
-            if (category == null) {
-                // 조회 이후 공고가 삭제되는 등의 예외적 상황 - 카테고리별 캐시에서만 제외, 전체 캐시엔 그대로 반영.
-                return;
-            }
-            scoresByCategory.computeIfAbsent(category, key -> new HashMap<>()).put(postingId, score);
-        });
-        return scoresByCategory;
+        // 삭제 등으로 더 이상 존재하지 않는 posting은 여기서 자연히 빠진다 - 어차피 나중에 응답 조립 시에도
+        // 걸러질 대상이라, ALL/카테고리 캐시 모두에서 제외하는 게 맞다.
+        List<PopularCandidate> candidates = postingRepository.findCategoryAndTitleByIds(postingIds).stream()
+                .map(row -> new PopularCandidate(
+                        row.getPostingId(), scoreByPostingId.get(row.getPostingId()), row.getTitle(), row.getCategoryName()))
+                .toList();
+
+        writeTopN(cacheKeyFor(null), candidates);
+
+        Map<String, List<PopularCandidate>> byCategory = candidates.stream()
+                .collect(Collectors.groupingBy(PopularCandidate::categoryName));
+        byCategory.forEach((category, categoryCandidates) -> writeTopN(cacheKeyFor(category), categoryCandidates));
+
+        log.info("홈 인기 공고 캐시 갱신 완료 - 전체 {}건, {}개 카테고리", candidates.size(), byCategory.size());
     }
 
-    private void writeTopN(String key, Map<Long, Double> scoreByPostingId) {
-        Set<TypedTuple<String>> topEntries = scoreByPostingId.entrySet().stream()
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+    private void writeTopN(String key, List<PopularCandidate> candidates) {
+        Set<TypedTuple<String>> topEntries = candidates.stream()
+                .sorted(Comparator.comparingDouble(PopularCandidate::score).reversed()
+                        .thenComparing(PopularCandidate::title, PopularPostingTitleTieBreaker.COMPARATOR))
                 .limit(TOP_N_PER_KEY)
-                .map(entry -> (TypedTuple<String>) new DefaultTypedTuple<>(entry.getKey().toString(), entry.getValue()))
+                .map(c -> (TypedTuple<String>) new DefaultTypedTuple<>(c.postingId().toString(), c.score()))
                 .collect(Collectors.toSet());
 
         String tempKey = key + ":tmp";
@@ -102,5 +94,8 @@ public class HomePopularPostingRefresher {
             scoreByPostingId.put(Long.valueOf(tuple.getValue()), tuple.getScore());
         }
         return scoreByPostingId;
+    }
+
+    private record PopularCandidate(Long postingId, Double score, String title, String categoryName) {
     }
 }
