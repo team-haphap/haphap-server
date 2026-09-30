@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 홈 [지금 많이 보는 공고]: 최대 10개, [전체]/카테고리(다중 선택) 필터, 마감된 공고도 노출 유지.
- * home:popular:cache(HomePopularPostingRefresher가 매 정각 갱신하는 ZSET)를 읽어 응답을 조립한다.
+ * HomePopularPostingRefresher가 매 정각 카테고리별로 미리 순위를 매겨 캐싱해둔 결과(home:popular:cache:*,
+ * ZSET)를 읽기만 한다 - 정렬/카테고리 필터링을 요청마다 다시 하지 않는다. 여러 카테고리를 선택하면
+ * 각 카테고리 캐시를 합친 뒤 다시 정렬해서 상위 10개를 뽑는다.
  * 정렬: 조회수(score) 내림차순, 동점이면 공고명 가나다순 - 우선순위는 숫자 → 한글 → 영문 → 그 외.
  * 팀원의 posting:popular-cache와는 완전히 별도의 캐시 - 조회/집계/갱신 전 과정이 독립적.
  */
@@ -43,7 +45,9 @@ public class HomePopularPostingService {
     public RecentViewListResponse getPopularPostings(List<String> category) {
         List<String> categories = categoryParser.parse(category);
 
-        Map<Long, Double> scoreByPostingId = fetchCandidateScores();
+        Map<Long, Double> scoreByPostingId = categories == null
+                ? fetchScores(HomePopularPostingRefresher.cacheKeyFor(null))
+                : mergeScores(categories);
         if (scoreByPostingId.isEmpty()) {
             return RecentViewListResponse.from(List.of());
         }
@@ -54,7 +58,6 @@ public class HomePopularPostingService {
         List<Posting> postings = candidateIds.stream()
                 .map(agg::posting)
                 .filter(Objects::nonNull)
-                .filter(posting -> matchesCategory(posting, categories))
                 .sorted(Comparator
                         .comparingDouble((Posting posting) -> scoreByPostingId.get(posting.getId())).reversed()
                         .thenComparing(Posting::getTitle, TITLE_COMPARATOR))
@@ -64,13 +67,17 @@ public class HomePopularPostingService {
         return RecentViewListResponse.from(homeCardAssembler.assemble(postings, agg));
     }
 
-    private boolean matchesCategory(Posting posting, List<String> categories) {
-        return categories == null || categories.contains(posting.getCategory().getName());
+    private Map<Long, Double> mergeScores(List<String> categories) {
+        Map<Long, Double> merged = new LinkedHashMap<>();
+        for (String category : categories) {
+            merged.putAll(fetchScores(HomePopularPostingRefresher.cacheKeyFor(category)));
+        }
+        return merged;
     }
 
-    private Map<Long, Double> fetchCandidateScores() {
+    private Map<Long, Double> fetchScores(String cacheKey) {
         Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet()
-                .reverseRangeWithScores(HomePopularPostingRefresher.CACHE_KEY, 0, -1);
+                .reverseRangeWithScores(cacheKey, 0, -1);
         if (tuples == null || tuples.isEmpty()) {
             return Map.of();
         }

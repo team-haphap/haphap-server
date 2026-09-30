@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.projection.PostingAutocompleteProjection;
+import org.sopt.haphap.domain.posting.dto.projection.PostingCategoryProjection;
 import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +27,14 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             WHERE p.id IN :ids
             """)
     List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+
+    // 홈 인기 공고 정각 갱신용 - 카테고리별로 나눠 캐싱하기 위해 postingId -> 카테고리명만 가볍게 조회
+    @Query("""
+            SELECT p.id AS postingId, p.category.name AS categoryName
+            FROM Posting p
+            WHERE p.id IN :ids
+            """)
+    List<PostingCategoryProjection> findCategoryNamesByIds(@Param("ids") List<Long> ids);
 
     // 온고잉 카운트/조회수 정리 스케줄러처럼 회사·카테고리 없이 마감 여부만 보면 되는 배치용
     @Query("""
