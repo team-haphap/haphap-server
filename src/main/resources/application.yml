@@ -39,6 +39,7 @@ jwt:
 aws:
   s3:
     bucket: ${AWS_S3_BUCKET}
+    private-bucket: ${AWS_S3_PRIVATE_BUCKET}
     region: ap-northeast-2
 
 apple:
@@ -58,5 +59,15 @@ admin:
 logging:
   config: classpath:logback-spring.xml
 
+verification:
+  link:
+    secret: ${VERIFICATION_LINK_SECRET}
+
+discord:
+  webhook:
+    verification-url: ${DISCORD_VERIFICATION_WEBHOOK_URL}
+
+app:
+  base_url: ${APP_BASE_URL}
 crypto:
   apple-token-key: ${APPLE_TOKEN_ENCRYPTION_KEY:}

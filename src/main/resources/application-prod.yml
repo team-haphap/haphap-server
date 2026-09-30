@@ -31,3 +31,10 @@ jwt:
 
 firebase:
   service-account-path: ${FIREBASE_CONFIG_PATH:/app/firebase-service-account.json}
+
+discord:
+  webhook:
+    verification-url: ${DISCORD_VERIFICATION_WEBHOOK_URL}
+
+app:
+  base-url: ${APP_BASE_URL}

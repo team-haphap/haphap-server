@@ -1,10 +1,12 @@
 package org.sopt.haphap.domain.registration.repository;
 
+import jakarta.persistence.LockModeType;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.projection.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,6 +16,10 @@ import java.util.Optional;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     Optional<Registration> findByUserIdAndPostingIdAndStageId(Long userId, Long postingId, Long stageId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query ("select r from Registration r where r.id = :id")
+    Optional<Registration> findByIdForUpdate (@Param("id") Long id);
 
     //48시간 내 PASS/FAIL 결과가 있는 공고 id 추리기.
     @Query("""

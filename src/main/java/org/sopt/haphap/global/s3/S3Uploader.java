@@ -2,9 +2,13 @@ package org.sopt.haphap.global.s3;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.sopt.haphap.global.code.GlobalErrorCode;
+import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -22,14 +26,22 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class S3Uploader {
+
+    private static final String PUBLIC_CACHE = "public, max-age=31536000, immutable";
+    private static final String PRIVATE_CACHE = "private, no-store";
+    private static final float WEBP_QUALITY = 0.85f;
 
     private final S3Client s3Client;
 
     @Value("${aws.s3.bucket}")
     private String bucket;
+
+    @Value("${aws.s3.private-bucket}")
+    private String privateBucket;
 
     @Value("${aws.s3.region}")
     private String region;
@@ -41,34 +53,75 @@ public class S3Uploader {
     }
 
     public String upload(MultipartFile file, String dirName) {
+        String key = dirName + "/" + UUID.randomUUID() + "-" + baseName(file) + ".webp";
+        putObject(bucket, key, toWebp(file), PUBLIC_CACHE);
+        return "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
+    }
+
+    // 비공개 파일용 key 생성 (원본 파일명 사용 X)
+    public String newPrivateKey(String dirName) {
+        return dirName + "/" + UUID.randomUUID() + ".webp";
+    }
+
+    // 정해진 key로 비공개 업로드
+    public void uploadPrivate(MultipartFile file, String key) {
+        putObject(privateBucket, key, toWebp(file), PRIVATE_CACHE);
+    }
+
+    public void delete(String key) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build());
+    }
+
+    public void deletePrivate(String key) {
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(privateBucket)
+                .key(key)
+                .build());
+    }
+
+    private byte[] toWebp(MultipartFile file) {
+        BufferedImage image = readImage(file);
+        try {
+            return convertToWebp(image, WEBP_QUALITY);
+        } catch (IOException | IllegalStateException e) {
+            log.error("webp 변환 실패", e);
+            throw new CustomException(GlobalErrorCode.IMAGE_UPLOAD_FAILED);   // 변환 실패 → 서버 문제
+        }
+    }
+
+    private BufferedImage readImage(MultipartFile file) {
+        try (InputStream in = file.getInputStream()) {
+            BufferedImage image = ImageIO.read(in);
+            if (image == null) {                          // 이미지가 아니거나 지원하지 않는 형식(HEIC 등)
+                throw new CustomException(GlobalErrorCode.INVALID_IMAGE_FILE);
+            }
+            return image;
+        } catch (IOException e) {
+            throw new CustomException(GlobalErrorCode.INVALID_IMAGE_FILE);
+        }
+    }
+
+    private void putObject(String targetBucket, String key, byte[] bytes, String cacheControl) {
+        try {
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(targetBucket).key(key)
+                            .contentType("image/webp")
+                            .cacheControl(cacheControl)
+                            .build(),
+                    RequestBody.fromBytes(bytes));
+        } catch (SdkException e) {
+            throw new CustomException(GlobalErrorCode.IMAGE_UPLOAD_FAILED);
+        }
+    }
+
+    private String baseName(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        String baseName = (originalFilename != null && originalFilename.contains("."))
+        return (originalFilename != null && originalFilename.contains("."))
                 ? originalFilename.substring(0, originalFilename.lastIndexOf('.'))
                 : "file";
-        String key = dirName + "/" + UUID.randomUUID() + "-" + baseName + ".webp";
-
-        try (InputStream inputStream = file.getInputStream()) {
-            BufferedImage image = ImageIO.read(inputStream);
-            if (image == null) {
-                throw new IllegalStateException("이미지를 읽을 수 없습니다: " + originalFilename);
-            }
-
-            byte[] webpBytes = convertToWebp(image, 0.85f);
-
-            s3Client.putObject(
-                    PutObjectRequest.builder()
-                            .bucket(bucket)
-                            .key(key)
-                            .contentType("image/webp")
-                            .cacheControl("public, max-age=31536000, immutable")
-                            .build(),
-                    RequestBody.fromBytes(webpBytes)
-            );
-        } catch (IOException e) {
-            throw new IllegalStateException("이미지 업로드 실패", e);
-        }
-
-        return "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
     }
 
     private byte[] convertToWebp(BufferedImage image, float quality) throws IOException {
@@ -102,12 +155,5 @@ public class S3Uploader {
             writer.dispose();
         }
         return baos.toByteArray();
-    }
-
-    public void delete(String key) {
-        s3Client.deleteObject(DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build());
     }
 }
