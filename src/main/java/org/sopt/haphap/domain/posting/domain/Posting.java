@@ -107,20 +107,24 @@ public class Posting extends BaseEntity {
             return new StageDisplay(null, UPCOMING_LABEL, false);   // 아직 전형 미등록 → 초기화 전
         }
 
-        LocalDate expected = currentStage.getExpectedAnnouncementDate();
-        if (expected == null) {
-            return new StageDisplay(currentStage, null, false);   // 예정일 미입력
-        }
+        return new StageDisplay(currentStage, dDayLabelFor(currentStage.getExpectedAnnouncementDate()), false);
+    }
 
+    // D-n / D-day / 발표 확인 중 라벨 계산. 어떤 전형의 예상 발표일이든 동일한 규칙을 적용한다
+    // (예: 홈 [내 지원]의 "다음 전형 발표 예상일" D-day도 이걸 재사용).
+    public static String dDayLabelFor(LocalDate expected) {
+        if (expected == null) {
+            return null;   // 예정일 미입력
+        }
         LocalDate today = LocalDate.now();
         if (today.isBefore(expected)) {
             long daysUntil = ChronoUnit.DAYS.between(today, expected);
-            return new StageDisplay(currentStage, "D-" + daysUntil, false);
+            return "D-" + daysUntil;
         }
         if (today.isEqual(expected)) {
-            return new StageDisplay(currentStage, D_DAY_LABEL, false);
+            return D_DAY_LABEL;
         }
-        return new StageDisplay(currentStage, CHECKING_LABEL, false);   // 예정일은 지났는데 아직 이동 전
+        return CHECKING_LABEL;   // 예정일은 지났는데 아직 이동 전
     }
 
     public record StageDisplay(PostingStage stage, String label, boolean closed) {}

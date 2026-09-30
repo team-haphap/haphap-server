@@ -160,4 +160,17 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
           AND r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED
         """)
     boolean existsApprovedPass(@Param("postingId") Long postingId, @Param("stageId") Long stageId);
+
+    // 홈 [내 지원]: 이 유저가 "유효한" 결과를 등록한 공고 id를, 그 공고에 마지막으로 활동한 시각(=최근 상태 등록) 최신순으로.
+    // 합격은 운영진 승인 전까지는 등록한 결과로 안 침 (승인되는 순간 approve()가 updatedAt을 갱신해서 그때부터 반영됨).
+    @Query("""
+        SELECT r.posting.id
+        FROM Registration r
+        WHERE r.user.id = :userId
+          AND (r.result <> org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+               OR r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED)
+        GROUP BY r.posting.id
+        ORDER BY MAX(r.updatedAt) DESC
+        """)
+    List<Long> findAppliedPostingIdsOrderByLastActivity(@Param("userId") Long userId);
 }
