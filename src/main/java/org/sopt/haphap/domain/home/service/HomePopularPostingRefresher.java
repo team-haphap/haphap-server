@@ -32,7 +32,6 @@ public class HomePopularPostingRefresher {
 
     private static final String CACHE_KEY_PREFIX = "home:popular:cache:";
     private static final String ALL_CATEGORIES_KEY_SUFFIX = "ALL";
-    private static final int TOP_N_PER_KEY = 20;
 
     private final RedisTemplate<String, String> redisTemplate;
     private final PostingRepository postingRepository;
@@ -57,25 +56,31 @@ public class HomePopularPostingRefresher {
 
         // 삭제 등으로 더 이상 존재하지 않는 posting은 여기서 자연히 빠진다 - 어차피 나중에 응답 조립 시에도
         // 걸러질 대상이라, ALL/카테고리 캐시 모두에서 제외하는 게 맞다.
-        List<PopularCandidate> candidates = postingRepository.findCategoryAndTitleByIds(postingIds).stream()
+        List<PopularCandidate> candidates = postingRepository.findCategoryNamesByIds(postingIds).stream()
                 .map(row -> new PopularCandidate(
-                        row.getPostingId(), scoreByPostingId.get(row.getPostingId()), row.getTitle(), row.getCategoryName()))
+                        row.getPostingId(), scoreByPostingId.get(row.getPostingId()), row.getCategoryName()))
                 .toList();
 
-        writeTopN(cacheKeyFor(null), candidates);
+        writeAboveThreshold(cacheKeyFor(null), candidates);
 
         Map<String, List<PopularCandidate>> byCategory = candidates.stream()
                 .collect(Collectors.groupingBy(PopularCandidate::categoryName));
-        byCategory.forEach((category, categoryCandidates) -> writeTopN(cacheKeyFor(category), categoryCandidates));
+        byCategory.forEach((category, categoryCandidates) -> writeAboveThreshold(cacheKeyFor(category), categoryCandidates));
 
         log.info("홈 인기 공고 캐시 갱신 완료 - 전체 {}건, {}개 카테고리", candidates.size(), byCategory.size());
     }
 
-    private void writeTopN(String key, List<PopularCandidate> candidates) {
+    private void writeAboveThreshold(String key, List<PopularCandidate> candidates) {
+        List<Double> scoresDesc = candidates.stream()
+                .map(PopularCandidate::score)
+                .sorted(Comparator.reverseOrder())
+                .toList();
+        double threshold = scoresDesc.size() >= HomePopularPostingService.MAX_POPULAR
+                ? scoresDesc.get(HomePopularPostingService.MAX_POPULAR - 1)
+                : Double.NEGATIVE_INFINITY;
+
         Set<TypedTuple<String>> topEntries = candidates.stream()
-                .sorted(Comparator.comparingDouble(PopularCandidate::score).reversed()
-                        .thenComparing(PopularCandidate::title, PopularPostingTitleTieBreaker.COMPARATOR))
-                .limit(TOP_N_PER_KEY)
+                .filter(c -> c.score() >= threshold)
                 .map(c -> (TypedTuple<String>) new DefaultTypedTuple<>(c.postingId().toString(), c.score()))
                 .collect(Collectors.toSet());
 
@@ -96,6 +101,6 @@ public class HomePopularPostingRefresher {
         return scoreByPostingId;
     }
 
-    private record PopularCandidate(Long postingId, Double score, String title, String categoryName) {
+    private record PopularCandidate(Long postingId, Double score, String categoryName) {
     }
 }

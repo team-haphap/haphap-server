@@ -31,7 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class HomePopularPostingService {
 
-    private static final int MAX_POPULAR = 10;
+    // package-private: HomePopularPostingRefresher가 캐시 컷오프 임계값을 정할 때 이 숫자와 반드시 맞춰야 한다.
+    static final int MAX_POPULAR = 10;
 
     private final RedisTemplate<String, String> redisTemplate;
     private final PostingAggregateLoader aggregateLoader;

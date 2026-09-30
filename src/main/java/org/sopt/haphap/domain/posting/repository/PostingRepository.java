@@ -28,14 +28,15 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             """)
     List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
 
-    // 홈 인기 공고 정각 갱신용 - 카테고리별로 나눠 캐싱하면서 동점(조회수 동일) 정렬에 쓸 제목까지 가볍게 조회.
-    // 회사/이미지 등은 필요 없어서 findAllWithCompanyAndCategoryByIds보다 가벼움.
+    // 홈 인기 공고 정각 갱신용 - 카테고리별로 나눠 캐싱하기 위해 postingId -> 카테고리명만 가볍게 조회.
+    // 동점(조회수 동일) 처리는 점수 임계값(threshold)만으로 판단해서 제목은 필요 없다 - 제목 기준 최종 정렬은
+    // 읽기 시점(HomePopularPostingService)에서, 이미 훨씬 작아진 캐시 후보만 대상으로 한다.
     @Query("""
-            SELECT p.id AS postingId, p.category.name AS categoryName, p.title AS title
+            SELECT p.id AS postingId, p.category.name AS categoryName
             FROM Posting p
             WHERE p.id IN :ids
             """)
-    List<PostingCategoryProjection> findCategoryAndTitleByIds(@Param("ids") List<Long> ids);
+    List<PostingCategoryProjection> findCategoryNamesByIds(@Param("ids") List<Long> ids);
 
     // 온고잉 카운트/조회수 정리 스케줄러처럼 회사·카테고리 없이 마감 여부만 보면 되는 배치용
     @Query("""
