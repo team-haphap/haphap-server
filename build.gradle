@@ -76,6 +76,9 @@ dependencies {
     implementation 'org.sejda.imageio:webp-imageio:0.1.6'
     implementation 'software.amazon.awssdk:s3'
     implementation 'org.sejda.imageio:webp-imageio:0.1.6'
+
+    //test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {

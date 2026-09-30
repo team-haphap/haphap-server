@@ -71,6 +71,10 @@ jobs:
             APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
             APPLE_TOKEN_ENCRYPTION_KEY=${{ secrets.APPLE_TOKEN_ENCRYPTION_KEY }}
             KAKAO_ADMIN_KEY=${{ secrets.KAKAO_ADMIN_KEY }}
+            VERIFICATION_LINK_SECRET=${{ secrets.VERIFICATION_LINK_SECRET }}
+            DISCORD_VERIFICATION_WEBHOOK_URL=${{ secrets.DISCORD_VERIFICATION_WEBHOOK_URL }}
+            DISCORD_VERIFICATION_MENTION_USER_IDS=${{ secrets.DISCORD_VERIFICATION_MENTION_USER_IDS }}
+            APP_BASE_URL=${{ secrets.APP_BASE_URL }}
             ENVEOF
             chmod 600 .env
 

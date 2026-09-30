@@ -8,8 +8,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -39,12 +41,12 @@ public class DiscordWebhookClientImpl implements DiscordWebhookClient {
                 .block();
     }
 
-    // 여러 이미지를 discord embed로 보낼 때, 같은 url을 가진 embed끼리는
-    // 디스코드가 자동으로 하나의 갤러리처럼 묶어서 보여주도록
+    @Value("${discord.webhook.mention-user-ids}")
+    private String mentionUserIds;   // 예: "123456789012345678,987654321098765432" (Discord 유저 ID, 콤마 구분)
+
     private Map<String, Object> buildPayload(Long registrationId, List<String> imageUrls,
                                              String approveLink, String rejectLink) {
         List<Map<String, Object>> embeds = new ArrayList<>();
-
         embeds.add(Map.of(
                 "title", "합격 인증 검토 요청",
                 "description", "등록 #%d 건의 인증샷을 확인해주세요.\n[승인하기](%s) · [반려하기](%s)"
@@ -55,6 +57,22 @@ public class DiscordWebhookClientImpl implements DiscordWebhookClient {
             embeds.add(Map.of("url", approveLink, "image", Map.of("url", imageUrl)));
         }
 
-        return Map.of("embeds", embeds);
+        String content = buildMentionContent();
+
+        return Map.of(
+                "content", content,
+                "embeds", embeds
+        );
+    }
+
+    private String buildMentionContent() {
+        if (mentionUserIds == null || mentionUserIds.isBlank()) {
+            return "";
+        }
+        return Arrays.stream(mentionUserIds.split(","))
+                .map(String::trim)
+                .filter(id -> !id.isEmpty())
+                .map(id -> "<@%s>".formatted(id))
+                .collect(Collectors.joining(" "));
     }
 }
