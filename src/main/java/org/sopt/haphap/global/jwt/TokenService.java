@@ -14,6 +14,7 @@ public class TokenService {
     private final RefreshTokenStore refreshTokenStore;
     private final RedisTemplate<String, String> redisTemplate;
     private static final String BLACKLIST_PREFIX = "blacklist:";
+    private static final String WITHDRAWN_PREFIX = "withdrawn:";
 
     public String issueRefreshToken(Long id, Role role) {
         String refreshToken = jwtProvider.createRefreshToken(id, role);
@@ -41,5 +42,13 @@ public class TokenService {
 
     public boolean isBlacklisted(String accessToken) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken));
+    }
+
+    public void markWithdrawn(Long userId, java.time.Duration ttl) {
+        redisTemplate.opsForValue().set(WITHDRAWN_PREFIX + userId, "1", ttl.toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    public boolean isWithdrawn(Long userId) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(WITHDRAWN_PREFIX + userId));
     }
 }
