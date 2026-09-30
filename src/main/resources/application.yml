@@ -66,6 +66,7 @@ verification:
 discord:
   webhook:
     verification-url: ${DISCORD_VERIFICATION_WEBHOOK_URL}
+    mention-user-ids: ${DISCORD_VERIFICATION_MENTION_USER_IDS:}
 
 app:
   base_url: ${APP_BASE_URL}
