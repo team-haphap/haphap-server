@@ -13,10 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BannerService {
 
+    private static final int MAX_BANNERS = 5;
+
     private final BannerRepository bannerRepository;
 
     public BannerListResponse getBanners() {
-        List<BannerResponse> banners = bannerRepository.findActiveBannersOrderByDisplayOrder();
+        List<BannerResponse> banners = bannerRepository.findActiveBannersOrderByDisplayOrder()
+                .stream()
+                .limit(MAX_BANNERS)
+                .toList();
         return BannerListResponse.from(banners);
     }
 }
