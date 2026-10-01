@@ -19,8 +19,11 @@ public class Banner extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 500)
+    @Column(nullable = false, length = 500)
     private String imageUrl;
+
+    @Column(length = 500)
+    private String linkUrl;
 
     @Column(nullable = false)
     private Integer displayOrder;
