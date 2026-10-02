@@ -22,18 +22,20 @@ public interface BannerApiDocs {
                       "message": "히어로 배너 목록 조회에 성공했습니다.",
                       "data": {
                         "banners": [
-                          { "imageUrl": "https://.../banner1.png", "displayOrder": 1 },
-                          { "imageUrl": "https://.../banner2.png", "displayOrder": 2 }
-                        ]
+                            { "imageUrl": "https://.../banner1.png", "displayOrder": 1,
+                            "linkUrl": "https://www.instagram.com/p/xxxx/" },
+                            { "imageUrl": "https://.../banner2.png", "displayOrder": 2, "linkUrl": null }
+                            ]
                       }
                     }
                     """)))
     @Operation(summary = "홈 히어로 배너 목록 조회",
             description = """
                     홈 화면 진입 시 노출할 히어로 배너 이미지 목록을 노출 순서(displayOrder) 오름차순으로 반환합니다.
-                    - 비활성(isActive=false) 배너는 응답에서 제외됩니다.
-                    - 메인/서브 메시지는 전역 고정 문구로 클라이언트에서 관리하며 응답에 포함하지 않습니다.
-                    - 배너 자동 전환(5초 간격)·스와이프 전환·인디케이터 갱신은 클라이언트가 이 응답을 기준으로 로컬에서 처리합니다.
+                                        - 비활성(isActive=false) 배너는 응답에서 제외되며, 최대 5개까지만 반환합니다.
+                                        - linkUrl이 있으면 배너 탭 시 해당 인스타그램 게시물로 이동하고, null이면 클릭 동작이 없습니다.
+                                        - 메인/서브 메시지는 전역 고정 문구로 클라이언트에서 관리하며 응답에 포함하지 않습니다.
+                    - 배너 자동 전환(3초 간격)·스와이프 전환·인디케이터 갱신은 클라이언트가 이 응답을 기준으로 로컬에서 처리합니다.
                     """
     )
     ResponseEntity<SuccessResponse<BannerListResponse>> getBanners();
