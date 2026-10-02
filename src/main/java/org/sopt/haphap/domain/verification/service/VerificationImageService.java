@@ -14,7 +14,12 @@ import org.sopt.haphap.global.s3.S3Uploader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
@@ -29,6 +34,8 @@ public class VerificationImageService {
 
     public VerificationImageUploadResponse upload(Long userId, List<MultipartFile> files) {
         validateCount(files);
+        validateFiles(files);
+
         User user = userService.findById(userId);
         String dirName = DIR_NAME + "/" + userId;
 
@@ -74,13 +81,8 @@ public class VerificationImageService {
 
     private void validateCount(List<MultipartFile> files) {
         int size = files != null ? files.size() : 0;
-
         if (size < VerificationImagePolicy.MIN_IMAGE_COUNT || size > VerificationImagePolicy.MAX_IMAGE_COUNT) {
-            throw new IllegalArgumentException(
-                    String.format("이미지 개수는 최소 %d장, 최대 %d장이어야 합니다.",
-                            VerificationImagePolicy.MIN_IMAGE_COUNT,
-                            VerificationImagePolicy.MAX_IMAGE_COUNT)
-            );
+            throw new CustomException(VerificationErrorCode.IMAGE_COUNT_INVALID);
         }
     }
 
@@ -89,6 +91,30 @@ public class VerificationImageService {
             s3Uploader.deletePrivate(key);
         } catch (Exception e) {
             log.warn("업로드 보상 삭제 실패(고아 정리 배치에서 재처리됨) key={}", key, e);
+        }
+    }
+
+    private void validateFiles(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            if (file.getSize() > VerificationImagePolicy.MAX_FILE_SIZE_BYTES) {
+                throw new CustomException(VerificationErrorCode.IMAGE_TOO_LARGE);
+            }
+            String format = detectFormat(file);
+            if (format == null || !VerificationImagePolicy.ALLOWED_FORMATS.contains(format)) {
+                throw new CustomException(VerificationErrorCode.IMAGE_FORMAT_NOT_ALLOWED);
+            }
+        }
+    }
+
+    private String detectFormat(MultipartFile file) {
+        try (ImageInputStream in = ImageIO.createImageInputStream(file.getInputStream())) {
+            if (in == null) {
+                return null;
+            }
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
+            return readers.hasNext() ? readers.next().getFormatName().toLowerCase() : null;
+        } catch (IOException e) {
+            return null;
         }
     }
 }

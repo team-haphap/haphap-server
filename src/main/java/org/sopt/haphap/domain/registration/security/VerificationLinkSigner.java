@@ -14,17 +14,14 @@ import java.util.Base64;
 @Component
 public class VerificationLinkSigner {
 
-    private static final Duration TOKEN_TTL = Duration.ofHours(24);
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
     @Value("${verification.link.secret}")
     private String secret;
 
     public String issue(Long registrationId, VerificationDecisionType action) {
-        long expiresAt = System.currentTimeMillis() + TOKEN_TTL.toMillis();
-        String payload = registrationId + ":" + action.name() + ":" + expiresAt;
-        String signature = sign(payload);
-        String raw = payload + ":" + signature;
+        String payload = registrationId + ":" + action.name();
+        String raw = payload + ":" + sign(payload);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -37,25 +34,19 @@ public class VerificationLinkSigner {
         }
 
         String[] parts = raw.split(":");
-        if (parts.length != 4) {
+        if (parts.length != 3) {
             throw new CustomException(RegistrationErrorCode.INVALID_VERIFICATION_TOKEN);
         }
 
-        String payload = parts[0] + ":" + parts[1] + ":" + parts[2];
-        String signature = parts[3];
+        String payload = parts[0] + ":" + parts[1];
+        String signature = parts[2];
         if (!sign(payload).equals(signature)) {
             throw new CustomException(RegistrationErrorCode.INVALID_VERIFICATION_TOKEN);
         }
 
         Long registrationId = Long.parseLong(parts[0]);
         VerificationDecisionType action = VerificationDecisionType.valueOf(parts[1]);
-        long expiresAt = Long.parseLong(parts[2]);
-
-        VerificationDecisionToken decoded = new VerificationDecisionToken(registrationId, action, expiresAt);
-        if (decoded.isExpired()) {
-            throw new CustomException(RegistrationErrorCode.VERIFICATION_TOKEN_EXPIRED);
-        }
-        return decoded;
+        return new VerificationDecisionToken(registrationId, action);
     }
 
     private String sign(String payload) {
@@ -69,5 +60,3 @@ public class VerificationLinkSigner {
         }
     }
 }
-
-//JWT 서명처럼, HMAC 서명 기반 무상태를 인증한 패턴을 사용했습니다

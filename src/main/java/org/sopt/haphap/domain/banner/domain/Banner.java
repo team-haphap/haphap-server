@@ -22,6 +22,9 @@ public class Banner extends BaseEntity {
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
+    @Column(length = 500)
+    private String linkUrl;
+
     @Column(nullable = false)
     private Integer displayOrder;
 

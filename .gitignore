@@ -18,6 +18,7 @@ out/
 !**/src/test/**/out/
 
 src/test/java/org/sopt/haphap/TempTokenGeneratorTest.java
+src/test/java/org/sopt/haphap/domain/registration/security/VerificationLinkSignerTest.java
 
 ### Eclipse ###
 .apt_generated
