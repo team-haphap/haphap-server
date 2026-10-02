@@ -44,7 +44,7 @@ public class PostingStage {
     private LocalDateTime movedAt;
 
     // (공고x전형) 최초 합격 인증 승인 알림 발송 시각. null이면 아직 미발송 - 전형이 바뀌면 다음 전형은
-    // 새 row라 자동으로 재무장된다. 한번 찍히면 같은 전형에서 다시 알림을 보내지 않는다.
+    // 한번 찍히면 같은 전형에서 다시 알림을 보내지 않는다.
     private LocalDateTime passAlramSentAt;
 
     private PostingStage(String name, int orderIndex, LocalDate expectedAnnouncementDate,
