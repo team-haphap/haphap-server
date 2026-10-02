@@ -38,6 +38,17 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             """)
     List<PostingCategoryProjection> findCategoryNamesByIds(@Param("ids") List<Long> ids);
 
+    // 마감 알림 스케줄러용 - 최종합격 전형까지 왔고 아직 마감 알림을 안 보낸 공고 후보.
+    // 실제 마감(+4일 경과) 판정은 Posting.isClosed()로 다시 거른다 - 날짜 계산 로직을 SQL에 중복 구현하지 않기 위함.
+    @Query("""
+            SELECT p FROM Posting p
+            JOIN FETCH p.currentStage cs
+            WHERE cs.stageType = org.sopt.haphap.domain.posting.domain.StageType.FINAL_PASS
+              AND cs.movedAt IS NOT NULL
+              AND p.closedAlramSentAt IS NULL
+            """)
+    List<Posting> findClosedAlramCandidates();
+
     // 온고잉 카운트/조회수 정리 스케줄러처럼 회사·카테고리 없이 마감 여부만 보면 되는 배치용
     @Query("""
             SELECT p FROM Posting p
