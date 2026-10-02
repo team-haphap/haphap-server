@@ -6,9 +6,12 @@ import org.sopt.haphap.domain.registration.security.VerificationDecisionToken;
 import org.sopt.haphap.domain.registration.security.VerificationDecisionType;
 import org.sopt.haphap.domain.registration.security.VerificationLinkSigner;
 import org.sopt.haphap.domain.registration.service.RegistrationVerificationDecisionService;
+import org.sopt.haphap.global.code.ErrorResultCode;
+import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
 @RestController
 @RequestMapping("/admin/registrations/verification")
@@ -50,5 +53,18 @@ public class RegistrationVerificationDecisionController {
             decisionService.reject(decoded.registrationId());
         }
         return ResponseEntity.ok("처리 완료");
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<String> handleError(CustomException e) {
+        ErrorResultCode code = e.getErrorCode();
+        String html = """
+            <html><body style="font-family:sans-serif;text-align:center;padding-top:80px;">
+                <h2>%s</h2>
+            </body></html>
+            """.formatted(HtmlUtils.htmlEscape(code.getMessage()));
+        return ResponseEntity.status(code.getStatus())
+                .contentType(MediaType.TEXT_HTML)
+                .body(html);
     }
 }
