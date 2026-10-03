@@ -115,6 +115,12 @@ public class RegistrationService {
         }
 
         List<Long> imageIds = request.verificationImageIds();
+
+        // TODO: 업로드 임시 비필수화에 맞춰, 이미지가 아예 없으면 첨부할 것도 없으니 그냥 스킵.
+        // 원복 시 이 if문도 같이 제거할 것 (validateImageCount가 다시 0개를 막아줌).
+        if (imageIds == null || imageIds.isEmpty()) {
+            return;
+        }
         validateImageCount(imageIds);
 
         List<Long> sortedIds = imageIds.stream().sorted().toList();   // 데드락 방지: 항상 같은 순서로 락
@@ -163,9 +169,10 @@ public class RegistrationService {
             }
         }
 
-        if (isPass && !request.hasVerificationImages()) {
-            throw new CustomException(VerificationErrorCode.IMAGE_REQUIRED);
-        }
+        // TODO: 클라 요청으로 합격 인증 이미지 업로드를 임시로 필수 아니게 풂. 추후 원복 필요.
+        // if (isPass && !request.hasVerificationImages()) {
+        //     throw new CustomException(VerificationErrorCode.IMAGE_REQUIRED);
+        // }
         if (!isPass && request.hasVerificationImages()) {
             throw new CustomException(VerificationErrorCode.IMAGE_NOT_ALLOWED);
         }
