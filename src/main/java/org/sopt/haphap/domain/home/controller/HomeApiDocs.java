@@ -32,7 +32,7 @@ public interface HomeApiDocs {
                                     "postingId": 12,
                                     "companyName": "토스",
                                     "title": "2026 상반기 신입 공채",
-                                    "position": "백엔드 개발자",
+                                    "category": "개발/데이터",
                                     "currentStageStatus": "1차 면접 발표 중",
                                     "dDayLabel": "D-3",
                                     "logoImageUrl": "https://.../toss.png"
@@ -63,7 +63,7 @@ public interface HomeApiDocs {
                                     "postingId": 12,
                                     "companyName": "토스",
                                     "title": "2026 상반기 신입 공채",
-                                    "position": "백엔드 개발자",
+                                    "category": "개발/데이터",
                                     "nextStage": "1차 면접",
                                     "dDayLabel": "D-3",
                                     "logoImageUrl": "https://.../toss.png"
@@ -95,7 +95,7 @@ public interface HomeApiDocs {
                                             "postingId": 12,
                                             "companyName": "토스",
                                             "title": "2026 상반기 신입 공채",
-                                            "position": "백엔드 개발자",
+                                            "category": "개발/데이터"add,
                                             "nextStage": "1차 면접",
                                             "dDayLabel": "D-3",
                                             "logoImageUrl": "https://.../toss.png"

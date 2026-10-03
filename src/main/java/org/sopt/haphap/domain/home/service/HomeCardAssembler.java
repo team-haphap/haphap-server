@@ -69,7 +69,9 @@ public class HomeCardAssembler {
         }
 
         return new RecentViewResponse(
-                posting.getId(), posting.getCompany().getName(), posting.getTitle(), posting.getPosition(),
+                posting.getId(), posting.getCompany().getName(), posting.getTitle(),
+                posting.getCategory().getName(),
+                //posting.getPosition(),
                 nextStageName, dDayLabel, logoImageUrl);
     }
 }

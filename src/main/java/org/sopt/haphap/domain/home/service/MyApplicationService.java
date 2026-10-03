@@ -60,7 +60,8 @@ public class MyApplicationService {
                 posting.getId(),
                 posting.getCompany().getName(),
                 posting.getTitle(),
-                posting.getPosition(),
+                //posting.getPosition(),
+                posting.getCategory().getName(),
                 current == null ? null : current.getName() + STATUS_SUFFIX,
                 resolveNextStageDDay(posting, current),
                 agg.companyImageUrl(posting.getId()));
