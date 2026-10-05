@@ -55,11 +55,15 @@ public interface MemberApiDocs {
     @Operation(summary = "회원 탈퇴",
             description = """
                     본인 계정을 즉시 탈퇴 처리합니다. 
-                    (1) 카카오/애플 연동 해제 -> 개인정보 파기 및 개인 데이터 (알림, 알림 설정, 푸시 토큰) 삭제 -> 토큰 폐기
-                    (2) 합불 기록은 작성자를 알 수 없는 비식별 상태로 전체 집계에만 남도록
-                    (3) 탈퇴 사유는 필수적이고, ETC 선택 시 etcReason 이 필요합니다 (공백제외 1-200자)
-                    (4) 외부 연동 해제에 실패하면 503 반환하고, 어떤 데이터도 변경되지 않습니다. 
-                    (5) Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                    (1) 요청 즉시: 개인정보 파기, 알림·알림 설정·푸시 토큰·조회 이력 삭제, 합불 기록 비식별화(전체 집계는 유지),
+                        합격 인증 이미지 삭제(약 25시간 이내), 액세스/리프레시 토큰 폐기
+                    (2) 카카오/애플 연동 해제는 응답 이후 진행되며, 실패 시 서버가 자동 재시도합니다. 연동 해제 결과와 무관하게 204를 반환합니다.
+                    (3) 탈퇴 사유 필수. ETC 선택 시 etcReason 필요 (앞쪽 공백 제외 1~150자, 이모지 1개 = 1자, 공백만 입력 불가)
+                    (4) 동시에 들어온 중복 요청도 204를 반환합니다.
+                        단, 탈퇴 완료 후 같은 토큰으로 재요청하면 401이 반환되니 '탈퇴 완료'로 간주하고 로그인 화면으로 이동해주세요.
+                    (5) 처리 중 서버 오류(5xx)가 나면 어떤 데이터도 변경되지 않습니다. 재시도해주세요.
+                    (6) 탈퇴 직후 연동 해제가 끝나기 전에 같은 소셜 계정으로 로그인하면 403 WITHDRAWAL_IN_PROGRESS가 반환됩니다.
+                    (7) Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
                     """)
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
@@ -73,13 +77,13 @@ public interface MemberApiDocs {
                                     """)
                     }))
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "탈퇴 성공 (응답 본문 없음)"),
-            @ApiResponse(responseCode = "400", description = "탈퇴 사유 누락 / 기타 사유 공백 / 200자 초과",
+            @ApiResponse(responseCode = "204", description = "탈퇴 성공 / 이미 처리된 중복 요청 (응답 본문 없음)"),
+            @ApiResponse(responseCode = "400", description = "탈퇴 사유 누락 / 기타 사유 공백 / 150자 초과",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = @ExampleObject(value = """
-                                    { "status": 400, "code": "INVALID_INPUT_VALUE", "message": "기타 사유를 입력해주세요." }
+                                    { "status": 400, "code": "INVALID_INPUT_VALUE", "message": "기타 사유를 150자 이하로 입력해주세요." }
                                     """))),
-            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료/유효하지 않음)",
+            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료/유효하지 않음, 또는 이미 탈퇴 완료된 토큰)",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = @ExampleObject(value = """
                                     { "status": 401, "code": "UNAUTHORIZED", "message": "인증이 필요합니다." }
@@ -88,11 +92,6 @@ public interface MemberApiDocs {
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),
                             examples = @ExampleObject(value = """
                                     { "status": 404, "code": "USER_NOT_FOUND", "message": "존재하지 않는 유저입니다." }
-                                    """))),
-            @ApiResponse(responseCode = "503", description = "카카오/애플 연동 해제 실패 (재시도 필요)",
-                    content = @Content(schema = @Schema(implementation = FailureResponse.class),
-                            examples = @ExampleObject(value = """
-                                    { "status": 503, "code": "KAKAO_SERVER_UNAVAILABLE", "message": "카카오 서버 응답이 원활하지 않습니다. 잠시 후 다시 시도해주세요." }
                                     """)))
     })
     ResponseEntity<Void> withdraw(

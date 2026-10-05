@@ -58,6 +58,17 @@ public class WithdrawalTransactionService {
         userRepository.findByIdForUpdate(userId).ifPresent(User::completeWithdrawal);
     }
 
+    @Transactional
+    public void recordFailure(Long userId) {
+        userRepository.findByIdForUpdate(userId).ifPresent(user -> {
+            if (user.recordUnlinkFailure(MAX_UNLINK_RETRY)) {
+                log.error("[탈퇴 연동해제 최종 실패] userId={}, provider={} - 수동 처리 필요",
+                        user.getId(), user.getProvider());
+                // TODO: 슬랙/디스코드 알림
+            }
+        });
+    }
+
     //관리자 수동 복구용
     @Transactional
     public void resetUnlinkRetry(Long userId) {
@@ -65,20 +76,5 @@ public class WithdrawalTransactionService {
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
         user.resetUnlinkRetry();
         log.info("[탈퇴] 연동 해제 재시도 상태로 복구 userId={}", userId);
-    }
-
-    /** 이번 실패로 최종 실패(UNLINK_FAILED)가 됐으면 true → 호출 측이 트랜잭션 밖에서 알림 */
-    @Transactional
-    public boolean recordFailure(Long userId) {
-        return userRepository.findByIdForUpdate(userId)
-                .map(user -> {
-                    boolean terminal = user.recordUnlinkFailure(MAX_UNLINK_RETRY);
-                    if (terminal) {
-                        log.error("[탈퇴 연동해제 최종 실패] userId={}, provider={} - 수동 처리 필요",
-                                user.getId(), user.getProvider());
-                    }
-                    return terminal;
-                })
-                .orElse(false);
     }
 }
