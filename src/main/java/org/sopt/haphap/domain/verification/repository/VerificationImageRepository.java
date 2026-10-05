@@ -5,6 +5,7 @@ import org.sopt.haphap.domain.verification.entity.VerificationImage;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,4 +31,12 @@ public interface VerificationImageRepository extends JpaRepository<VerificationI
     Optional<VerificationImage> findByIdForUpdate(@Param("id") Long id);
 
     List<VerificationImage> findByRegistrationId(Long registrationId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+    UPDATE VerificationImage v
+    SET v.registration = null, v.sortOrder = null
+    WHERE v.user.id = :userId AND v.registration IS NOT NULL
+    """)
+    int detachAllByUserId(@Param("userId") Long userId);
 }
