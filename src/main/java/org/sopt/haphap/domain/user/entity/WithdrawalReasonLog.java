@@ -19,7 +19,7 @@ public class WithdrawalReasonLog extends BaseEntity {
     @Column(nullable = false, length = 30)
     private WithdrawalReason reason;
 
-    @Column(length = 200)
+    @Column(columnDefinition = "TEXT")
     private String etcReason;
 
     private WithdrawalReasonLog(WithdrawalReason reason, String etcReason) {
