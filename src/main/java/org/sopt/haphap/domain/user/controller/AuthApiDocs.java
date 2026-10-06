@@ -39,7 +39,8 @@ public interface AuthApiDocs {
                                         "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "name": "김소프트",
                                         "anonymousName": "익명의 판다",
-                                        "profileImageUrl": "https://.../profile.png"
+                                        "profileImageUrl": "https://.../profile.png",
+                                        "isNewUser":true
                                       }
                                     }
                                     """))),
@@ -86,7 +87,8 @@ public interface AuthApiDocs {
                                         "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "name": "김소프트",
                                         "anonymousName": "익명의 판다",
-                                        "profileImageUrl": "https://.../profile.png"
+                                        "profileImageUrl": "https://.../profile.png",
+                                        "isNewUser":false
                                       }
                                     }
                                     """))),
@@ -138,7 +140,8 @@ public interface AuthApiDocs {
                                         "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "name": "김소프트",
                                         "anonymousName": "익명의 판다",
-                                        "profileImageUrl": "https://.../profile.png"
+                                        "profileImageUrl": "https://.../profile.png",
+                                        "isNewUser":true
                                       }
                                     }
                                     """))),

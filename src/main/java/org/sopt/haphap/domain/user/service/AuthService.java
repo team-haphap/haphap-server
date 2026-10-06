@@ -3,7 +3,6 @@ package org.sopt.haphap.domain.user.service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.sopt.haphap.domain.alram.domain.PushToken;
 import org.sopt.haphap.domain.alram.repository.PushTokenRepository;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.entity.Provider;
@@ -56,7 +55,8 @@ public class AuthService {
                 newRefreshToken,
                 user.getName(),
                 user.getAnonymousName(),
-                user.getProfileImageUrl()
+                user.getProfileImageUrl(),
+                result.isNew()
         );
     }
     public AuthResponse appleLogin(String authorizationCode, String identityToken, String name) {
@@ -86,7 +86,7 @@ public class AuthService {
 
         String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
         return new AuthResponse(jwtProvider.createAccessToken(user.getId()), newRefreshToken,
-                user.getName(), user.getAnonymousName(), user.getProfileImageUrl());
+                user.getName(), user.getAnonymousName(), user.getProfileImageUrl(), result.isNew());
     }
 
     @Transactional
@@ -109,14 +109,19 @@ public class AuthService {
                 newRefreshToken,
                 user.getName(),
                 user.getAnonymousName(),
-                user.getProfileImageUrl()
+                user.getProfileImageUrl(),
+                false
         );
     }
 
+    @Transactional
     public void logout(String accessToken, String deviceId) {
         boolean expired = jwtProvider.isExpiredAccessToken(accessToken);
         if (!expired && !jwtProvider.validateAccessToken(accessToken)) {
             throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+        }
+        if (!expired && tokenService.isBlacklisted(accessToken)) {
+            return;
         }
         Long userId = jwtProvider.getUserIdIgnoringExpiration(accessToken);
         if (!expired) {
@@ -125,8 +130,7 @@ public class AuthService {
         tokenService.deleteRefreshToken(userId, Role.USER);
 
         if (deviceId != null && !deviceId.isBlank()) {
-            pushTokenRepository.findByUserIdAndDeviceId(userId, deviceId)
-                    .ifPresent(PushToken::deactivate);
+            pushTokenRepository.deactivateByUserIdAndDeviceId(userId, deviceId);
         }
     }
 }

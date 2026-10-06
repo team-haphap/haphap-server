@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.sopt.haphap.domain.home.domain.PostingViewHistory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,4 +23,8 @@ public interface PostingViewHistoryRepository extends JpaRepository<PostingViewH
         """)
     List<Long> findRecentPostingIds(
             @Param("userId") Long userId, @Param("since") LocalDateTime since, Pageable pageable);
+
+    @Modifying(flushAutomatically = true)
+    @Query("DELETE FROM PostingViewHistory v WHERE v.user.id = :userId")
+    int deleteAllByUserId(@Param("userId") Long userId);
 }

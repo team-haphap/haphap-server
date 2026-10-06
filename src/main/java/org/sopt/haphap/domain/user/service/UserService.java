@@ -8,65 +8,42 @@ import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
-import org.sopt.haphap.global.util.NicknameAssigner;
-import org.sopt.haphap.global.util.ProfileImageAssigner;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final NicknameAssigner nicknameAssigner;
-    private final ProfileImageAssigner profileImageAssigner;
+    private final UserCreator userCreator;
 
     // User + isNew를 함께 담는 record
     public record FindOrCreateResult(User user, boolean isNew) {}
 
-    @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
-        return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> {
-                    // 탈퇴 처리 중·해제 실패 계정은 원래 providerId가 남아 있어 검색됨 -> 로그인 차단
-                    // 탈퇴 완료면 providerId가 바뀌어 여기까지 오지 않고, 아래 createNewUser로 새로 가입됨
-                    if (!user.isActive()) {
-                        throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
-                    }
-                    return new FindOrCreateResult(user, false);
-                })
-                .orElseGet(() -> createNewUser(provider, providerId, userInfo));
-    }
-
-    private FindOrCreateResult createNewUser(Provider provider, String providerId, OAuthUserInfo userInfo) {
-        if (userInfo.email() == null) {
-            throw new CustomException(AuthErrorCode.EMAIL_REQUIRED);
-        }
-        if (userInfo.name() == null) {
-            throw new CustomException(AuthErrorCode.NAME_REQUIRED);
+        Optional<User> existing = userRepository.findByProviderAndProviderId(provider, providerId);
+        if (existing.isPresent()) {
+            return new FindOrCreateResult(requireActive(existing.get()), false);
         }
         try {
-            User newUser = userRepository.save(
-                    User.builder()
-                            .provider(provider)
-                            .providerId(providerId)
-                            .name(userInfo.name())
-                            .email(userInfo.email())
-                            .birthDate(userInfo.birthDate())
-                            .gender(userInfo.gender())
-                            .ageRange(userInfo.ageRange())
-                            .phoneNumber(userInfo.phoneNumber())
-                            .anonymousName(nicknameAssigner.assign())
-                            .profileImageUrl(profileImageAssigner.assign())
-                            .build()
-            );
-            return new FindOrCreateResult(newUser, true);
+            return new FindOrCreateResult(userCreator.create(provider, providerId, userInfo), true);
         } catch (DataIntegrityViolationException e) {
-            User existing = userRepository.findByProviderAndProviderId(provider, providerId)
+            // 동시 첫 로그인: 다른 요청이 먼저 가입시킴 → 그 유저로 로그인 처리
+            User user = userRepository.findByProviderAndProviderId(provider, providerId)
                     .orElseThrow(() -> new CustomException(GlobalErrorCode.INTERNAL_SERVER_ERROR));
-            return new FindOrCreateResult(existing, false);
+            return new FindOrCreateResult(requireActive(user), false);
         }
+    }
+
+    private User requireActive(User user) {
+        if (!user.isActive()) {
+            throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
+        }
+        return user;
     }
 
     @Transactional(readOnly = true)

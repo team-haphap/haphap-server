@@ -1,0 +1,1 @@
+ALTER TABLE withdrawal_reasons ALTER COLUMN etc_reason TYPE TEXT;
