@@ -19,7 +19,7 @@ public class AlramFailure extends BaseEntity {
     @Column(nullable = false)
     private Long postingId;
 
-    @Column(nullable = false)
+    // 마감 알림처럼 특정 등록자가 없는(스케줄러가 트리거하는) 실패 기록은 null.
     private Long registrantMemberId;
 
     @Column(length = 50)
