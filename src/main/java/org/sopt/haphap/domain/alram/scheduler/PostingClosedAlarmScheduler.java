@@ -49,7 +49,11 @@ public class PostingClosedAlarmScheduler {
                 sent++;
             } catch (Exception e) {
                 log.error("마감 알람 준비 실패 - postingId={}", posting.getId(), e);
-                alramFailureRecorder.record(posting.getId(), null, null, e);
+                try {
+                    alramFailureRecorder.record(posting.getId(), null, null, e);
+                } catch (Exception recordError) {
+                    log.error("마감 알람 실패 기록 저장 실패 - postingId={}", posting.getId(), recordError);
+                }
             }
         }
 
