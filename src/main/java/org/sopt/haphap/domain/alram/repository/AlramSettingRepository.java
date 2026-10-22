@@ -13,15 +13,14 @@ public interface AlramSettingRepository extends JpaRepository<AlramSetting, Long
 
     Optional<AlramSetting> findByUserIdAndPostingId(Long userId, Long postingId);
 
+    // 합격/마감 알림 모두 등록자 본인 포함 전체 구독자에게 발송한다(제외 없음).
     @Query("""
         select s from AlramSetting s
         join fetch s.user
         where s.posting.id = :postingId
           and s.enabled = true
-          and s.user.id <> :registrantId
     """)
-    List<AlramSetting> findActiveSubscribers(@Param("postingId") Long postingId,
-                                             @Param("registrantId") Long registrantId);
+    List<AlramSetting> findActiveSubscribers(@Param("postingId") Long postingId);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from AlramSetting s where s.user.id = :userId")

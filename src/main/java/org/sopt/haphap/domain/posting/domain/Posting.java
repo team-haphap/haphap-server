@@ -55,6 +55,10 @@ public class Posting extends BaseEntity {
 
     private String position;
 
+    // 공고 최초 마감 알림 발송 시각. null이면 아직 미발송. 한번 찍히면, 마감 이후 단순 데이터 정정으로
+    // isClosed()가 다시 평가되더라도 재발송하지 않는다.
+    private LocalDateTime closedAlramSentAt;
+
     private Posting(String title, LocalDate deadline, String location, String position,Category category, Company company) {
         this.title = title;
         this.deadline = deadline;
@@ -95,6 +99,10 @@ public class Posting extends BaseEntity {
         }
         LocalDateTime closesAt = movedAt.toLocalDate().plusDays(CLOSE_AFTER_DAYS).atStartOfDay();
         return !LocalDateTime.now().isBefore(closesAt);
+    }
+
+    public void markClosedAlramSent(LocalDateTime sentAt) {
+        this.closedAlramSentAt = sentAt;
     }
 
     // D-day 칩 정책: 현재 전형의 예상 발표일 기준으로 라벨을 정한다.
