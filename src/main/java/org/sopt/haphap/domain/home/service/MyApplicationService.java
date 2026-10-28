@@ -40,7 +40,7 @@ public class MyApplicationService {
             return MyApplicationListResponse.from(List.of());
         }
 
-        PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.POPULAR);
+        PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.CALENDAR_LOGO);
 
         List<MyApplicationResponse> result = postingIds.stream()
                 .map(agg::posting)
