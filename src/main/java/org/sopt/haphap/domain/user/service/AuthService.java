@@ -56,6 +56,7 @@ public class AuthService {
                 user.getName(),
                 user.getAnonymousName(),
                 user.getProfileImageUrl(),
+                user.getPointBalance(),
                 result.isNew()
         );
     }
@@ -86,7 +87,7 @@ public class AuthService {
 
         String newRefreshToken = tokenService.issueRefreshToken(user.getId(), Role.USER);
         return new AuthResponse(jwtProvider.createAccessToken(user.getId()), newRefreshToken,
-                user.getName(), user.getAnonymousName(), user.getProfileImageUrl(), result.isNew());
+                user.getName(), user.getAnonymousName(), user.getProfileImageUrl(), user.getPointBalance(), result.isNew());
     }
 
     @Transactional
@@ -110,6 +111,7 @@ public class AuthService {
                 user.getName(),
                 user.getAnonymousName(),
                 user.getProfileImageUrl(),
+                user.getPointBalance(),
                 false
         );
     }

@@ -24,6 +24,8 @@ public class UserCreator {
     private final NicknameAssigner nicknameAssigner;
     private final ProfileImageAssigner profileImageAssigner;
 
+    private static final int SIGNUP_BONUS_POINTS = 300;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User create(Provider provider, String providerId, OAuthUserInfo userInfo) {
         if (userInfo.email() == null) {
@@ -36,6 +38,7 @@ public class UserCreator {
                 User.builder()
                         .provider(provider)
                         .providerId(providerId)
+                        .pointBalance(SIGNUP_BONUS_POINTS)
                         .name(userInfo.name())
                         .email(userInfo.email())
                         .birthDate(userInfo.birthDate())
