@@ -32,6 +32,7 @@ public interface MemberApiDocs {
                                       "data": {
                                         "name": "김소프트",
                                         "anonymousName": "익명의 판다",
+                                        "pointBalance":300,
                                         "email": "user@example.com",
                                         "profileImageUrl": "https://.../profile.png",
                                         "provider": "KAKAO"

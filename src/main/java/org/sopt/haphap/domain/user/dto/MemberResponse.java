@@ -8,6 +8,7 @@ public record MemberResponse(
         String anonymousName,
         String email,
         String profileImageUrl,
+        int pointBalance,
         Provider provider
 ) {
     public static MemberResponse from(User user) {
@@ -16,6 +17,7 @@ public record MemberResponse(
                 user.getAnonymousName(),
                 user.getEmail(),
                 user.getProfileImageUrl(),
+                user.getPointBalance(),
                 user.getProvider()
         );
     }

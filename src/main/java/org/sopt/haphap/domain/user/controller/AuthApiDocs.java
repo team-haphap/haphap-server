@@ -38,6 +38,7 @@ public interface AuthApiDocs {
                                         "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "name": "김소프트",
+                                        "pointBalance":300,
                                         "anonymousName": "익명의 판다",
                                         "profileImageUrl": "https://.../profile.png",
                                         "isNewUser":true
@@ -86,6 +87,7 @@ public interface AuthApiDocs {
                                         "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "name": "김소프트",
+                                        "pointBalance":300,
                                         "anonymousName": "익명의 판다",
                                         "profileImageUrl": "https://.../profile.png",
                                         "isNewUser":false
@@ -139,6 +141,7 @@ public interface AuthApiDocs {
                                         "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
                                         "name": "김소프트",
+                                        "pointBalance":300,
                                         "anonymousName": "익명의 판다",
                                         "profileImageUrl": "https://.../profile.png",
                                         "isNewUser":true

@@ -85,6 +85,10 @@ public class User extends BaseEntity {
         return this.withdrawalStatus == WithdrawalStatus.WITHDRAWN;
     }
 
+    @Builder.Default
+    @Column(name = "point_balance", nullable = false)
+    private int pointBalance = 0;
+
     /** 1단계: 개인정보 즉시 파기. 외부 연동 해제에 필요한 providerId·appleRefreshToken만 남기기 */
     public void startWithdrawal() {
         if (!isActive()) {
@@ -93,6 +97,7 @@ public class User extends BaseEntity {
         this.name = WITHDRAWN_DISPLAY_NAME;
         this.email = "withdrawn+" + UUID.randomUUID() + "@deleted.local";
         this.anonymousName = "탈퇴한 사용자";
+        this.pointBalance=0;
         this.birthDate = null;
         this.gender = null;
         this.ageRange = null;

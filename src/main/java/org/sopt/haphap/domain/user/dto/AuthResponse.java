@@ -8,6 +8,7 @@ public record AuthResponse(
         String name,
         String anonymousName,
         String profileImageUrl,
+        int pointBalance,
         @Schema(description = "이번 로그인으로 새로 가입된 유저인지 (재발급 응답에서는 항상 false)", example = "true")
         boolean isNewUser
 ) {
