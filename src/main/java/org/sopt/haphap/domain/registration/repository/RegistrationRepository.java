@@ -193,4 +193,18 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY MAX(r.updatedAt) DESC
         """)
     List<Long> findAppliedPostingIdsOrderByLastActivity(@Param("userId") Long userId);
+
+    // 마이페이지 [내 지원 내역]: 위와 같은 "유효한 결과" 기준에 마지막 활동 시각까지 함께. 개수는 Pageable로 자른다.
+    // 같은 시각이면 공고 id 역순으로 고정해 페이지 경계에서 순서가 흔들리지 않게 한다.
+    @Query("""
+        SELECT r.posting.id AS postingId, MAX(r.updatedAt) AS lastActivityAt
+        FROM Registration r
+        WHERE r.user.id = :userId
+          AND (r.result <> org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+               OR r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED)
+        GROUP BY r.posting.id
+        ORDER BY MAX(r.updatedAt) DESC, r.posting.id DESC
+        """)
+    List<AppliedPostingProjection> findAppliedPostingsOrderByLastActivity(
+            @Param("userId") Long userId, Pageable pageable);
 }
