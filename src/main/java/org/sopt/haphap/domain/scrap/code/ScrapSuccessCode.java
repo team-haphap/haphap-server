@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 public enum ScrapSuccessCode implements SuccessResultCode {
 
     SCRAP_CREATED(HttpStatus.CREATED, "공고를 찜했습니다."),
-    ALREADY_SCRAPPED(HttpStatus.OK, "이미 찜한 공고입니다.");
+    ALREADY_SCRAPPED(HttpStatus.OK, "이미 찜한 공고입니다."),
+    SCRAP_DELETED(HttpStatus.OK, "공고 찜을 취소했습니다."),
+    ALREADY_UNSCRAPPED(HttpStatus.OK, "찜하지 않은 공고입니다.");
 
     private final HttpStatus status;
     private final String message;

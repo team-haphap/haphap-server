@@ -7,4 +7,8 @@ public record ScrapResponse(
     public static ScrapResponse scrapped(Long postingId) {
         return new ScrapResponse(postingId, true);
     }
+
+    public static ScrapResponse unscrapped(Long postingId) {
+        return new ScrapResponse(postingId, false);
+    }
 }

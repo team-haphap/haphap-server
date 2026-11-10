@@ -25,4 +25,17 @@ public class ScrapService {
         }
         return scrapRepository.insertIfAbsent(userId, postingId, LocalDateTime.now()) == 1;
     }
+
+    // 찜하지 않은 공고를 취소해도 에러가 아니다. 단 공고 자체가 없으면 404.
+    // 공고 존재 확인은 지운 게 없을 때만 한다 (찜이 있었다면 FK상 공고도 있으므로 일반 경로는 쿼리 1번).
+    // @return 이번 요청으로 찜을 취소했으면 true, 원래 찜하지 않았으면 false
+    public boolean unscrap(Long userId, Long postingId) {
+        if (scrapRepository.deleteByUserIdAndPostingId(userId, postingId) == 1) {
+            return true;
+        }
+        if (!postingRepository.existsById(postingId)) {
+            throw new CustomException(PostingErrorCode.POSTING_NOT_FOUND);
+        }
+        return false;
+    }
 }

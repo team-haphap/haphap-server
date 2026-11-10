@@ -20,6 +20,11 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
     int insertIfAbsent(@Param("userId") Long userId, @Param("postingId") Long postingId,
                        @Param("now") LocalDateTime now);
 
+    // DELETE는 그 자체로 멱등이라 동시 요청이 와도 한쪽만 1, 나머지는 0을 받는다.
+    @Modifying
+    @Query("DELETE FROM Scrap s WHERE s.user.id = :userId AND s.posting.id = :postingId")
+    int deleteByUserIdAndPostingId(@Param("userId") Long userId, @Param("postingId") Long postingId);
+
     @Modifying(flushAutomatically = true)
     @Query("DELETE FROM Scrap s WHERE s.user.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
