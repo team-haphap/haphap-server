@@ -17,6 +17,7 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregate;
 import org.sopt.haphap.domain.posting.service.support.PostingAggregateLoader;
+import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.projection.AppliedPostingProjection;
 import org.sopt.haphap.domain.registration.projection.MyRegistrationRowProjection;
 import org.sopt.haphap.domain.registration.projection.PostingParticipantCountProjection;
@@ -38,6 +39,7 @@ public class MyRegistrationService {
     private static final int PREVIEW_LIMIT = 10;
     private static final String CLOSED_STATE = "마감";
     private static final String UPCOMING_STATE = "진행 예정";
+    private static final String UNKNOWN_RESULT = "아직 몰라요";
 
     private final RegistrationRepository registrationRepository;
     private final PostingAggregateLoader aggregateLoader;
@@ -128,7 +130,12 @@ public class MyRegistrationService {
                 posting.getTitle(),
                 agg.companyImageUrl(posting.getId()),
                 resolveCurrentState(posting, closed),
-                latest.getStageName() + " " + latest.getResult().getDescription());
+                latest.getStageName() + " " + resultLabel(latest.getResult()));
+    }
+
+    // 화면 용어 기준. PENDING은 상태 등록의 "아직 몰라요" 선택지 (enum 설명 "대기"는 승인 대기로 오해될 수 있어 쓰지 않는다)
+    private String resultLabel(RegistrationResult result) {
+        return result == RegistrationResult.PENDING ? UNKNOWN_RESULT : result.getDescription();
     }
 
     // 공고 상세의 [현재 전형]과 같은 기준: 마감 → "마감", 현재 전형 없음 → "진행 예정", 그 외 현재 전형명

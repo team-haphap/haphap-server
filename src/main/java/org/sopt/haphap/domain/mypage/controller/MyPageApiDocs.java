@@ -104,7 +104,7 @@ public interface MyPageApiDocs {
                     - counts: 탭에 표시할 개수. 선택한 filter와 무관하게 항상 전체 기준입니다.
                     - 합격은 운영진의 합격 인증 승인이 나야 등록한 것으로 취급합니다. (승인 전/반려된 합격은 제외)
                     - currentState: 공고 상세의 현재 전형과 같은 기준. 현재 전형명, 마감된 공고는 "마감", 전형 시작 전이면 "진행 예정"
-                    - myResult: 내가 등록한 결과 중 전형 순서상 가장 뒤 전형의 결과 ("{전형명} 합격/불합격/대기").
+                    - myResult: 내가 등록한 결과 중 전형 순서상 가장 뒤 전형의 결과 ("{전형명} 합격" / "{전형명} 불합격" / "{전형명} 아직 몰라요").
                       등록/수정 시점과 무관하게 공고에 설정된 전형 순서 기준입니다.
                     """)
     ResponseEntity<SuccessResponse<MyRegistrationListResponse>> getRegistrations(
