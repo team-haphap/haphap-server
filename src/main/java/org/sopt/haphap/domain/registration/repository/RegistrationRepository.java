@@ -207,4 +207,17 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     List<AppliedPostingProjection> findAppliedPostingsOrderByLastActivity(
             @Param("userId") Long userId, Pageable pageable);
+
+    // 마이페이지 [내 지원 내역] 전체보기: 같은 "유효한 결과" 기준으로 유저의 등록을 전형 정보와 함께 전부.
+    // 유저 한 명의 등록 수는 작아서 한 번에 읽고, 공고별 그룹핑/정렬은 서비스에서 한다 (쿼리 1번으로 끝).
+    @Query("""
+        SELECT r.posting.id AS postingId, s.name AS stageName, s.orderIndex AS stageOrder,
+               r.result AS result, r.updatedAt AS updatedAt
+        FROM Registration r
+        JOIN r.stage s
+        WHERE r.user.id = :userId
+          AND (r.result <> org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+               OR r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED)
+        """)
+    List<MyRegistrationRowProjection> findValidRegistrationRowsByUserId(@Param("userId") Long userId);
 }
