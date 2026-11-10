@@ -1,9 +1,13 @@
 package org.sopt.haphap.domain.scrap.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.code.PostingErrorCode;
+import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
+import org.sopt.haphap.domain.scrap.dto.response.MyScrapListResponse;
+import org.sopt.haphap.domain.scrap.dto.response.MyScrapResponse;
 import org.sopt.haphap.domain.scrap.repository.ScrapRepository;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
@@ -37,5 +41,14 @@ public class ScrapService {
             throw new CustomException(PostingErrorCode.POSTING_NOT_FOUND);
         }
         return false;
+    }
+
+    // 마이페이지 [찜한 공고]: 찜한 시각 최신순(같으면 공고 id 역순). 페이지네이션 없이 전부, 쿼리 1번.
+    @Transactional(readOnly = true)
+    public MyScrapListResponse getMyScraps(Long userId) {
+        List<MyScrapResponse> scraps = scrapRepository.findMyScraps(userId, CompanyImageType.CALENDAR_LOGO).stream()
+                .map(MyScrapResponse::from)
+                .toList();
+        return MyScrapListResponse.from(scraps);
     }
 }
