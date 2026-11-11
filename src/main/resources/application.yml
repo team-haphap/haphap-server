@@ -5,6 +5,10 @@ spring:
     scheduling:
       pool:
         size: 4
+  elasticsearch:
+    uris: ${ES_URIS:http://localhost:9200}
+    connection-timeout: 2s
+    socket-timeout: 5s
 
   jpa:
     hibernate:
@@ -72,3 +76,14 @@ app:
   base_url: ${APP_BASE_URL}
 crypto:
   apple-token-key: ${APPLE_TOKEN_ENCRYPTION_KEY:}
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
+search: #이거 말고 다르게 사전 채워놓는법 미리 찾아보기
+  synonyms:
+    - ["네이버", "naver"]
+    - ["한국전력공사", "한전", "kepco"]
+    - ["카카오뱅크", "카뱅"]
