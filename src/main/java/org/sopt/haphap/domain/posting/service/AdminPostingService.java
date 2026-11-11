@@ -16,7 +16,9 @@ import org.sopt.haphap.domain.posting.repository.CategoryRepository;
 import org.sopt.haphap.domain.posting.repository.CompanyRepository;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
+import org.sopt.haphap.domain.search.indexing.PostingSearchIndexEvent;
 import org.sopt.haphap.global.exception.CustomException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +29,7 @@ public class AdminPostingService {
     private final CategoryRepository categoryRepository;
     private final CompanyRepository companyRepository;
     private final PostingStageRepository postingStageRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PostingAdminResponse createPosting(PostingCreateRequest request) {
@@ -37,6 +40,8 @@ public class AdminPostingService {
 
         Posting posting = postingRepository.save(Posting.create(
                 request.title(), request.deadline(), request.location(), request.position(), category, company));
+
+        eventPublisher.publishEvent(new PostingSearchIndexEvent(posting.getId()));
         return PostingAdminResponse.from(posting);
     }
 
@@ -50,6 +55,7 @@ public class AdminPostingService {
                 .orElseThrow(() -> new CustomException(PostingErrorCode.COMPANY_NOT_FOUND));
 
         posting.update(request.title(), request.deadline(), request.location(), request.position(), category, company);
+        eventPublisher.publishEvent(new PostingSearchIndexEvent(posting.getId()));
         return PostingAdminResponse.from(posting);
     }
 
