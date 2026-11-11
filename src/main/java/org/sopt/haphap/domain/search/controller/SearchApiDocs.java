@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
+import org.sopt.haphap.domain.search.dto.PopularKeywordListResponse;
+import org.sopt.haphap.domain.search.dto.SearchExecutionRequest;
 import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
@@ -71,7 +73,7 @@ public interface SearchApiDocs {
             description = """
                 입력한 키워드로 "기업명 + 공고명" 결합 문자열 및 관련 검색어를 매칭해 자동완성 결과를 반환합니다.
                 relatedPostings: 기업명+공고명이 매칭된 공고 바로가기 목록 (postingId, imageUrl로 상세 이동/로고 표시).
-                    마감된 공고는 제외하며, 검색어와 완전히 일치하는 항목을 최상단에 노출하고 나머지는 가나다순 정렬합니다. 최대 5개.
+                    "마감 공고도 포함합니다(상세페이지 조회 가능한 공고). 검색어와 기업명/공고명이 완전히 일치하는 항목을 최상단에 노출하고, 이후 기업명 가나다 → 공고명 가나다 → 등록일 내림차순 → 공고 ID 오름차순으로 정렬합니다. 최대 5개."
                     imageUrl은 해당 기업에 AUTOCOMPLETE 타입 이미지가 등록되어 있지 않으면 null일 수 있습니다.
                 relatedKeywords: 관련 검색어 목록 (keywordId로 GET /api/v1/search/postings?relatedKeywordId= 호출해 필터링된 목록으로 이동).
                     검색어와 완전히 일치하는 항목을 최상단에 노출하고 나머지는 가나다순 정렬합니다. 최대 10개.
@@ -133,4 +135,24 @@ public interface SearchApiDocs {
             @Parameter(description = "카테고리 필터, 복수 전달 가능. 전체 조회 시 파라미터 생략") List<String> category,
             @Parameter(description = "페이지 번호, 0부터 시작, 기본 0") Integer page,
             @Parameter(description = "페이지 크기, 기본 20, 최대 50") Integer size);
+
+    @Operation(summary = "인기 검색어 조회",
+            description = """
+                매 정각 직전 1시간의 검색 횟수 기준 상위 10개를 반환합니다.
+                1~9개면 있는 만큼, 0개면 빈 배열이며(영역 제거), 갱신 실패 시 이전 목록이 유지됩니다.
+                """)
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    ResponseEntity<SuccessResponse<PopularKeywordListResponse>> getPopularKeywords();
+
+    @Operation(summary = "검색 실행 기록 (인기 검색어 집계)",
+            description = """
+                검색이 정상 처리된 직후 클라이언트가 1회 호출합니다. 결과가 0건이어도 집계합니다.
+                앞 공백은 제거되며 공백만 있으면 400(KEYWORD_REQUIRED)을 반환합니다.
+                """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "기록 성공"),
+            @ApiResponse(responseCode = "400", description = "검색어 미입력/공백만 입력",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class)))
+    })
+    ResponseEntity<Void> recordExecution(SearchExecutionRequest request);
 }
