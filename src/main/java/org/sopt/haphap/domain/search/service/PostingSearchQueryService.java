@@ -1,6 +1,11 @@
 package org.sopt.haphap.domain.search.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingResponse;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
@@ -15,6 +20,9 @@ import org.sopt.haphap.domain.search.domain.RelatedSearchKeyword;
 import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
 import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
 import org.sopt.haphap.domain.search.dto.SearchPostingResponse;
+import org.sopt.haphap.domain.search.engine.PostingSearchEngine;
+import org.sopt.haphap.domain.search.engine.PostingSearchHit;
+import org.sopt.haphap.domain.search.engine.PostingSearchHitResult;
 import org.sopt.haphap.domain.search.repository.RelatedSearchKeywordRepository;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
@@ -26,7 +34,7 @@ import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 @Transactional(readOnly = true)
 public class PostingSearchQueryService {
 
-    private final PostingRepository postingRepository;
+    private final PostingSearchEngine postingSearchEngine;
     private final PostingAggregateLoader aggregateLoader;
     private final PostingResponseAssembler assembler;
     private final CategoryParser categoryParser;
@@ -41,8 +49,14 @@ public class PostingSearchQueryService {
         PostingSearchCondition condition = PostingSearchCondition.of(resolvedKeyword, categories, page, size);
         validateKeyword(condition.keyword());
 
-        List<Long> postingIds = postingRepository.searchPostingIds(
-                condition.keyword(), condition.categories());
+        PostingSearchHitResult hits = postingSearchEngine.search(condition.keyword(), condition.categories());
+
+        Set<Long> fullMatchIds = hits.all().stream()
+                .map(PostingSearchHit::postingId)
+                .collect(Collectors.toSet());
+        List<Long> postingIds = Stream.concat(hits.all().stream(), hits.partial().stream())
+                .map(PostingSearchHit::postingId)
+                .toList();
 
         if (postingIds.isEmpty()) {
             return SearchPostingListResponse.of(List.of(), condition.page(), condition.size(), false);
@@ -50,10 +64,20 @@ public class PostingSearchQueryService {
 
         PostingAggregate agg = aggregateLoader.load(postingIds, CompanyImageType.LISTING);
 
-        List<Scored> sorted = postingIds.stream()
+        List<Scored> assembled = postingIds.stream()
+                .filter(id -> agg.posting(id) != null)
                 .map(id -> assembler.assemble(agg.posting(id), agg.companyImageUrl(id)))
-                .sorted(PostingSortComparators.byAnnounceDate())
                 .toList();
+
+        List<Scored> sorted = new ArrayList<>();
+        sorted.addAll(assembled.stream()
+                .filter(s -> fullMatchIds.contains(s.response().id()))
+                .sorted(PostingSortComparators.byAnnounceDate())
+                .toList());
+        sorted.addAll(assembled.stream()
+                .filter(s -> !fullMatchIds.contains(s.response().id()))
+                .sorted(PostingSortComparators.byAnnounceDate())
+                .toList());
 
         int totalSize = sorted.size();
         long fromLong = (long) condition.page() * condition.size();
