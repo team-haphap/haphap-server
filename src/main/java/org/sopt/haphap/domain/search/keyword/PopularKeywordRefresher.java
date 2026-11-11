@@ -24,7 +24,7 @@ public class PopularKeywordRefresher {
     public static final String POPULAR_KEYWORD_CACHE_KEY = "search:popular:keywords";
     private static final String TEMP_KEY = POPULAR_KEYWORD_CACHE_KEY + ":tmp";
     private static final int TOP_COUNT = 10;
-    private static final int FETCH_COUNT = 100;
+    private static final int FETCH_COUNT = 1000;
 
     private final SearchKeywordLogRepository repository;
     private final RedisTemplate<String, String> redisTemplate;
