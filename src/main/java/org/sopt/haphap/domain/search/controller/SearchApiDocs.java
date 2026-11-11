@@ -44,12 +44,14 @@ public interface SearchApiDocs {
                               }
                             }
                             """)))
-    @Operation(summary = "인기 공고 목록 조회",
+    @Operation(summary = "[Deprecated] 검색 화면 인기 공고 목록 조회",
+            deprecated = true,
             description = """
-                    검색 진입화면에 노출할 인기 공고 상위 4개를 반환합니다.
-                    카드 클릭 + 상세진입 합산 조회수 기준이며, 매시 정각에 갱신되는 캐시를 서빙합니다
-                    (최대 1시간 지연 가능). 아직 집계된 데이터가 없으면 빈 배열을 반환합니다.
-                    """)
+                검색 진입 화면 개편으로 이 API가 제공하던 [인기 공고] 영역이 사라지고
+                [인기 검색어] 영역(GET /api/v1/search/popular-keywords)으로 바뀌었습니다.
+                홈의 [지금 많이 보는 공고]는 GET /api/v1/home/popular-postings 를 사용하세요.
+                클라이언트 전환 완료 후 제거 예정입니다.
+                """)
     ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings();
 
     @ApiResponse(responseCode = "200", description = "자동완성 결과",
