@@ -2,6 +2,8 @@ package org.sopt.haphap.domain.alram.notification;
 
 import com.google.firebase.messaging.*;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.HashMap;
 import java.util.Map;
 import org.sopt.haphap.domain.alram.exception.InvalidTokenException;
 import org.sopt.haphap.domain.alram.exception.NotificationDeliveryException;
@@ -26,23 +28,24 @@ public class FcmNotificationSender implements NotificationSender {
     )
     public void send(String fcmToken, NotificationMessage message) {
         try {
+            // 1. 기본 data payload dynamic composition Map 구성
+            Map<String, String> dataMap = new HashMap<>();
+            dataMap.put("title", message.title());
+            dataMap.put("body", message.body());
+            dataMap.put("postingId", String.valueOf(message.postingId()));
+
+            // 2. registrationId 존재 여부에 따른 조건부 키-값 추가
+            if (message.registrationId() != null) {
+                dataMap.put("type", "PASS_CARD");
+                dataMap.put("registrationId", String.valueOf(message.registrationId()));
+            }
+
+            // 3. FCM Message 객체 생성
             Message fcmMessage = Message.builder()
                     .setToken(fcmToken)
-                    /*
-                    .setNotification(Notification.builder()
-                            .setTitle(message.title())
-                            .setBody(message.body())
-                            .build())
-                    .putData("postingId", String.valueOf(message.postingId()))
+                    .putAllData(dataMap)
                     .build();
 
-                     */
-                    .putAllData(Map.of(
-                            "title", message.title(),
-                            "body", message.body(),
-                            "postingId", String.valueOf(message.postingId())
-                    ))
-                    .build();
             String messageId = FirebaseMessaging.getInstance().send(fcmMessage);
             log.info("[FCM 발송 성공] messageId={}", messageId);
         } catch (FirebaseMessagingException e) {
@@ -78,3 +81,4 @@ public class FcmNotificationSender implements NotificationSender {
         throw new NotificationDeliveryException("재시도 소진 후 발송 실패", e);
     }
 }
+//Map.of가 불변 객체여서 조건문 동적 insert가 불가한 것 같아서 HashMap 선언해서 기본 데이터 넣어놓고 if문으로 넣어놨습니다

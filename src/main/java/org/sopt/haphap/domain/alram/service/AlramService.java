@@ -23,6 +23,7 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.repository.PostingStageRepository;
+import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.event.RegistrationApprovedEvent;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.global.exception.CustomException;
@@ -67,7 +68,7 @@ public class AlramService {
             return AlramDispatch.empty();
         }
 
-        NotificationMessage message = createStagePassedMessage(posting);
+        NotificationMessage message = createStagePassedMessage(posting, stage, event);
         return buildDispatch(posting, subscribers, AlramType.STAGE_PASSED, message);
     }
 
@@ -118,10 +119,14 @@ public class AlramService {
         return new AlramDispatch(message, targets);
     }
 
-    private NotificationMessage createStagePassedMessage(Posting posting) {
+    private NotificationMessage createStagePassedMessage(Posting posting, PostingStage stage, RegistrationApprovedEvent event) {
         String title = "[%s] 합격 소식이 도착했어요".formatted(posting.getCompany().getName());
-        String body = "[%s] 현황이 업데이트됐어요. 지금 확인해보세요.".formatted(posting.getTitle());
-        return new NotificationMessage(title, body, posting.getId());
+        String body = "[%s] 현황이 업데이트됐어요. 지금 확인해보세요.".formatted(
+                posting.getCompany().getName(),
+                posting.getPosition(),
+                stage.getName()
+        );
+        return new NotificationMessage(title, body, posting.getId(), event.registrationId());
     }
 
     private NotificationMessage createClosedMessage(Posting posting) {
