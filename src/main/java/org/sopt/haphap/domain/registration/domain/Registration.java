@@ -41,9 +41,13 @@ public class Registration extends BaseEntity {
 
     // 합격 인증(인증샷 검토) 상태. 실제 승인/반려 플로우는 별도 파트에서 연결 예정이라
     // 지금은 전형 이동 트리거가 참조할 상태값만 갖고 있다.
+
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false, length = 20)
     private RegistrationVerificationStatus verificationStatus;
+
+    @Column(name = "pass_card_confirmed_at")
+    private LocalDateTime passCardConfirmedAt;
 
     @Convert(converter = ContactMethodListConverter.class)
     @Column(name = "contact_methods")
@@ -122,6 +126,17 @@ public class Registration extends BaseEntity {
             throw new CustomException(RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
         }
         this.verificationStatus = RegistrationVerificationStatus.REJECTED;
+    }
+
+    //합격카드가 사용자 화면에 정상 노출된 시점 기록
+    public void confirmPassCard() {
+        if (this.passCardConfirmedAt == null) {
+            this.passCardConfirmedAt = LocalDateTime.now();
+        }
+    }
+
+    public boolean isPassCardConfirmed() {
+        return this.passCardConfirmedAt != null;
     }
 
     public boolean isApproved() {

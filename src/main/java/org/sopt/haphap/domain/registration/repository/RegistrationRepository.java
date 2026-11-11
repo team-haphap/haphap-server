@@ -3,7 +3,9 @@ package org.sopt.haphap.domain.registration.repository;
 import jakarta.persistence.LockModeType;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+import org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus;
 import org.sopt.haphap.domain.registration.projection.*;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -53,6 +55,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // 실시간 집계(StageResultCountUpdater)가 보류하는 것과 반드시 같은 기준으로 걸러야 한다 —
     // 안 그러면 배치가 돌 때마다 보류해둔 값을 무시하고 원본으로 덮어써버린다.
     // PENDING은 항상 집계. PASS는 인증 승인된 것만. FAIL은 "후속 전형 불합격" 검토가 승인 안 된 건 제외.
+
     @Query("""
         SELECT r.posting.id AS postingId, r.stage.id AS stageId,
                r.result AS result, COUNT(r) AS cnt
@@ -193,4 +196,55 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY MAX(r.updatedAt) DESC
         """)
     List<Long> findAppliedPostingIdsOrderByLastActivity(@Param("userId") Long userId);
+
+    // 앱 실행 시 자동 노출용
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.user
+        JOIN FETCH r.posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE r.user.id = :userId
+          AND r.verificationStatus = :status
+          AND r.passCardConfirmedAt IS NULL
+        ORDER BY r.id ASC
+        """)
+    List<Registration> findUnconfirmedPassCards(
+            @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status);
+
+    // 보관함; 확인 완료한 합격카드
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.user
+        JOIN FETCH r.posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE r.user.id = :userId
+          AND r.verificationStatus = :status
+          AND r.passCardConfirmedAt IS NOT NULL
+        ORDER BY r.passCardConfirmedAt DESC, r.id DESC
+        """)
+    List<Registration> findConfirmedPassCards(
+            @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status);
+
+    // 상세 조회
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.user
+        JOIN FETCH r.posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE r.id = :registrationId
+          AND r.user.id = :userId
+          AND r.verificationStatus = :status
+        """)
+    Optional<Registration> findPassCard(
+            @Param("registrationId") Long registrationId,
+            @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status);
+
+    Optional<Registration> findByIdAndUser_IdAndVerificationStatus(
+            Long id, Long userId, RegistrationVerificationStatus status);
 }
