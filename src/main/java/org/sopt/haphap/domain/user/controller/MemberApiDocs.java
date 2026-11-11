@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.sopt.haphap.domain.user.dto.MemberAccountResponse;
 import org.sopt.haphap.domain.user.dto.MemberProfileResponse;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
 import org.sopt.haphap.domain.user.dto.WithdrawRequest;
@@ -53,6 +54,43 @@ public interface MemberApiDocs {
                     - Authorization 헤더에 Bearer {accessToken}을 넣어주세요. (로그인한 본인 정보만 조회됩니다)
                     """)
     ResponseEntity<SuccessResponse<MemberResponse>> getMyInfo(
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId);
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = MemberAccountResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "status": 200,
+                                      "code": "MEMBER_ACCOUNT_INFO_FETCHED",
+                                      "message": "사용자 계정 정보 조회에 성공했습니다.",
+                                      "data": {
+                                        "name": "박연수",
+                                        "email": "yeonsoo1234@naver.com",
+                                        "provider": "KAKAO"
+                                      }
+                                    }
+                                    """))),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료/유효하지 않음)",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                    { "status": 401, "code": "UNAUTHORIZED", "message": "인증이 필요합니다." }
+                                    """))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저",
+                    content = @Content(schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                    { "status": 404, "code": "USER_NOT_FOUND", "message": "존재하지 않는 유저입니다." }
+                                    """)))
+    })
+    @Operation(summary = "계정 정보 조회",
+            description = """
+                    계정 정보 화면에 필요한 실제 이름, 이메일, 로그인 수단을 조회합니다.
+                    - name: 소셜 로그인으로 받은 실제 이름 (닉네임/anonymousName 아님)
+                    - email: 소셜 로그인으로 받은 이메일
+                    - provider: 로그인 수단 (KAKAO / APPLE)
+                    - Authorization 헤더에 Bearer {accessToken}을 넣어주세요. (로그인한 본인 정보만 조회됩니다)
+                    """)
+    ResponseEntity<SuccessResponse<MemberAccountResponse>> getMyAccount(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId);
 
     @ApiResponses({

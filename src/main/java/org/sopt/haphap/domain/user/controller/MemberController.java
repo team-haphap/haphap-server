@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.user.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.user.dto.MemberAccountResponse;
 import org.sopt.haphap.domain.user.dto.MemberProfileResponse;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
 import org.sopt.haphap.domain.user.dto.WithdrawRequest;
@@ -30,6 +31,12 @@ public class MemberController implements MemberApiDocs {
     public ResponseEntity<SuccessResponse<MemberResponse>> getMyInfo(
             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(SuccessResponse.of(MemberSuccessCode.MEMBER_INFO_FETCHED, memberService.getMyInfo(userId)));
+    }
+
+    @GetMapping("/me/account")
+    public ResponseEntity<SuccessResponse<MemberAccountResponse>> getMyAccount(
+            @AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(SuccessResponse.of(MemberSuccessCode.MEMBER_ACCOUNT_INFO_FETCHED, memberService.getMyAccount(userId)));
     }
 
     @PatchMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
