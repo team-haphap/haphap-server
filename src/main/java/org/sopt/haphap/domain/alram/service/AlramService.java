@@ -121,8 +121,7 @@ public class AlramService {
 
     private NotificationMessage createStagePassedMessage(Posting posting, PostingStage stage, RegistrationApprovedEvent event) {
         String title = "[%s] 합격 소식이 도착했어요".formatted(posting.getCompany().getName());
-        String body = "[%s] 현황이 업데이트됐어요. 지금 확인해보세요.".formatted(
-                posting.getCompany().getName(),
+        String body = "%s %s 전형 현황이 업데이트됐어요. 지금 확인해보세요.".formatted(
                 posting.getPosition(),
                 stage.getName()
         );
