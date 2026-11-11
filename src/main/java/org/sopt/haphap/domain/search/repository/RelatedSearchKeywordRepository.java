@@ -11,17 +11,12 @@ import org.springframework.data.repository.query.Param;
 public interface RelatedSearchKeywordRepository extends JpaRepository<RelatedSearchKeyword, Long> {
 
     @Query(value = """
-        SELECT k.id AS id, k.keyword AS keyword
-        FROM related_search_keyword k
-        WHERE k.is_active = true
-          AND k.keyword ILIKE CONCAT('%', :keyword, '%')
-        ORDER BY
-            CASE WHEN k.keyword = :keyword THEN 0 ELSE 1 END,
-            k.keyword ASC
-        LIMIT :limit
-        """, nativeQuery = true)
-    List<RelatedSearchKeywordProjection> searchByKeywordContaining(
-            @Param("keyword") String keyword, @Param("limit") int limit);
+    SELECT k.id AS id, k.keyword AS keyword
+    FROM related_search_keyword k
+    WHERE k.is_active = true
+      AND REPLACE(LOWER(k.keyword), ' ', '') LIKE CONCAT('%', :normalized, '%')
+    """, nativeQuery = true)
+    List<RelatedSearchKeywordProjection> searchByNormalizedContaining(@Param("normalized") String normalized);
 
     // relatedKeywordId → 텍스트 변환용. 비활성화된 키워드는 조회 안 되게 isActive 조건 포함
     Optional<RelatedSearchKeyword> findByIdAndIsActiveTrue(Long id);

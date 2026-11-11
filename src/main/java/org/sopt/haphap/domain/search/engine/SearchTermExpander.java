@@ -56,4 +56,14 @@ public class SearchTermExpander {
         Set<String> group = termToGroup.get(token);
         return group == null ? List.of(token) : new ArrayList<>(group);
     }
+
+    /* 입력 전체를 하나의 명칭으로 보고, 동의어 그룹이 있으면 그룹 전체를, 없으면 정규화된 입력만 반환 */
+    public List<String> wholeAlternatives(String keyword) {
+        String whole = SearchTextNormalizer.normalize(keyword);
+        if (whole.isEmpty()) {
+            return List.of();
+        }
+        Set<String> group = termToGroup.get(whole);
+        return group == null ? List.of(whole) : new ArrayList<>(group);
+    }
 }

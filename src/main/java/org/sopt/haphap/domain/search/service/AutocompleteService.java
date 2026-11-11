@@ -6,19 +6,19 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.posting.dto.projection.PostingAutocompleteProjection;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.search.dto.AutocompleteRelatedKeywordResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
 import org.sopt.haphap.domain.search.dto.AutocompleteRelatedPostingResponse;
-import org.sopt.haphap.domain.search.engine.PostingSearchEngine;
-import org.sopt.haphap.domain.search.engine.PostingSearchHit;
-import org.sopt.haphap.domain.search.engine.PostingSearchHitResult;
-import org.sopt.haphap.domain.search.engine.SearchTextNormalizer;
+import org.sopt.haphap.domain.search.dto.RelatedSearchKeywordProjection;
+import org.sopt.haphap.domain.search.engine.*;
 import org.sopt.haphap.domain.search.repository.RelatedSearchKeywordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,20 +28,40 @@ public class AutocompleteService {
     private static final int JOB_LIMIT = 10;
     private static final Pattern INCOMPLETE_JAMO_ONLY = Pattern.compile("^[ㄱ-ㅣ]+$");
 
-    private static final int CANDIDATE_LIMIT = 200;
     private static final Collator KOREAN = Collator.getInstance(Locale.KOREAN);
 
     private final PostingRepository postingRepository;
     private final HighlightRangeCalculator highlightRangeCalculator;
     private final RelatedSearchKeywordRepository relatedSearchKeywordRepository;
     private final PostingSearchEngine postingSearchEngine;
+    private final SearchTermExpander termExpander;
 
     public AutocompleteResponse autocomplete(String rawKeyword) {
         String keyword = normalize(rawKeyword);
         if (keyword == null) {
             return AutocompleteResponse.from(List.of(), List.of());
         }
-        return AutocompleteResponse.from(searchRelatedPostings(keyword), searchRelatedKeywords(keyword));
+        return AutocompleteResponse.from(
+                safeRelatedPostings(keyword),   // ES 장애 시 바로가기 영역만 비움
+                safeRelatedKeywords(keyword));  // DB 장애 시 관련 검색어 영역만 비움
+    }
+
+    private List<AutocompleteRelatedPostingResponse> safeRelatedPostings(String keyword) {
+        try {
+            return searchRelatedPostings(keyword);
+        } catch (Exception e) {
+            log.warn("[자동완성] 공고 바로가기 조회 실패 - 영역 비움", e);
+            return List.of();
+        }
+    }
+
+    private List<AutocompleteRelatedKeywordResponse> safeRelatedKeywords(String keyword) {
+        try {
+            return searchRelatedKeywords(keyword);
+        } catch (Exception e) {
+            log.warn("[자동완성] 관련 검색어 조회 실패 - 영역 비움", e);
+            return List.of();
+        }
     }
 
     private String normalize(String rawKeyword) {
@@ -57,7 +77,6 @@ public class AutocompleteService {
     private List<AutocompleteRelatedPostingResponse> searchRelatedPostings(String keyword) {
         PostingSearchHitResult result = postingSearchEngine.search(keyword, null);
         List<PostingSearchHit> hits = Stream.concat(result.all().stream(), result.partial().stream())
-                .limit(CANDIDATE_LIMIT)
                 .toList();
         if (hits.isEmpty()) {
             return List.of();
@@ -99,13 +118,45 @@ public class AutocompleteService {
                 || (company + title).equals(normalizedKeyword);
     }
 
-    // 관련 검색어: 기존 그대로 (DB related_search_keyword)
+    /// 관련 검색어: 동의어(약칭·한영)·띄어쓰기 변형·대소문자 무시로 후보를 모으고
+    // 완전일치 → 직접 일치 글자 수 내림차순 → 가나다순으로 정렬
+
     private List<AutocompleteRelatedKeywordResponse> searchRelatedKeywords(String keyword) {
-        return relatedSearchKeywordRepository.searchByKeywordContaining(keyword, JOB_LIMIT).stream()
+        String normalizedInput = SearchTextNormalizer.normalize(keyword);
+        if (normalizedInput.isEmpty()) {
+            return List.of();
+        }
+
+        // 입력값 + 동의어 그룹 전체로 후보 수집 (중복은 id로 제거)
+        Map<Long, RelatedSearchKeywordProjection> candidates = new LinkedHashMap<>();
+        for (String alternative : termExpander.wholeAlternatives(keyword)) {
+            relatedSearchKeywordRepository.searchByNormalizedContaining(alternative)
+                    .forEach(k -> candidates.putIfAbsent(k.getId(), k));
+        }
+        if (candidates.isEmpty()) {
+            return List.of();
+        }
+
+        String lowerInput = keyword.toLowerCase(Locale.KOREAN);
+
+        Comparator<RelatedSearchKeywordProjection> order = Comparator
+                .comparing((RelatedSearchKeywordProjection k) ->
+                        !SearchTextNormalizer.normalize(k.getKeyword()).equals(normalizedInput))
+                .thenComparing(k -> -directMatchLength(k.getKeyword(), lowerInput))
+                .thenComparing(RelatedSearchKeywordProjection::getKeyword, KOREAN);
+
+        return candidates.values().stream()
+                .sorted(order)
+                .limit(JOB_LIMIT)
                 .map(k -> new AutocompleteRelatedKeywordResponse(
                         k.getId(), k.getKeyword(),
                         highlightRangeCalculator.calculate(k.getKeyword(), keyword)))
                 .toList();
+    }
+
+    // 후보 텍스트에 입력값이 그대로 들어있으면 그 길이, 아니면 0 (동의어로만 매칭된 경우)
+    private int directMatchLength(String candidate, String lowerInput) {
+        return candidate.toLowerCase(Locale.KOREAN).contains(lowerInput) ? lowerInput.length() : 0;
     }
 }
 
