@@ -31,7 +31,6 @@ import org.sopt.haphap.domain.posting.domain.CompanyImageType;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class PostingSearchQueryService {
 
     private final PostingSearchEngine postingSearchEngine;
