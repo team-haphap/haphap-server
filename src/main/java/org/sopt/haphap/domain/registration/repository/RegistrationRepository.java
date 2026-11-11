@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -245,6 +246,39 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("userId") Long userId,
             @Param("status") RegistrationVerificationStatus status);
 
-    Optional<Registration> findByIdAndUser_IdAndVerificationStatus(
+    //재제출 API
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Registration r where r.id = :id and r.user.id = :userId")
+    Optional<Registration> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") Long userId);
+
+    // 목록 + 기업/전형까지 fetch join
+    @Query("""
+    SELECT r FROM Registration r
+    JOIN FETCH r.posting p
+    JOIN FETCH p.company
+    JOIN FETCH r.stage
+    WHERE r.user.id = :userId
+      AND r.verificationStatus IN :statuses
+    ORDER BY r.verificationSubmittedAt DESC, r.id DESC
+    """)
+    List<Registration> findVerificationHistory(
+            @Param("userId") Long userId,
+            @Param("statuses") Collection<RegistrationVerificationStatus> statuses);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    UPDATE Registration r
+       SET r.passCardConfirmedAt = :now
+     WHERE r.id = :id
+       AND r.user.id = :userId
+       AND r.verificationStatus = :status
+       AND r.passCardConfirmedAt IS NULL
+    """)
+    int markPassCardConfirmed(@Param("id") Long id,
+                              @Param("userId") Long userId,
+                              @Param("status") RegistrationVerificationStatus status,
+                              @Param("now") LocalDateTime now);
+
+    boolean existsByIdAndUser_IdAndVerificationStatus(
             Long id, Long userId, RegistrationVerificationStatus status);
 }

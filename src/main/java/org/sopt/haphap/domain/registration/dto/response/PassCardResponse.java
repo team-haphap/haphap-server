@@ -5,6 +5,7 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.registration.domain.Registration;
 
 public record PassCardResponse(
+        Long registrationId,
         String userName,
         String companyName,
         String companyCardLogoImageUrl,
@@ -16,6 +17,7 @@ public record PassCardResponse(
         Posting posting = registration.getPosting();
         Category category = posting.getCategory();
         return new PassCardResponse(
+                registration.getId(),
                 registration.getUser().getName(),
                 posting.getCompany().getName(),
                 posting.getCompany().getCardLogoImageUrl(),

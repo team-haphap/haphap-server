@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.passcard.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.passcard.code.PassCardErrorCode;
@@ -52,9 +53,13 @@ public class PassCardService {
     /* 카드가 화면에 정상 노출된 시점에 호출 */
     @Transactional
     public void confirm(Long userId, Long registrationId) {
-        Registration registration = registrationRepository
-                .findByIdAndUser_IdAndVerificationStatus(registrationId, userId, APPROVED)
-                .orElseThrow(() -> new CustomException(PassCardErrorCode.PASS_CARD_NOT_FOUND));
-        registration.confirmPassCard();
+        int updated = registrationRepository.markPassCardConfirmed(
+                registrationId, userId, APPROVED, LocalDateTime.now());
+
+        // 0건 = 이미 확인됨 or 내 승인 카드가 아님(404)
+        if (updated == 0 && !registrationRepository
+                .existsByIdAndUser_IdAndVerificationStatus(registrationId, userId, APPROVED)) {
+            throw new CustomException(PassCardErrorCode.PASS_CARD_NOT_FOUND);
+        }
     }
 }
