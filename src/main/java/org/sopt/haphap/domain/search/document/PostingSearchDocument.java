@@ -26,9 +26,12 @@ public class PostingSearchDocument {
     @Field(type = FieldType.Keyword)
     private String categoryName;
 
-    // 소문자 + 공백 제거한 "기업명공고명". 부분 일치/띄어쓰기 변형/대소문자 무시에 사용
+    // 소문자 + 공백 제거. 부분 일치/띄어쓰기 변형/대소문자 무시에 사용
     @Field(type = FieldType.Keyword)
-    private String searchText;
+    private String companyText;
+
+    @Field(type = FieldType.Keyword)
+    private String titleText;
 
     @Field(type = FieldType.Long)
     private Long registeredAtEpoch;
@@ -38,10 +41,9 @@ public class PostingSearchDocument {
         doc.id = String.valueOf(posting.getId());
         doc.postingId = posting.getId();
         doc.categoryName = posting.getCategory().getName();
-        doc.searchText = SearchTextNormalizer.normalize(
-                posting.getCompany().getName() + posting.getTitle());
-
-        LocalDateTime created = posting.getCreatedAt();   // [확인] BaseEntity 에 getCreatedAt() 이 있는지
+        doc.companyText = SearchTextNormalizer.normalize(posting.getCompany().getName());
+        doc.titleText = SearchTextNormalizer.normalize(posting.getTitle());
+        LocalDateTime created = posting.getCreatedAt();
         doc.registeredAtEpoch = created == null
                 ? 0L
                 : created.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();

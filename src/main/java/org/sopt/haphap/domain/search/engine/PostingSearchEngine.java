@@ -2,6 +2,8 @@ package org.sopt.haphap.domain.search.engine;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,8 +25,10 @@ import org.springframework.stereotype.Component;
 public class PostingSearchEngine {
 
     private static final int MAX_HITS = 2000;
-    private static final String FIELD_SEARCH_TEXT = "searchText";
     private static final String FIELD_CATEGORY = "categoryName";
+
+    private static final String FIELD_COMPANY = "companyText";
+    private static final String FIELD_TITLE = "titleText";
 
     private final ElasticsearchOperations operations;
     private final SearchTermExpander termExpander;
@@ -78,14 +82,16 @@ public class PostingSearchEngine {
         }));
     }
 
-    /* 한 단어의 대체어(동의어 포함) 중 하나라도 부분 일치 */
+    /* 한 단어의 대체어(동의어 포함) 중 하나라도 기업명 또는 공고명에 부분 일치 */
     private Query anyOf(List<String> alternatives) {
-        List<Query> wildcards = alternatives.stream()
-                .map(alt -> Query.of(q -> q.wildcard(w -> w
-                        .field(FIELD_SEARCH_TEXT)
-                        .value("*" + escape(alt) + "*"))))
-                .toList();
-        return Query.of(q -> q.bool(b -> b.should(wildcards).minimumShouldMatch("1")));
+        List<Query> wildcards = new ArrayList<>();
+        for (String alt : alternatives) {
+            String pattern = "*" + escape(alt) + "*";
+            wildcards.add(Query.of(q -> q.wildcard(w -> w.field(FIELD_COMPANY).value(pattern))));
+            wildcards.add(Query.of(q -> q.wildcard(w -> w.field(FIELD_TITLE).value(pattern))));
+        }
+        List<Query> finalWildcards = wildcards;
+        return Query.of(q -> q.bool(b -> b.should(finalWildcards).minimumShouldMatch("1")));
     }
 
     private Query categoryFilter(List<String> categories) {
