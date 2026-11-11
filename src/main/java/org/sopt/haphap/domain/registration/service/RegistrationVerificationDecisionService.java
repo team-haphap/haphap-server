@@ -34,7 +34,11 @@ public class RegistrationVerificationDecisionService {
         registration.approve();
 
         eventPublisher.publishEvent(new RegistrationApprovedEvent(
-                registration.getPosting().getId(), registration.getStage().getId(), registration.getUser().getId()));
+                registration.getPosting().getId(),
+                registration.getStage().getId(),
+                registration.getUser().getId(),
+                registration.getId()
+        ));
     }
 
     @Transactional
