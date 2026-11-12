@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sopt.haphap.domain.user.dto.MemberAccountResponse;
 import org.sopt.haphap.domain.user.dto.MemberResponse;
 import org.sopt.haphap.domain.user.entity.User;
 import org.springframework.stereotype.Service;
@@ -18,5 +19,9 @@ public class MemberService {
     public MemberResponse getMyInfo(Long userId) {
         User user = userService.findById(userId);
         return MemberResponse.from(user);
+    }
+
+    public MemberAccountResponse getMyAccount(Long userId) {
+        return MemberAccountResponse.from(userService.findById(userId));
     }
 }
