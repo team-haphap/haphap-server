@@ -17,6 +17,8 @@ public enum RegistrationErrorCode implements ErrorResultCode {
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 검토 항목입니다."),
     REVIEW_ALREADY_RESOLVED(HttpStatus.CONFLICT, "이미 처리된 검토 항목입니다."),
     VERIFICATION_ALREADY_RESOLVED(HttpStatus.CONFLICT, "이미 처리된 인증 요청입니다."),
+    VERIFICATION_NOT_RESUBMITTABLE(HttpStatus.CONFLICT, "반려된 인증 건만 다시 제출할 수 있습니다."),
+    VERIFICATION_LINK_EXPIRED(HttpStatus.CONFLICT, "만료된 인증 링크입니다. 최신 요청의 링크를 사용해주세요."),
     INVALID_VERIFICATION_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 인증 링크입니다.");
 
     private final HttpStatus status;

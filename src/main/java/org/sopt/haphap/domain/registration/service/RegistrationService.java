@@ -12,6 +12,7 @@ import org.sopt.haphap.domain.verification.code.VerificationErrorCode;
 import org.sopt.haphap.domain.verification.code.VerificationImagePolicy;
 import org.sopt.haphap.domain.verification.entity.VerificationImage;
 import org.sopt.haphap.domain.verification.repository.VerificationImageRepository;
+import org.sopt.haphap.domain.verification.service.VerificationImageAttacher;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
@@ -39,6 +40,7 @@ public class RegistrationService {
     private final RegistrationTargetValidator registrationTargetValidator;
     private final AlramSettingService alramSettingService;
     private final VerificationImageRepository verificationImageRepository;
+    private final VerificationImageAttacher verificationImageAttacher;
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
@@ -58,13 +60,9 @@ public class RegistrationService {
         publishEvent(registration, target.posting(), target.user());
 
         // PASS일 때만 연관을 fetch join으로 당겨와 카드 정보 구성, 아니면 ID만
-        if (registration.isPass()) {
-            Registration detailed = registrationRepository.findByIdWithDetails(registration.getId())
-                    .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
-            return RegistrationCreateResponse.pass(detailed);
-        }
-        return RegistrationCreateResponse.idOnly(registration.getId());
-
+        return registration.isPass()
+                ? RegistrationCreateResponse.pass(registration)
+                : RegistrationCreateResponse.idOnly(registration.getId());
     }
 
     private Registration updateExisting(Registration existing,
@@ -109,35 +107,16 @@ public class RegistrationService {
     }
 
     private void attachVerificationImagesIfPass(Registration registration, Long userId,
-                                                RegistrationCreateRequest request) {
+                                                 RegistrationCreateRequest request) {
         if (registration.getResult() != RegistrationResult.PASS) {
             return;
         }
+        // TODO: 업로드 임시 비필수화 — 원복 시 이 if문도 같이 제거할 것
 
-        List<Long> imageIds = request.verificationImageIds();
-
-        // TODO: 업로드 임시 비필수화에 맞춰, 이미지가 아예 없으면 첨부할 것도 없으니 그냥 스킵.
-        // 원복 시 이 if문도 같이 제거할 것 (validateImageCount가 다시 0개를 막아줌).
-        if (imageIds == null || imageIds.isEmpty()) {
+        if (!request.hasVerificationImages()) {
             return;
         }
-        validateImageCount(imageIds);
-
-        List<Long> sortedIds = imageIds.stream().sorted().toList();   // 데드락 방지: 항상 같은 순서로 락
-
-        List<VerificationImage> images = new ArrayList<>();
-        for (Long imageId : sortedIds) {
-            VerificationImage image = verificationImageRepository.findByIdForUpdate(imageId)
-                    .orElseThrow(() -> new CustomException(VerificationErrorCode.IMAGE_NOT_FOUND));
-            if (!image.isOwnedBy(userId)) {
-                throw new CustomException(VerificationErrorCode.IMAGE_NOT_OWNED);
-            }
-            images.add(image);
-        }
-
-        for (int i = 0; i < images.size(); i++) {
-            images.get(i).attachTo(registration, i);   // 이미 attach된 경우 IMAGE_ALREADY_ATTACHED 예외
-        }
+        verificationImageAttacher.attach(registration, userId, request.verificationImageIds());
     }
 
     private void validateImageCount(List<Long> imageIds) {

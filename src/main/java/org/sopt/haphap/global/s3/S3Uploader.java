@@ -75,6 +75,16 @@ public class S3Uploader {
                 .build());
     }
 
+    // upload()가 돌려준 공개 URL로 삭제. 이 버킷 URL이 아니면 아무것도 안 하고 false.
+    public boolean deleteByUrl(String url) {
+        String prefix = "https://%s.s3.%s.amazonaws.com/".formatted(bucket, region);
+        if (url == null || !url.startsWith(prefix)) {
+            return false;
+        }
+        delete(url.substring(prefix.length()));
+        return true;
+    }
+
     public void deletePrivate(String key) {
         s3Client.deleteObject(DeleteObjectRequest.builder()
                 .bucket(privateBucket)

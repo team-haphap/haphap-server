@@ -53,10 +53,10 @@ public class RegistrationVerificationDecisionController {
 
         String actionLabel;
         if (decoded.action() == VerificationDecisionType.APPROVE) {
-            decisionService.approve(decoded.registrationId());
+            decisionService.approve(decoded.registrationId(), decoded.round());
             actionLabel = "승인";
         } else {
-            decisionService.reject(decoded.registrationId());
+            decisionService.reject(decoded.registrationId(),decoded.round());
             actionLabel = "반려";
         }
         return html(ResponseEntity.ok(),

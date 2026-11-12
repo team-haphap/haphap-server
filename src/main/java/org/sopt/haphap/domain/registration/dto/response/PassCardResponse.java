@@ -5,25 +5,25 @@ import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.registration.domain.Registration;
 
 public record PassCardResponse(
+        Long registrationId,
         String userName,
         String companyName,
         String companyCardLogoImageUrl,
         String title,
-        //String stageName,
-        //String categoryName,
-        String cardImageUrl
+        String cardImageUrl,
+        boolean confirmed
 ) {
     public static PassCardResponse from(Registration registration) {
         Posting posting = registration.getPosting();
         Category category = posting.getCategory();
         return new PassCardResponse(
+                registration.getId(),
                 registration.getUser().getName(),
                 posting.getCompany().getName(),
                 posting.getCompany().getCardLogoImageUrl(),
                 posting.getTitle(),
-                //registration.getStage().getName(),
-                //category.getName(),
-                category.getCardImageUrl()
+                category.getCardImageUrl(),
+                registration.isPassCardConfirmed()
         );
     }
 }
