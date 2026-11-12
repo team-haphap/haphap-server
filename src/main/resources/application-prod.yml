@@ -6,13 +6,13 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   elasticsearch:
-    uris: ${ES_URIS}
+    uris: http://${ELASTICSEARCH_HOST:haphap-es}:9200
 
   jpa:
     hibernate:
       ddl-auto: validate
   flyway:
-    out-of-order:true
+    out-of-order: true
 
 management:
   endpoint:
