@@ -57,4 +57,9 @@ public class VerificationImage extends BaseEntity {
         this.registration = registration;
         this.sortOrder = sortOrder;
     }
+
+    public void detach() {
+        this.registration = null;
+        this.sortOrder = null;
+    }
 }

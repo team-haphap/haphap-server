@@ -44,4 +44,25 @@ public interface VerificationImageRepository extends JpaRepository<VerificationI
     WHERE v.user.id = :userId AND v.registration IS NOT NULL
     """)
     int detachAllByUserId(@Param("userId") Long userId);
+
+    @Query("""
+    SELECT image
+    FROM VerificationImage image
+    JOIN FETCH image.registration registration
+    WHERE registration.id IN :registrationIds
+    ORDER BY registration.id ASC, image.sortOrder ASC, image.id ASC
+    """)
+    List<VerificationImage> findAttachedByRegistrationIds(
+            @Param("registrationIds") Collection<Long> registrationIds
+    );
+
+    @Query("""
+    SELECT image
+    FROM VerificationImage image
+    WHERE image.registration.id = :registrationId
+    ORDER BY image.sortOrder ASC, image.id ASC
+    """)
+    List<VerificationImage> findAttachedByRegistrationIdOrdered(
+            @Param("registrationId") Long registrationId
+    );
 }

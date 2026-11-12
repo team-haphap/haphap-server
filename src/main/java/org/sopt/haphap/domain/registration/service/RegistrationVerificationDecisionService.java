@@ -1,29 +1,20 @@
 package org.sopt.haphap.domain.registration.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.event.RegistrationApprovedEvent;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
-import org.sopt.haphap.domain.verification.entity.VerificationImage;
-import org.sopt.haphap.domain.verification.repository.VerificationImageRepository;
 import org.sopt.haphap.global.exception.CustomException;
-import org.sopt.haphap.global.s3.S3Uploader;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RegistrationVerificationDecisionService {
 
     private final RegistrationRepository registrationRepository;
-    private final VerificationImageRepository verificationImageRepository;
-    private final S3Uploader s3Uploader;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -47,26 +38,13 @@ public class RegistrationVerificationDecisionService {
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
         validateRound(registration, round);
 
+        // 반려 상세에서 사용자가 제출 이미지를 확인할 수 있도록 이미지를 유지한다.
         registration.reject();
-        cleanupImages(registrationId);
     }
 
-    // 재제출로 회차가 바뀐 뒤에는 이전 회차 링크로 처리할 수 없음
     private void validateRound(Registration registration, int round) {
         if (registration.getVerificationRound() != round) {
             throw new CustomException(RegistrationErrorCode.VERIFICATION_LINK_EXPIRED);
         }
-    }
-
-    private void cleanupImages(Long registrationId) {
-        List<VerificationImage> images = verificationImageRepository.findByRegistrationId(registrationId);
-        images.forEach(image -> {
-            try {
-                s3Uploader.deletePrivate(image.getS3Key());
-            } catch (Exception e) {
-                log.warn("반려 이미지 삭제 실패(고아 정리 배치에서 재처리됨) key={}", image.getS3Key(), e);
-            }
-        });
-        verificationImageRepository.deleteAll(images);
     }
 }
