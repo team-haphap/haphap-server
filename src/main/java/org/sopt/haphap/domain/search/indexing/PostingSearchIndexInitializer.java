@@ -1,6 +1,7 @@
 package org.sopt.haphap.domain.search.indexing;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,11 @@ import org.sopt.haphap.domain.search.document.PostingSearchDocument;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.index.AliasAction;
+import org.springframework.data.elasticsearch.core.index.AliasActionParameters;
+import org.springframework.data.elasticsearch.core.index.AliasActions;
+import org.springframework.data.elasticsearch.core.index.AliasData;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,36 +30,40 @@ public class PostingSearchIndexInitializer {
     private final AtomicBoolean synced = new AtomicBoolean(false);
 
     @Scheduled(initialDelay = 5_000, fixedDelay = 30_000)
-    public void ensureIndexSynced() {
-        if (synced.get()) {
-            return;
-        }
-        try {
-            ensureValidIndex();
+    private void ensureValidIndex() {
+        String alias = "posting_search";
 
-            long dbCount = postingRepository.count();
-            long esCount = countIndexed();
-            if (esCount != dbCount) {
-                int count = indexer.reindexAll();
-                log.info("[검색] 초기 색인 동기화 완료 db={} es={} -> {}", dbCount, esCount, count);
-            }
-            synced.set(true);
-        } catch (Exception e) {
-            log.warn("[검색] 초기 색인 동기화 실패 - 30초 후 재시도", e);
+        boolean aliasExists = isAliasExists(alias);
+
+        if (!aliasExists) {
+            String initialIndex = alias + "_v" + System.currentTimeMillis();
+            IndexOperations initOps = operations.indexOps(IndexCoordinates.of(initialIndex));
+            initOps.create(
+                    Map.of("number_of_shards", "1", "number_of_replicas", "0"),
+                    operations.indexOps(PostingSearchDocument.class).createMapping()
+            );
+            initOps.alias(new AliasActions().add(
+                    new AliasAction.Add(AliasActionParameters.builder()
+                            .withIndices(initialIndex)
+                            .withAliases(alias)
+                            .build())));
+            log.info("[검색] 초기 인덱스+alias 생성 완료 - index={}", initialIndex);
+        } else if (isMappingCorrupted(operations.indexOps(PostingSearchDocument.class))) {
+            log.warn("[검색] 매핑 오염 감지 - 재색인 시작");
+            indexer.reindexAll();
+        } else {
+            log.info("[검색] 인덱스 alias 정상 확인");
         }
     }
 
-    private void ensureValidIndex() {
-        IndexOperations indexOps = operations.indexOps(PostingSearchDocument.class);
-        if (indexOps.exists()) {
-            if (isMappingCorrupted(indexOps)) {
-                log.warn("[검색] 동적 매핑 오염 감지(companyText) - 인덱스 재생성 진행");
-                indexOps.delete();
-                indexOps.createWithMapping();
-            }
-        } else {
-            indexOps.createWithMapping();
-            log.info("[검색] 신규 인덱스 및 매핑 생성 완료");
+    private boolean isAliasExists(String alias) {
+        try {
+            Map<String, Set<AliasData>> result = operations
+                    .indexOps(IndexCoordinates.of(alias))
+                    .getAliasesForIndex(alias);
+            return result != null && !result.isEmpty();
+        } catch (Exception e) {
+            return false;
         }
     }
 
