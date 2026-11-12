@@ -56,7 +56,9 @@ docker run -d \
 
 # health check
 echo ">>> haphap-$NEXT health check 중..."
-for i in $(seq 1 15); do
+MAX_HEALTH_ATTEMPTS=60
+
+for i in $(seq 1 "$MAX_HEALTH_ATTEMPTS"); do
   if curl -sf "http://localhost:${NEXT_PORT}/actuator/health" > /dev/null 2>&1; then
     echo "Health check 통과 (시도 $i)"
     break

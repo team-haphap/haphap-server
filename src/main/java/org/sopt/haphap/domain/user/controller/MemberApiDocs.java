@@ -9,16 +9,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.sopt.haphap.domain.user.dto.MemberAccountResponse;
-import org.sopt.haphap.domain.user.dto.MemberProfileResponse;
-import org.sopt.haphap.domain.user.dto.MemberResponse;
-import org.sopt.haphap.domain.user.dto.WithdrawRequest;
+import org.sopt.haphap.domain.user.dto.*;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "회원", description = "마이페이지 등 회원 정보 조회를 위한 API")
@@ -149,7 +147,6 @@ public interface MemberApiDocs {
                       - 2~5자 (한글·영문·숫자 모두 1자로 계산) → INVALID_NICKNAME_LENGTH
                       - 허용하지 않는 문자와 길이 오류가 함께 있으면 INVALID_NICKNAME_CHARACTER가 우선입니다.
                       - 현재 내 닉네임과 같으면 중복이 아닙니다.
-                      - 다른 사용자가 사용 중이면 409 DUPLICATE_NICKNAME (별도 중복 확인 API 없음)
                     - profileImage: 이미지 파일 (최대 10MB). webp로 변환해 저장합니다.
                     - Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
                     """)
@@ -157,6 +154,115 @@ public interface MemberApiDocs {
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @Parameter(description = "새 닉네임 (\"익명의 \" 제외, 한글·영문·숫자 2~5자)", example = "김합합") String nickname,
             @Parameter(description = "새 프로필 이미지 파일") MultipartFile profileImage);
+
+    @Operation(
+            summary = "닉네임 사용 가능 여부 확인",
+            description = """
+                입력한 닉네임의 형식과 중복 여부를 확인합니다.
+                현재 본인의 닉네임을 다시 입력한 경우 사용 가능으로 응답합니다.
+                Authorization 헤더에 Bearer {accessToken}을 넣어주세요.
+                """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "사용 가능",
+                    content = @Content(
+                            schema = @Schema(implementation = NicknameValidationResponse.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "status": 200,
+                                  "code": "NICKNAME_AVAILABLE",
+                                  "message": "사용 가능한 닉네임입니다.",
+                                  "data": { "anonymousName": "익명의 김합합" }
+                                }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "닉네임 형식 오류 또는 파라미터 누락",
+                    content = @Content(
+                            schema = @Schema(implementation = FailureResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "닉네임 형식 오류", value = """
+                                        {
+                                          "status": 400,
+                                          "code": "INVALID_NICKNAME_FORMAT",
+                                          "message": "한글, 영문, 숫자만 사용할 수 있어요."
+                                        }
+                                        """),
+                                    @ExampleObject(name = "nickname 파라미터 누락", value = """
+                                        {
+                                          "status": 400,
+                                          "code": "INVALID_INPUT_VALUE",
+                                          "message": "유효하지 않은 입력값입니다."
+                                        }
+                                        """)
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패",
+                    content = @Content(
+                            schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "status": 401,
+                                  "code": "UNAUTHORIZED",
+                                  "message": "인증이 필요합니다."
+                                }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자를 찾을 수 없음",
+                    content = @Content(
+                            schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "status": 404,
+                                  "code": "USER_NOT_FOUND",
+                                  "message": "존재하지 않는 유저입니다."
+                                }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "다른 사용자가 이미 사용 중인 닉네임",
+                    content = @Content(
+                            schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "status": 409,
+                                  "code": "NICKNAME_DUPLICATED",
+                                  "message": "다른 사용자가 사용중인 닉네임이에요."
+                                }
+                                """)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류",
+                    content = @Content(
+                            schema = @Schema(implementation = FailureResponse.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "status": 500,
+                                  "code": "INTERNAL_SERVER_ERROR",
+                                  "message": "서버 내부 오류가 발생했습니다."
+                                }
+                                """)
+                    )
+            )
+    })
+    ResponseEntity<SuccessResponse<NicknameValidationResponse>> validateNickname(
+            @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
+            @Parameter(description = "한글·영문·숫자 2~5자", example = "김합합")
+            @RequestParam("nickname") String nickname);
 
     @Operation(summary = "회원 탈퇴",
             description = """
