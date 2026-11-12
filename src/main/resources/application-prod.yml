@@ -5,6 +5,9 @@ spring:
     password: ${RDS_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
+  elasticsearch:
+    uris: ${ES_URIS}
+
   jpa:
     hibernate:
       ddl-auto: validate

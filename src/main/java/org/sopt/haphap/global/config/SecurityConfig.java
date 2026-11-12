@@ -41,7 +41,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/v1/auth/**",
-                                "/api/v1/search/**",
                                 "/api/v1/banners/**",
                                 "/api/v1/admin/auth/**",
                                 "/admin/registrations/verification/**"
@@ -51,6 +50,8 @@ public class SecurityConfig {
                                 "/api/v1/postings/*/views",
                                 "/api/v1/postings/*/card-clicks"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()      // ← 이동
+                        .requestMatchers(HttpMethod.POST, "/api/v1/search/executions").authenticated()  // ← 이동
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().hasRole("USER")
                 )

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,4 +99,14 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<Long> searchPostingIds(
             @Param("keyword") String keyword,
             @Param("categories") List<String> categories);
+
+    //자동완성용 ID 목록 조회
+    @Query(value = """
+    SELECT p.id AS id, p.title AS title, c.name AS companyName, ci.image_url AS logoImageUrl
+    FROM posting p
+    JOIN company c ON c.id = p.company_id
+    LEFT JOIN company_image ci ON ci.company_id = c.id AND ci.type = 'AUTOCOMPLETE'
+    WHERE p.id IN (:ids)
+    """, nativeQuery = true)
+    List<PostingAutocompleteProjection> findAutocompleteRowsByIds(@Param("ids") Collection<Long> ids);
 }

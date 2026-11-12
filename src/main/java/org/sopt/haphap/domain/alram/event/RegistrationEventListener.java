@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.alram.event;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.alram.dispatch.AlramDispatch;
@@ -23,7 +24,6 @@ public class RegistrationEventListener {
     private final AlramFailureRecorder alramFailureRecorder;
     private final AlramDispatcher alramDispatcher;
 
-    // 합격 인증 승인 커밋 이후에만 발송 (롤백되면 알림도 안 나가야 하므로 AFTER_COMMIT)
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRegistrationApproved(RegistrationApprovedEvent event) {
@@ -32,8 +32,10 @@ public class RegistrationEventListener {
             if (dispatches.isEmpty()) {
                 return;
             }
-            for (AlramDispatch dispatch : dispatches) {   // 순회로 변경
-                alramDispatcher.dispatch(event.postingId(), event.registrantUserId(), null, dispatch);
+            for (AlramDispatch dispatch : dispatches) {
+                if (!dispatch.isEmpty()) {
+                    alramDispatcher.dispatch(event.postingId(), event.registrantUserId(), null, dispatch);
+                }
             }
         } catch (Exception e) {
             log.error("합격 알람 준비 실패 - postingId={}, stageId={}, registrant={}",
