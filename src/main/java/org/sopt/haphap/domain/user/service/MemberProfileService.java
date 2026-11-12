@@ -55,8 +55,17 @@ public class MemberProfileService {
     }
 
     // 직접 올린 이미지만 지운다. 기본(프리셋) 이미지는 여러 유저가 공유하므로 유지.
+    // 프로필은 이미 커밋됐으므로 프리셋 조회·삭제 모두 최선형 정리: 실패하면 이전 이미지를 남기고 응답은 정상 반환.
     private void deleteReplacedImage(String previousUrl) {
-        if (previousUrl == null || profileImageRepository.existsByImageUrl(previousUrl)) {
+        if (previousUrl == null) {
+            return;
+        }
+        try {
+            if (profileImageRepository.existsByImageUrl(previousUrl)) {
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("프리셋 이미지 여부 확인 실패 - 이전 프로필 이미지를 보존함 url={}", previousUrl, e);
             return;
         }
         deleteQuietly(previousUrl);
