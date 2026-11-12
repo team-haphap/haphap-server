@@ -48,7 +48,7 @@ public class VerificationQueryService {
         }
 
         List<Long> companyIds = registrations.stream()
-                .map(registration -> registration.getPosting().getCompany().getId())
+                .map(r -> r.getPosting().getCompany().getId())
                 .distinct()
                 .toList();
 
@@ -57,7 +57,8 @@ public class VerificationQueryService {
                 .stream()
                 .collect(Collectors.toMap(
                         image -> image.getCompany().getId(),
-                        CompanyImage::getImageUrl
+                        CompanyImage::getImageUrl,
+                        (first, ignored) -> first
                 ));
 
         List<Long> rejectedRegistrationIds = registrations.stream()

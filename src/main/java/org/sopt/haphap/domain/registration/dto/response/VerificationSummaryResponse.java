@@ -30,9 +30,12 @@ public record VerificationSummaryResponse(
                     Long registrationId = registration.getId();
 
                     List<String> imageUrls =
-                            registration.getVerificationStatus() == RegistrationVerificationStatus.REJECTED
+                            registration.getVerificationStatus()
+                                    == RegistrationVerificationStatus.REJECTED
                                     ? submittedImageUrlsByRegistrationId.getOrDefault(
-                                    registrationId, List.of())
+                                    registrationId,
+                                    List.of()
+                            )
                                     : List.of();
 
                     return VerificationItemResponse.from(
