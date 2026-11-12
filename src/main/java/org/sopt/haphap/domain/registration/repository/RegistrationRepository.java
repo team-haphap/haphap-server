@@ -194,6 +194,19 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         """)
     List<Long> findAppliedPostingIdsOrderByLastActivity(@Param("userId") Long userId);
 
+    // 마이페이지 [합격 인증]: 내 합격 등록 중 승인/반려 건수. 승인 대기(PENDING)는 어느 쪽에도 안 셈.
+    // 집계 쿼리라 항상 한 행이 나온다 (등록이 없으면 0, 0). user_id 선두 유니크 인덱스를 탄다.
+    @Query("""
+        SELECT COALESCE(SUM(CASE WHEN r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED
+                                 THEN 1 ELSE 0 END), 0) AS approvedCount,
+               COALESCE(SUM(CASE WHEN r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.REJECTED
+                                 THEN 1 ELSE 0 END), 0) AS rejectedCount
+        FROM Registration r
+        WHERE r.user.id = :userId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+        """)
+    PassCertificationCountProjection countPassCertifications(@Param("userId") Long userId);
+
     // 마이페이지 [내 지원 내역]: 위와 같은 "유효한 결과" 기준에 마지막 활동 시각까지 함께. 개수는 Pageable로 자른다.
     // 같은 시각이면 공고 id 역순으로 고정해 페이지 경계에서 순서가 흔들리지 않게 한다.
     @Query("""
