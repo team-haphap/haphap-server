@@ -11,6 +11,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -45,8 +46,15 @@ public class PopularKeywordRefresher {
             String tempKey = POPULAR_KEYWORD_CACHE_KEY + ":tmp:" + UUID.randomUUID();
             redisTemplate.opsForList().rightPushAll(tempKey, top);
             redisTemplate.expire(tempKey, Duration.ofMinutes(5));      // rename 전에 죽어도 고아 키 자동 정리
-            redisTemplate.rename(tempKey, POPULAR_KEYWORD_CACHE_KEY);
-            redisTemplate.persist(POPULAR_KEYWORD_CACHE_KEY);          // rename이 TTL을 승계하므로 해제
+
+            String luaScript =
+                    "redis.call('RENAME', KEYS[1], KEYS[2])\n" +
+                            "redis.call('PERSIST', KEYS[2])\n" +
+                            "return 1";
+            redisTemplate.execute(
+                    new DefaultRedisScript<>(luaScript, Long.class),
+                    List.of(tempKey, POPULAR_KEYWORD_CACHE_KEY)
+            );
         } catch (Exception e) {
             log.error("[인기 검색어] 갱신 실패 - 이전 목록 유지", e);
         }

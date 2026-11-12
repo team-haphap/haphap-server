@@ -50,10 +50,10 @@ public class SecurityConfig {
                                 "/api/v1/postings/*/views",
                                 "/api/v1/postings/*/card-clicks"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()      // ← 이동
+                        .requestMatchers(HttpMethod.POST, "/api/v1/search/executions").authenticated()  // ← 이동
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().hasRole("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/search/executions").authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {

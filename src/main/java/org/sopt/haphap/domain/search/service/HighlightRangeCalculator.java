@@ -22,7 +22,7 @@ public class HighlightRangeCalculator {
 
         List<HighlightRange> whole = find(lowerText, keyword.trim().toLowerCase(Locale.KOREAN));
         if (!whole.isEmpty()) {
-            return whole;
+            return merge(whole);
         }
 
         List<HighlightRange> ranges = new ArrayList<>();
