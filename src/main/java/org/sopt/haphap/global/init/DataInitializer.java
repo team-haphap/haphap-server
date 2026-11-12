@@ -107,37 +107,44 @@ public class DataInitializer implements CommandLineRunner {
         Category dev = category("개발/데이터");
         Category finance = category("금융/보험");
 
-        Company toss = company("토스");
-        Company kakao = company("카카오");
-        Company naver = company("네이버");
-        Company amore = company("아모레퍼시픽");
+        //Company toss = company("토스");
+        //Company kakao = company("카카오");
+        //Company naver = company("네이버");
+        //Company amore = company("아모레퍼시픽");
+        //Company hyundai = company("현대자동차");
+        //Company lgHnh = company("LG생활건강");   // ★ company 테이블에 미리 추가 필요
+
         Company hyundai = company("현대자동차");
-        Company lgHnh = company("LG생활건강");   // ★ company 테이블에 미리 추가 필요
+        Company naver = company("네이버");
+        Company kakao = company("카카오");
+        Company amore = company("아모레퍼시픽");
+        Company lgHnh = company("LG생활건강");
+        Company toss = company("토스");
 
         // ===== 현대자동차 =====
         seed("자율주행개발 - 2026 신입 채용", "남양, 판교", dev, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 87),
                 stage("인적성검사", 2, d(2026, 6, 19), 23),
-                stage("직무면접", 3, d(2026, 7, 18), 44), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 17), 44), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 3), 65));
 
         seed("차량개발 - 2026 신입 채용", "남양", dev, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 34),
                 stage("인적성검사", 2, d(2026, 6, 24), 80),
                 stage("코딩테스트", 3, d(2026, 7, 7), 54),
-                stage("직무면접", 4, d(2026, 7, 18), 23),
+                stage("직무면접", 4, d(2026, 7, 17), 23),
                 stage("임원면접 (최종)", 5, d(2026, 8, 7), 65));  //Todo: 7/18로
 
         seed("경영기획 - 2026 신입 채용", "양재", pm, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 66),
                 stage("인적성검사", 2, d(2026, 6, 29), 23),
-                stage("직무면접", 3, d(2026, 7, 18), 19), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 17), 19), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 7), 70));
 
         seed("신사업 전략 기획 - 2026 신입 채용", "양재", pm, hyundai,
                 stage("서류", 1, d(2026, 6, 5), 86),
                 stage("인적성검사", 2, d(2026, 6, 29), 58),
-                stage("직무면접", 3, d(2026, 7, 18), 34), //Todo: 7/18로
+                stage("직무면접", 3, d(2026, 7, 17), 34), //Todo: 7/18로
                 stage("임원면접 (최종)", 4, d(2026, 8, 7), 91));
 
         seed("HR - 2026 신입 채용", "양재, 울산", hr, hyundai,
@@ -450,7 +457,22 @@ public class DataInitializer implements CommandLineRunner {
         postingCount++;
 
         List<PostingStage> stages = addStages(posting, specs);
+        initializeCurrentStage(posting, stages);
         autoRegister(posting, stages);
+    }
+
+    // 어드민 전형 등록(AdminPostingStageService)과 같이 1번 전형을 현재 전형으로 초기화.
+    // run()에 @Transactional이 없어 더티 체킹이 안 되므로 직접 save한다.
+    private void initializeCurrentStage(Posting posting, List<PostingStage> stages) {
+        stages.stream()
+                .filter(stage -> stage.getOrderIndex() == 1)
+                .findFirst()
+                .ifPresent(first -> {
+                    first.markMoved(LocalDateTime.now());
+                    postingStageRepository.save(first);
+                    posting.moveCurrentStageTo(first);
+                    postingRepository.save(posting);
+                });
     }
 
     /**

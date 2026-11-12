@@ -27,36 +27,28 @@ public interface RegistrationApiDocs {
             @ApiResponse(responseCode = "201", description = "등록 성공",
                     content = @Content(schema = @Schema(implementation = RegistrationCreateResponse.class),
                             examples = {
-                                    @ExampleObject(name = "PASS(합격) - 카드 정보 포함", value = """
-                                    {
-                                      "status": 201,
-                                      "code": "REGISTRATION_CREATED",
-                                      "message": "상태 등록이 완료되었습니다.",
-                                      "data": {
-                                        "registrationId": 101,
-                                        "card": {
-                                          "userName": "김소프트",
-                                          "companyName": "토스",
-                                          "companyCardLogoImageUrl": "https://.../toss_logo.png",
-                                          "title": "2026 상반기 신입 공채",
-                                          "stageName": "최종 면접",
-                                          "categoryName": "개발",
-                                          "cardImageUrl": "https://.../pass_card_bg.png"
-                                        }
-                                      }
-                                    }
-                                    """),
-                                    @ExampleObject(name = "FAIL/PENDING - 카드 없음", value = """
-                                    {
-                                      "status": 201,
-                                      "code": "REGISTRATION_CREATED",
-                                      "message": "상태 등록이 완료되었습니다.",
-                                      "data": {
-                                        "registrationId": 102,
-                                        "card": null
-                                      }
-                                    }
-                                    """)
+                                    @ExampleObject(name = "PASS(합격) - 인증 승인 대기", value = """  
+          {
+          "status": 201,
+          "code": "REGISTRATION_CREATED",
+          "message": "상태 등록이 완료되었습니다.",
+          "data": {
+            "registrationId": 101,
+            "verificationStatus": "PENDING"
+          }
+        }
+        """),
+                                    @ExampleObject(name = "FAIL/PENDING - 인증 대상 아님", value = """ 
+          {
+          "status": 201,
+          "code": "REGISTRATION_CREATED",
+          "message": "상태 등록이 완료되었습니다.",
+          "data": {
+            "registrationId": 102,
+            "verificationStatus": "NOT_REQUIRED"
+          }
+        }
+        """)
                             })),
             @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료/유효하지 않음)",
                     content = @Content(schema = @Schema(implementation = FailureResponse.class),

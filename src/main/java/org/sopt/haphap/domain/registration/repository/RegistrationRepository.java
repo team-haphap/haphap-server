@@ -3,7 +3,10 @@ package org.sopt.haphap.domain.registration.repository;
 import jakarta.persistence.LockModeType;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
+import org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus;
 import org.sopt.haphap.domain.registration.projection.*;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -12,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +57,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // 실시간 집계(StageResultCountUpdater)가 보류하는 것과 반드시 같은 기준으로 걸러야 한다 —
     // 안 그러면 배치가 돌 때마다 보류해둔 값을 무시하고 원본으로 덮어써버린다.
     // PENDING은 항상 집계. PASS는 인증 승인된 것만. FAIL은 "후속 전형 불합격" 검토가 승인 안 된 건 제외.
+
     @Query("""
         SELECT r.posting.id AS postingId, r.stage.id AS stageId,
                r.result AS result, COUNT(r) AS cnt
@@ -193,6 +198,103 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         ORDER BY MAX(r.updatedAt) DESC
         """)
     List<Long> findAppliedPostingIdsOrderByLastActivity(@Param("userId") Long userId);
+
+    // 앱 실행 시 자동 노출용
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.user
+        JOIN FETCH r.posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE r.user.id = :userId
+          AND r.verificationStatus = :status
+          AND r.passCardConfirmedAt IS NULL
+        ORDER BY r.id ASC
+        """)
+    List<Registration> findUnconfirmedPassCards(
+            @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status);
+
+    // 보관함; 확인 완료한 합격카드
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.user
+        JOIN FETCH r.posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE r.user.id = :userId
+          AND r.verificationStatus = :status
+          AND r.passCardConfirmedAt IS NOT NULL
+        ORDER BY r.passCardConfirmedAt DESC, r.id DESC
+        """)
+    Page<Registration> findConfirmedPassCards(
+            @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status,
+            Pageable pageable);
+
+    // 상세 조회
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.user
+        JOIN FETCH r.posting p
+        JOIN FETCH p.company
+        JOIN FETCH p.category
+        WHERE r.id = :registrationId
+          AND r.user.id = :userId
+          AND r.verificationStatus = :status
+        """)
+    Optional<Registration> findPassCard(
+            @Param("registrationId") Long registrationId,
+            @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status);
+
+    //재제출 API
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Registration r where r.id = :id and r.user.id = :userId")
+    Optional<Registration> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") Long userId);
+
+    // 목록 + 기업/전형까지 fetch join
+    @Query("""
+    SELECT r FROM Registration r
+    JOIN FETCH r.posting p
+    JOIN FETCH p.company
+    JOIN FETCH r.stage
+    WHERE r.user.id = :userId
+      AND r.verificationStatus IN :statuses
+    ORDER BY r.verificationResolvedAt DESC, r.id DESC
+    """)
+    List<Registration> findVerificationHistory(
+            @Param("userId") Long userId,
+            @Param("statuses") Collection<RegistrationVerificationStatus> statuses);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    UPDATE Registration r
+       SET r.passCardConfirmedAt = :now
+     WHERE r.id = :id
+       AND r.user.id = :userId
+       AND r.verificationStatus = :status
+       AND r.passCardConfirmedAt IS NULL
+    """)
+    int markPassCardConfirmed(@Param("id") Long id,
+                              @Param("userId") Long userId,
+                              @Param("status") RegistrationVerificationStatus status,
+                              @Param("now") LocalDateTime now);
+
+    boolean existsByIdAndUser_IdAndVerificationStatus(
+            Long id, Long userId, RegistrationVerificationStatus status);
+    // 마이페이지 [합격 인증]: 내 합격 등록 중 승인/반려 건수. 승인 대기(PENDING)는 어느 쪽에도 안 셈.
+    // 집계 쿼리라 항상 한 행이 나온다 (등록이 없으면 0, 0). user_id 선두 유니크 인덱스를 탄다.
+    @Query("""
+        SELECT COALESCE(SUM(CASE WHEN r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.APPROVED
+                                 THEN 1 ELSE 0 END), 0) AS approvedCount,
+               COALESCE(SUM(CASE WHEN r.verificationStatus = org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus.REJECTED
+                                 THEN 1 ELSE 0 END), 0) AS rejectedCount
+        FROM Registration r
+        WHERE r.user.id = :userId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+        """)
+    PassCertificationCountProjection countPassCertifications(@Param("userId") Long userId);
 
     // 마이페이지 [내 지원 내역]: 위와 같은 "유효한 결과" 기준에 마지막 활동 시각까지 함께. 개수는 Pageable로 자른다.
     // 같은 시각이면 공고 id 역순으로 고정해 페이지 경계에서 순서가 흔들리지 않게 한다.

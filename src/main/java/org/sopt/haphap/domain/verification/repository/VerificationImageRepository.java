@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,10 @@ public interface VerificationImageRepository extends JpaRepository<VerificationI
     Optional<VerificationImage> findByIdForUpdate(@Param("id") Long id);
 
     List<VerificationImage> findByRegistrationId(Long registrationId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select v from VerificationImage v where v.id in :ids order by v.id asc")
+    List<VerificationImage> findAllByIdInForUpdate(@Param("ids") Collection<Long> ids);
 
     @Modifying(flushAutomatically = true)
     @Query("""

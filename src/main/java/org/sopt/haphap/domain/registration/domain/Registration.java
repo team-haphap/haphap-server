@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
+import org.sopt.haphap.global.code.ErrorResultCode;
 import org.sopt.haphap.global.common.BaseEntity;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
@@ -39,11 +40,21 @@ public class Registration extends BaseEntity {
     @Column(nullable = false, length = 20)
     private RegistrationResult result;  // 합격 / 불합격 / 대기
 
-    // 합격 인증(인증샷 검토) 상태. 실제 승인/반려 플로우는 별도 파트에서 연결 예정이라
-    // 지금은 전형 이동 트리거가 참조할 상태값만 갖고 있다.
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false, length = 20)
     private RegistrationVerificationStatus verificationStatus;
+
+    @Column(name = "pass_card_confirmed_at")
+    private LocalDateTime passCardConfirmedAt;
+
+    @Column(name = "verification_round", nullable = false)
+    private int verificationRound = 1;
+
+    @Column(name = "verification_submitted_at")
+    private LocalDateTime verificationSubmittedAt;
+
+    @Column(name = "verification_resolved_at")
+    private LocalDateTime verificationResolvedAt;
 
     @Convert(converter = ContactMethodListConverter.class)
     @Column(name = "contact_methods")
@@ -71,7 +82,7 @@ public class Registration extends BaseEntity {
         this.contactMethods = contactMethods;
         this.contactedAt = contactedAt;
         this.anonymous = anonymous;
-        this.verificationStatus = deriveVerificationStatus(result);
+        applyVerificationStatus(result);
     }
 
     // PASS만 인증 대상. FAIL/PENDING은 애초에 검토할 게 없어 NOT_REQUIRED로 바로 확정.
@@ -79,6 +90,13 @@ public class Registration extends BaseEntity {
         return result == RegistrationResult.PASS
                 ? RegistrationVerificationStatus.PENDING
                 : RegistrationVerificationStatus.NOT_REQUIRED;
+    }
+
+    private void applyVerificationStatus(RegistrationResult result) {
+        this.verificationStatus = deriveVerificationStatus(result);
+        this.verificationSubmittedAt =
+                this.verificationStatus == RegistrationVerificationStatus.PENDING ? LocalDateTime.now() : null;
+        this.verificationResolvedAt = null;
     }
 
     public boolean isPending() {
@@ -107,21 +125,46 @@ public class Registration extends BaseEntity {
         this.contactMethods = contactMethods;
         this.contactedAt = contactedAt;
         this.anonymous = anonymous;
-        this.verificationStatus = deriveVerificationStatus(result);
+        applyVerificationStatus(result);
     }
 
     public void approve() {
-        if (this.verificationStatus != RegistrationVerificationStatus.PENDING) {
-            throw new CustomException(RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
-        }
-        this.verificationStatus = RegistrationVerificationStatus.APPROVED;
+        transitionTo(RegistrationVerificationStatus.APPROVED, RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
+        this.verificationResolvedAt = LocalDateTime.now();
     }
 
     public void reject() {
-        if (this.verificationStatus != RegistrationVerificationStatus.PENDING) {
-            throw new CustomException(RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
+        transitionTo(RegistrationVerificationStatus.REJECTED, RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
+        this.verificationResolvedAt = LocalDateTime.now();
+    }
+
+    public void resubmitVerification() {
+        transitionTo(RegistrationVerificationStatus.PENDING, RegistrationErrorCode.VERIFICATION_NOT_RESUBMITTABLE);
+        this.verificationRound++;
+        this.verificationSubmittedAt = LocalDateTime.now();
+        this.verificationResolvedAt = null;
+    }
+
+    public boolean isVerificationResubmittable() {
+        return this.verificationStatus == RegistrationVerificationStatus.REJECTED;
+    }
+
+    private void transitionTo(RegistrationVerificationStatus next, ErrorResultCode onFail) {
+        if (!this.verificationStatus.canTransitionTo(next)) {
+            throw new CustomException(onFail);
         }
-        this.verificationStatus = RegistrationVerificationStatus.REJECTED;
+        this.verificationStatus = next;
+    }
+
+    //합격카드가 사용자 화면에 정상 노출된 시점 기록
+    public void confirmPassCard() {
+        if (this.passCardConfirmedAt == null) {
+            this.passCardConfirmedAt = LocalDateTime.now();
+        }
+    }
+
+    public boolean isPassCardConfirmed() {
+        return this.passCardConfirmedAt != null;
     }
 
     public boolean isApproved() {

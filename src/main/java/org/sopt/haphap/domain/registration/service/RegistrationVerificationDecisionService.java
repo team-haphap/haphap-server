@@ -27,24 +27,35 @@ public class RegistrationVerificationDecisionService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void approve(Long registrationId) {
+    public void approve(Long registrationId, int round) {
         Registration registration = registrationRepository.findByIdForUpdate(registrationId)
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
-
+        validateRound(registration, round);
         registration.approve();
 
         eventPublisher.publishEvent(new RegistrationApprovedEvent(
-                registration.getPosting().getId(), registration.getStage().getId(), registration.getUser().getId()));
+                registration.getPosting().getId(),
+                registration.getStage().getId(),
+                registration.getUser().getId(),
+                registration.getId()
+        ));
     }
 
     @Transactional
-    public void reject(Long registrationId) {
+    public void reject(Long registrationId, int round) {
         Registration registration = registrationRepository.findByIdForUpdate(registrationId)
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
+        validateRound(registration, round);
 
         registration.reject();
-
         cleanupImages(registrationId);
+    }
+
+    // 재제출로 회차가 바뀐 뒤에는 이전 회차 링크로 처리할 수 없음
+    private void validateRound(Registration registration, int round) {
+        if (registration.getVerificationRound() != round) {
+            throw new CustomException(RegistrationErrorCode.VERIFICATION_LINK_EXPIRED);
+        }
     }
 
     private void cleanupImages(Long registrationId) {
