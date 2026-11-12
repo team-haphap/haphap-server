@@ -63,7 +63,7 @@ for i in $(seq 1 "$MAX_HEALTH_ATTEMPTS"); do
     echo "Health check 통과 (시도 $i)"
     break
   fi
-  if [ "$i" -eq 15 ]; then
+  if [ "$i" -eq "$MAX_HEALTH_ATTEMPTS" ]; then
     echo "Health check 실패. 최근 로그:"
     docker logs "haphap-$NEXT" --tail 200
     echo "위 로그 확인 후 롤백합니다."
