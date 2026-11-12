@@ -41,7 +41,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/v1/auth/**",
-                                "/api/v1/search/**",
                                 "/api/v1/banners/**",
                                 "/api/v1/admin/auth/**",
                                 "/admin/registrations/verification/**"
@@ -53,6 +52,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/search/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/search/executions").authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
