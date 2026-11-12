@@ -48,6 +48,7 @@ docker run -d \
   -p "${NEXT_PORT}:8080" \
   --env-file "$WORK_DIR/.env" \
   -e REDIS_HOST=redis \
+  -e ELASTICSEARCH_HOST=haphap-es \
   -e FIREBASE_CONFIG_PATH=/app/firebase-service-account.json \
   -v "$WORK_DIR/firebase-service-account.json:/app/firebase-service-account.json:ro" \
   --restart unless-stopped \
