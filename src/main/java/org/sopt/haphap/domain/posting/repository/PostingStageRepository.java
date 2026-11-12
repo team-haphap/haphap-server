@@ -101,4 +101,7 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
 
     // 같은 공고 안에서 canonical 전형 유형이 중복되지 않게 방지 (최소 시차표는 유형당 1개를 전제로 함)
     boolean existsByPostingIdAndStageType(Long postingId, StageType stageType);
+
+    // 마이페이지 [이번 주 발표 예상]: 기간 안에 발표 예상일이 잡힌 전형이 하나라도 있는지 (LIMIT 1로 끊김)
+    boolean existsByExpectedAnnouncementDateBetween(LocalDate start, LocalDate end);
 }

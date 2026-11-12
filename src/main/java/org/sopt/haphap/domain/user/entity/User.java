@@ -73,6 +73,16 @@ public class User extends BaseEntity {
 
     private LocalDateTime withdrawnAt;
 
+    // 프로필 수정: null인 항목은 그대로 둔다
+    public void updateProfile(String anonymousName, String profileImageUrl) {
+        if (anonymousName != null) {
+            this.anonymousName = anonymousName;
+        }
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
     public void updateAppleRefreshToken(String refreshToken) {
         this.appleRefreshToken = refreshToken;
     }
