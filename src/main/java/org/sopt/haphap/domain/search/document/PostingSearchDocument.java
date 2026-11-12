@@ -11,11 +11,15 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.annotation.Version;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Document(indexName = "posting_search")
 public class PostingSearchDocument {
+
+    @Version
+    private Long version;
 
     @Id
     private String id;
@@ -47,6 +51,10 @@ public class PostingSearchDocument {
         doc.registeredAtEpoch = created == null
                 ? 0L
                 : created.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        LocalDateTime updated = posting.getUpdatedAt();
+        doc.version = updated == null
+                ? doc.registeredAtEpoch
+                : updated.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         return doc;
     }
 }

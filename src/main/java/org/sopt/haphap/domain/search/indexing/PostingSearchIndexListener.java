@@ -13,15 +13,32 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class PostingSearchIndexListener {
 
     private final PostingSearchIndexer indexer;
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long RETRY_BACKOFF_MS = 1_000;
 
-    // 공고 저장 트랜잭션이 커밋된 뒤 색인
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void on(PostingSearchIndexEvent event) {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                indexer.index(event.postingId());
+                return;
+            } catch (Exception e) {
+                if (attempt == MAX_ATTEMPTS) {
+                    log.warn("[검색] 공고 색인 {}회 실패 postingId={} - 일일 재색인에서 복구",
+                            MAX_ATTEMPTS, event.postingId(), e);
+                    return;
+                }
+                sleep(RETRY_BACKOFF_MS * attempt);
+            }
+        }
+    }
+
+    private void sleep(long ms) {
         try {
-            indexer.index(event.postingId());
-        } catch (Exception e) {
-            log.warn("[검색] 공고 색인 실패 postingId={} - 재색인 필요", event.postingId(), e);
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

@@ -6,6 +6,20 @@ WORK_DIR="/home/ubuntu/haphap"
 cd "$WORK_DIR"
 docker compose up -d redis elasticsearch
 
+echo ">>> Elasticsearch 준비 확인 중..."
+for i in $(seq 1 20); do
+  if curl -sf "http://localhost:9200/_cluster/health" > /dev/null 2>&1; then
+    echo "Elasticsearch OK (시도 $i)"
+    break
+  fi
+  if [ "$i" -eq 20 ]; then
+    echo "Elasticsearch에 연결할 수 없어 배포를 중단합니다. 최근 로그:"
+    docker logs haphap-es --tail 50 || true
+    exit 1
+  fi
+  sleep 3
+done
+
 if docker ps --format '{{.Names}}' | grep -q "^haphap-blue$"; then
   CURRENT="blue"
   NEXT="green"

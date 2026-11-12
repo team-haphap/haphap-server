@@ -1,12 +1,10 @@
 package org.sopt.haphap.domain.search.keyword;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -42,9 +40,13 @@ public class PopularKeywordRefresher {
                 redisTemplate.delete(POPULAR_KEYWORD_CACHE_KEY);
                 return;
             }
-            redisTemplate.delete(TEMP_KEY);
-            redisTemplate.opsForList().rightPushAll(TEMP_KEY, top);
-            redisTemplate.rename(TEMP_KEY, POPULAR_KEYWORD_CACHE_KEY);
+
+            // 임시 키를 호출마다 고유하게 만들어, 블루/그린 두 인스턴스의 갱신이 겹쳐도 섞이지 않게 한다
+            String tempKey = POPULAR_KEYWORD_CACHE_KEY + ":tmp:" + UUID.randomUUID();
+            redisTemplate.opsForList().rightPushAll(tempKey, top);
+            redisTemplate.expire(tempKey, Duration.ofMinutes(5));      // rename 전에 죽어도 고아 키 자동 정리
+            redisTemplate.rename(tempKey, POPULAR_KEYWORD_CACHE_KEY);
+            redisTemplate.persist(POPULAR_KEYWORD_CACHE_KEY);          // rename이 TTL을 승계하므로 해제
         } catch (Exception e) {
             log.error("[인기 검색어] 갱신 실패 - 이전 목록 유지", e);
         }
@@ -52,8 +54,12 @@ public class PopularKeywordRefresher {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initIfAbsent() {
-        if (!Boolean.TRUE.equals(redisTemplate.hasKey(POPULAR_KEYWORD_CACHE_KEY))) {
-            refresh();
+        try {
+            if (!Boolean.TRUE.equals(redisTemplate.hasKey(POPULAR_KEYWORD_CACHE_KEY))) {
+                refresh();
+            }
+        } catch (Exception e) {
+            log.warn("[인기 검색어] 초기화 중 Redis 확인 실패 - 다음 정각 갱신에서 재시도", e);
         }
     }
 
