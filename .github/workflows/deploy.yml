@@ -63,9 +63,6 @@ jobs:
 
             sudo nginx -t
             sudo systemctl reload nginx
-
-            cat > .env <<'ENVEOF'
-            RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
   
             cat > .env <<'ENVEOF'
             RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
