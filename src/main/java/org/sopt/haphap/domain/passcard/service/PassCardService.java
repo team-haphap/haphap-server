@@ -12,6 +12,8 @@ import org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus
 import org.sopt.haphap.domain.registration.dto.response.PassCardResponse;
 import org.sopt.haphap.domain.registration.repository.RegistrationRepository;
 import org.sopt.haphap.global.exception.CustomException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,12 +36,11 @@ public class PassCardService {
     }
 
     /* 마이페이지 > 합격 카드 보관함 */
-    public PassCardArchiveListResponse getArchive(Long userId) {
-        List<PassCardArchiveItemResponse> items = registrationRepository
-                .findConfirmedPassCards(userId, APPROVED).stream()
-                .map(PassCardArchiveItemResponse::from)
-                .toList();
-        return PassCardArchiveListResponse.from(items);
+    public PassCardArchiveListResponse getArchive(Long userId, Pageable pageable) {
+        Page<PassCardArchiveItemResponse> page = registrationRepository
+                .findConfirmedPassCards(userId, APPROVED, pageable)
+                .map(PassCardArchiveItemResponse::from);
+        return PassCardArchiveListResponse.from(page);
     }
 
     /* 푸시 탭 / 보관함 [다시 보기]*/

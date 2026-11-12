@@ -13,6 +13,8 @@ import org.sopt.haphap.domain.passcard.dto.response.UnconfirmedPassCardListRespo
 import org.sopt.haphap.domain.registration.dto.response.PassCardResponse;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
@@ -91,4 +93,8 @@ public interface PassCardApiDocs {
     ResponseEntity<Void> confirm(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @Parameter(description = "등록 ID") Long registrationId);
+
+    ResponseEntity<SuccessResponse<PassCardArchiveListResponse>> getArchive(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 20) Pageable pageable);
 }

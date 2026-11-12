@@ -6,6 +6,7 @@ import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus;
 import org.sopt.haphap.domain.registration.projection.*;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -226,9 +227,10 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
           AND r.passCardConfirmedAt IS NOT NULL
         ORDER BY r.passCardConfirmedAt DESC, r.id DESC
         """)
-    List<Registration> findConfirmedPassCards(
+    Page<Registration> findConfirmedPassCards(
             @Param("userId") Long userId,
-            @Param("status") RegistrationVerificationStatus status);
+            @Param("status") RegistrationVerificationStatus status,
+            Pageable pageable);
 
     // 상세 조회
     @Query("""
@@ -259,7 +261,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     JOIN FETCH r.stage
     WHERE r.user.id = :userId
       AND r.verificationStatus IN :statuses
-    ORDER BY r.verificationSubmittedAt DESC, r.id DESC
+    ORDER BY r.verificationResolvedAt DESC, r.id DESC
     """)
     List<Registration> findVerificationHistory(
             @Param("userId") Long userId,

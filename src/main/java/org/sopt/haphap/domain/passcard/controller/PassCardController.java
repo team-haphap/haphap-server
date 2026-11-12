@@ -8,6 +8,9 @@ import org.sopt.haphap.domain.passcard.service.PassCardService;
 import org.sopt.haphap.domain.registration.dto.response.PassCardResponse;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +33,12 @@ public class PassCardController implements PassCardApiDocs {
 
     @GetMapping
     public ResponseEntity<SuccessResponse<PassCardArchiveListResponse>> getArchive(
-            @AuthenticationPrincipal Long userId) {
-        SuccessResponse<PassCardArchiveListResponse> body = ApiResponse.success(
-                PassCardSuccessCode.PASS_CARD_LIST_FETCHED,
-                passCardService.getArchive(userId));
-        return ResponseEntity.status(body.status()).body(body);
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 20, sort = "verificationResolvedAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return ResponseEntity.ok(SuccessResponse.of(
+                PassCardSuccessCode.GET_ARCHIVE_SUCCESS,
+                passCardService.getArchive(userId, pageable)));
     }
 
     @GetMapping("/{registrationId}")
