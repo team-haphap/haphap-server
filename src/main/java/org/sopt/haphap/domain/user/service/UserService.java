@@ -53,6 +53,13 @@ public class UserService {
     }
 
     @Transactional
+    public User findActiveByIdForUpdate(Long userId) {
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+        return requireActive(user);
+    }
+
+    @Transactional
     public void updateAppleRefreshToken(Long userId, String refreshToken) {
         User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));

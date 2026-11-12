@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.sopt.haphap.domain.content.code.ContentSuccessCode;
 
 @RestController
 @RequestMapping("/api/v1/members/me/contents")

@@ -32,7 +32,10 @@ public record ContentSummaryResponse(
     }
 
     private static String preview(String body) {
-        return body.length() <= PREVIEW_LENGTH ? body : body.substring(0, PREVIEW_LENGTH);
+        if (body.codePointCount(0, body.length()) <= PREVIEW_LENGTH) {
+            return body;
+        }
+        return body.substring(0, body.offsetByCodePoints(0, PREVIEW_LENGTH));
     }
 
     static String authorNickname(Content c) {

@@ -2,6 +2,9 @@ package org.sopt.haphap.domain.content.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.sopt.haphap.domain.content.domain.ContentType;
 
 public record ContentCreateRequest(
 

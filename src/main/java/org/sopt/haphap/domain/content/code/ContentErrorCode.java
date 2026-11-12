@@ -1,3 +1,5 @@
+package org.sopt.haphap.domain.content.code;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.global.code.ErrorResultCode;

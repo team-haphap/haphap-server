@@ -24,7 +24,7 @@ public class ContentService {
 
     @Transactional
     public ContentCreateResponse create(Long userId, ContentCreateRequest request) {
-        User user = userService.findById(userId);
+        User user = userService.findActiveByIdForUpdate(userId);
         Posting posting = resolvePosting(request.postingId());
 
         Content content = Content.create(
