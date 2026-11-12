@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.event.RegistrationCreatedEvent;
+import org.sopt.haphap.domain.registration.event.VerificationResubmittedEvent;
 import org.sopt.haphap.domain.registration.security.VerificationDecisionType;
 import org.sopt.haphap.domain.registration.security.VerificationLinkSigner;
 import org.sopt.haphap.domain.verification.entity.VerificationImage;
@@ -38,26 +39,36 @@ public class VerificationDiscordNotifier {
             return;
         }
         try {
-            notify(e.registrationId());
+            notify(e.registrationId(), 1);
         } catch (Exception ex) {
             // 에러 삼키고 로그 남기도록
             log.warn("합격 인증 디스코드 알림 발송 실패 registrationId={}", e.registrationId(), ex);
         }
     }
 
-    private void notify(Long registrationId) {
+    private void notify(Long registrationId, int round) {
         List<String> imageUrls = verificationImageRepository.findByRegistrationId(registrationId).stream()
                 .map(image -> presignedUrlGenerator.generateGetUrl(image.getS3Key()))
                 .toList();
 
-        String approveLink = confirmLink(registrationId, VerificationDecisionType.APPROVE);
-        String rejectLink = confirmLink(registrationId, VerificationDecisionType.REJECT);
+        String approveLink = confirmLink(registrationId, VerificationDecisionType.APPROVE, round);
+        String rejectLink = confirmLink(registrationId, VerificationDecisionType.REJECT, round);
 
         discordWebhookClient.sendVerificationRequest(registrationId, imageUrls, approveLink, rejectLink);
     }
 
-    private String confirmLink(Long registrationId, VerificationDecisionType action) {
-        String token = linkSigner.issue(registrationId, action);
+    private String confirmLink(Long registrationId, VerificationDecisionType action, int round) {
+        String token = linkSigner.issue(registrationId, action, round);
         return baseUrl + "/admin/registrations/verification?token=" + token;
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onVerificationResubmitted(VerificationResubmittedEvent e) {
+        try {
+            notify(e.registrationId(), e.round());
+        } catch (Exception ex) {
+            log.warn("합격 인증 재제출 디스코드 알림 발송 실패 registrationId={}", e.registrationId(), ex);
+        }
     }
 }

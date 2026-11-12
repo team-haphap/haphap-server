@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.security.MessageDigest;
 import java.util.Base64;
 
 @Component
@@ -19,8 +19,8 @@ public class VerificationLinkSigner {
     @Value("${verification.link.secret}")
     private String secret;
 
-    public String issue(Long registrationId, VerificationDecisionType action) {
-        String payload = registrationId + ":" + action.name();
+    public String issue(Long registrationId, VerificationDecisionType action, int round) {
+        String payload = registrationId + ":" + action.name() + ":" + round;
         String raw = payload + ":" + sign(payload);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
@@ -34,19 +34,35 @@ public class VerificationLinkSigner {
         }
 
         String[] parts = raw.split(":");
-        if (parts.length != 3) {
+        String payload;
+        String signature;
+        int round;
+        if (parts.length == 3) {
+            payload = parts[0] + ":" + parts[1];
+            signature = parts[2];
+            round = 1;
+        } else if (parts.length == 4) {
+            payload = parts[0] + ":" + parts[1] + ":" + parts[2];
+            signature = parts[3];
+            round = parseRound(parts[2]);
+        } else {
             throw new CustomException(RegistrationErrorCode.INVALID_VERIFICATION_TOKEN);
         }
 
-        String payload = parts[0] + ":" + parts[1];
-        String signature = parts[2];
-        if (!sign(payload).equals(signature)) {
+        if (!MessageDigest.isEqual(
+                sign(payload).getBytes(StandardCharsets.UTF_8), signature.getBytes(StandardCharsets.UTF_8))) {
             throw new CustomException(RegistrationErrorCode.INVALID_VERIFICATION_TOKEN);
         }
+        return new VerificationDecisionToken(
+                Long.parseLong(parts[0]), VerificationDecisionType.valueOf(parts[1]), round);
+    }
 
-        Long registrationId = Long.parseLong(parts[0]);
-        VerificationDecisionType action = VerificationDecisionType.valueOf(parts[1]);
-        return new VerificationDecisionToken(registrationId, action);
+    private int parseRound(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new CustomException(RegistrationErrorCode.INVALID_VERIFICATION_TOKEN);
+        }
     }
 
     private String sign(String payload) {

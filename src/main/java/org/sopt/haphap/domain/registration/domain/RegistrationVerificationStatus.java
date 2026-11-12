@@ -14,4 +14,13 @@ public enum RegistrationVerificationStatus {
     REJECTED("반려됨");
 
     private final String description;
+
+    // 허용 전이: PENDING > APPROVED/REJECTED, REJECTED > PENDING(재제출)
+    public boolean canTransitionTo(RegistrationVerificationStatus next) {
+        return switch (this) {
+            case PENDING -> next == APPROVED || next == REJECTED;
+            case REJECTED -> next == PENDING;
+            default -> false;
+        };
+    }
 }
