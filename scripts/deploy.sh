@@ -4,7 +4,7 @@ IMAGE="haphapsopt/haphap-server:${IMAGE_TAG:?IMAGE_TAG is required}"
 WORK_DIR="/home/ubuntu/haphap"
 
 cd "$WORK_DIR"
-docker compose up -d redis
+docker compose up -d redis elasticsearch
 
 if docker ps --format '{{.Names}}' | grep -q "^haphap-blue$"; then
   CURRENT="blue"
