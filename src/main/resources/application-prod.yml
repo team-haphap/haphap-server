@@ -11,6 +11,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  flyway:
+    out-of-order:true
 
 management:
   endpoint:
