@@ -31,6 +31,19 @@ public final class NicknamePolicy {
         return PREFIX + nickname;
     }
 
+    public static String toValidationAnonymousName(String nickname) {
+        if (nickname == null || DISALLOWED.matcher(nickname).find()) {
+            throw new CustomException(MemberErrorCode.INVALID_NICKNAME_FORMAT);
+        }
+
+        int length = nickname.codePointCount(0, nickname.length());
+        if (length < MIN_LENGTH || length > MAX_LENGTH) {
+            throw new CustomException(MemberErrorCode.INVALID_NICKNAME_FORMAT);
+        }
+
+        return PREFIX + nickname;
+    }
+
     // anonymousName에서 닉네임 부분만. 접두어가 없는 예전 데이터는 그대로 돌려준다.
     public static String toNickname(String anonymousName) {
         if (anonymousName == null || !anonymousName.startsWith(PREFIX)) {

@@ -3,14 +3,18 @@ package org.sopt.haphap.domain.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.user.dto.MemberProfileResponse;
+import org.sopt.haphap.domain.user.dto.NicknameValidationResponse;
+import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.user.repository.ProfileImageRepository;
 import org.sopt.haphap.domain.user.repository.UserRepository;
+import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.code.MemberErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.s3.ImageCategory;
 import org.sopt.haphap.global.s3.S3Uploader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 // 트랜잭션을 걸지 않는다: 이미지 변환·업로드 동안 DB 커넥션/행 잠금을 잡지 않도록
 @Slf4j
@@ -80,5 +84,21 @@ public class MemberProfileService {
         } catch (Exception e) {
             log.warn("프로필 이미지 삭제 실패(고아 파일로 남음) url={}", url, e);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public NicknameValidationResponse validateNickname(Long userId, String nickname) {
+        userRepository.findById(userId)
+                .filter(User::isActive)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+
+        String anonymousName = NicknamePolicy.toValidationAnonymousName(nickname);
+
+        // 현재 사용자 ID는 제외하므로 현재 닉네임을 다시 입력해도 사용 가능으로 판정
+        if (userRepository.existsActiveAnonymousNameExcept(anonymousName, userId)) {
+            throw new CustomException(MemberErrorCode.NICKNAME_DUPLICATED);
+        }
+
+        return new NicknameValidationResponse(anonymousName);
     }
 }

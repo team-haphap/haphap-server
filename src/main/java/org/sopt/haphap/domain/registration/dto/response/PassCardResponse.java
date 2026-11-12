@@ -11,7 +11,10 @@ public record PassCardResponse(
         String companyCardLogoImageUrl,
         String title,
         String cardImageUrl,
-        boolean confirmed
+        boolean confirmed,
+        Long stageId,
+        String stageName,
+        int orderIndex
 ) {
     public static PassCardResponse from(Registration registration) {
         Posting posting = registration.getPosting();
@@ -23,7 +26,10 @@ public record PassCardResponse(
                 posting.getCompany().getCardLogoImageUrl(),
                 posting.getTitle(),
                 category.getCardImageUrl(),
-                registration.isPassCardConfirmed()
+                registration.isPassCardConfirmed(),
+                registration.getStage().getId(),
+                registration.getStage().getName(),
+                registration.getStage().getOrderIndex()
         );
     }
 }

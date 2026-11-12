@@ -206,6 +206,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         JOIN FETCH r.posting p
         JOIN FETCH p.company
         JOIN FETCH p.category
+        JOIN FETCH r.stage
         WHERE r.user.id = :userId
           AND r.verificationStatus = :status
           AND r.passCardConfirmedAt IS NULL
@@ -239,6 +240,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         JOIN FETCH r.posting p
         JOIN FETCH p.company
         JOIN FETCH p.category
+        JOIN FETCH r.stage
         WHERE r.id = :registrationId
           AND r.user.id = :userId
           AND r.verificationStatus = :status
@@ -246,6 +248,21 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     Optional<Registration> findPassCard(
             @Param("registrationId") Long registrationId,
             @Param("userId") Long userId,
+            @Param("status") RegistrationVerificationStatus status);
+
+    // 같은 사용자·공고의 승인된 합격카드 전형을 순서대로 조회해 상세 화면 칩에 사용
+    @Query("""
+        SELECT r FROM Registration r
+        JOIN FETCH r.stage s
+        WHERE r.user.id = :userId
+          AND r.posting.id = :postingId
+          AND r.result = org.sopt.haphap.domain.registration.domain.RegistrationResult.PASS
+          AND r.verificationStatus = :status
+        ORDER BY s.orderIndex ASC, r.id ASC
+        """)
+    List<Registration> findApprovedPassCardsByPosting(
+            @Param("userId") Long userId,
+            @Param("postingId") Long postingId,
             @Param("status") RegistrationVerificationStatus status);
 
     //재제출 API

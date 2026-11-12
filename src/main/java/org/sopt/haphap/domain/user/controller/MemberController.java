@@ -2,10 +2,7 @@ package org.sopt.haphap.domain.user.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.sopt.haphap.domain.user.dto.MemberAccountResponse;
-import org.sopt.haphap.domain.user.dto.MemberProfileResponse;
-import org.sopt.haphap.domain.user.dto.MemberResponse;
-import org.sopt.haphap.domain.user.dto.WithdrawRequest;
+import org.sopt.haphap.domain.user.dto.*;
 import org.sopt.haphap.domain.user.service.MemberProfileService;
 import org.sopt.haphap.domain.user.service.MemberService;
 import org.sopt.haphap.domain.user.service.MemberWithdrawalService;
@@ -56,5 +53,18 @@ public class MemberController implements MemberApiDocs {
         String token = BearerTokenExtractor.extract(authorization);
         memberWithdrawalService.withdraw(userId, token, request);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me/nickname/validation")
+    public ResponseEntity<SuccessResponse<NicknameValidationResponse>> validateNickname(
+            @AuthenticationPrincipal Long userId,
+            @RequestParam("nickname") String nickname) {
+
+        NicknameValidationResponse response =
+                memberProfileService.validateNickname(userId, nickname);
+
+        return ResponseEntity.ok(
+                SuccessResponse.of(MemberSuccessCode.NICKNAME_AVAILABLE, response)
+        );
     }
 }

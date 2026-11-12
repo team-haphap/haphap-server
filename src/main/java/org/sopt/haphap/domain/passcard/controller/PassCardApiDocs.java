@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.haphap.domain.passcard.dto.response.PassCardArchiveListResponse;
+import org.sopt.haphap.domain.passcard.dto.response.PassCardDetailResponse;
 import org.sopt.haphap.domain.passcard.dto.response.UnconfirmedPassCardListResponse;
-import org.sopt.haphap.domain.registration.dto.response.PassCardResponse;
 import org.sopt.haphap.global.dto.FailureResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.data.domain.Pageable;
@@ -42,10 +42,13 @@ public interface PassCardApiDocs {
             description = """
                     푸시 알림 탭, 보관함 [다시 보기]에서 사용합니다.
                     조회만으로는 확인 완료 상태가 바뀌지 않습니다(확인 완료는 POST /{registrationId}/confirm).
+                    stageId/stageName/orderIndex는 현재 선택된 카드의 전형 정보입니다.
+                    availableStages에는 같은 공고에서 본인에게 승인된 합격카드가 있는 전형을 순서대로 반환합니다.
+                    칩 선택 시 해당 항목의 registrationId로 상세 조회를 다시 호출하면 됩니다.
                     """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = PassCardResponse.class),
+                    content = @Content(schema = @Schema(implementation = PassCardDetailResponse.class),
                             examples = @ExampleObject(value = """
                                     {
                                       "status": 200,
@@ -58,7 +61,14 @@ public interface PassCardApiDocs {
                                         "companyCardLogoImageUrl": "https://.../kakao-card.png",
                                         "title": "카카오 2026 신입 카카오 AI 신규 서비스 기획 공개 채용",
                                         "cardImageUrl": "https://.../card-planning.png",
-                                        "confirmed": false
+                                        "confirmed": false,
+                                        "stageId": 11,
+                                        "stageName": "서류",
+                                        "orderIndex": 1,
+                                        "availableStages": [
+                                          { "registrationId": 501, "stageId": 11, "stageName": "서류", "orderIndex": 1, "confirmed": false },
+                                          { "registrationId": 502, "stageId": 12, "stageName": "인적성", "orderIndex": 2, "confirmed": true }
+                                        ]
                                       }
                                     }
                                     """))),
@@ -68,7 +78,7 @@ public interface PassCardApiDocs {
                                     { "status": 404, "code": "PASS_CARD_NOT_FOUND", "message": "합격카드를 찾을 수 없습니다." }
                                     """)))
     })
-    ResponseEntity<SuccessResponse<PassCardResponse>> getPassCard(
+    ResponseEntity<SuccessResponse<PassCardDetailResponse>> getPassCard(
             @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @Parameter(description = "등록 ID") Long registrationId);
 

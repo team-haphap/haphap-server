@@ -3,9 +3,9 @@ package org.sopt.haphap.domain.passcard.controller;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.passcard.code.PassCardSuccessCode;
 import org.sopt.haphap.domain.passcard.dto.response.PassCardArchiveListResponse;
+import org.sopt.haphap.domain.passcard.dto.response.PassCardDetailResponse;
 import org.sopt.haphap.domain.passcard.dto.response.UnconfirmedPassCardListResponse;
 import org.sopt.haphap.domain.passcard.service.PassCardService;
-import org.sopt.haphap.domain.registration.dto.response.PassCardResponse;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.data.domain.Pageable;
@@ -43,10 +43,10 @@ public class PassCardController implements PassCardApiDocs {
     }
 
     @GetMapping("/{registrationId}")
-    public ResponseEntity<SuccessResponse<PassCardResponse>> getPassCard(
+    public ResponseEntity<SuccessResponse<PassCardDetailResponse>> getPassCard(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long registrationId) {
-        SuccessResponse<PassCardResponse> body = ApiResponse.success(
+        SuccessResponse<PassCardDetailResponse> body = ApiResponse.success(
                 PassCardSuccessCode.PASS_CARD_FETCHED,
                 passCardService.getPassCard(userId, registrationId));
         return ResponseEntity.status(body.status()).body(body);

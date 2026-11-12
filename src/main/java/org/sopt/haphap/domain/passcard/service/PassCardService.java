@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.passcard.code.PassCardErrorCode;
 import org.sopt.haphap.domain.passcard.dto.response.PassCardArchiveItemResponse;
 import org.sopt.haphap.domain.passcard.dto.response.PassCardArchiveListResponse;
+import org.sopt.haphap.domain.passcard.dto.response.PassCardDetailResponse;
+import org.sopt.haphap.domain.passcard.dto.response.PassCardStageOptionResponse;
 import org.sopt.haphap.domain.passcard.dto.response.UnconfirmedPassCardListResponse;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus;
@@ -44,11 +46,16 @@ public class PassCardService {
     }
 
     /* 푸시 탭 / 보관함 [다시 보기]*/
-    public PassCardResponse getPassCard(Long userId, Long registrationId) {
+    public PassCardDetailResponse getPassCard(Long userId, Long registrationId) {
         Registration registration = registrationRepository
                 .findPassCard(registrationId, userId, APPROVED)
                 .orElseThrow(() -> new CustomException(PassCardErrorCode.PASS_CARD_NOT_FOUND));
-        return PassCardResponse.from(registration);
+        List<PassCardStageOptionResponse> availableStages = registrationRepository
+                .findApprovedPassCardsByPosting(userId, registration.getPosting().getId(), APPROVED)
+                .stream()
+                .map(PassCardStageOptionResponse::from)
+                .toList();
+        return PassCardDetailResponse.from(registration, availableStages);
     }
 
     /* 카드가 화면에 정상 노출된 시점에 호출 */
