@@ -6,7 +6,7 @@ spring:
       pool:
         size: 4
   elasticsearch:
-    uris: ${ES_URIS:http://localhost:9200}
+    uris: "http://${ELASTICSEARCH_HOST:localhost}:9200"
     connection-timeout: 2s
     socket-timeout: 5s
 

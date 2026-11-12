@@ -54,7 +54,19 @@ jobs:
             umask 077
             cd /home/ubuntu/haphap
             git pull origin main
+            NGINX_CONF=/etc/nginx/conf.d/haphap.conf
+            if sudo grep -qE '^[[:space:]]*client_max_body_size[[:space:]]+' "$NGINX_CONF"; then
+              sudo sed -i -E 's/^[[:space:]]*client_max_body_size[[:space:]]+.*/    client_max_body_size 35M;/' "$NGINX_CONF"
+            else
+              sudo sed -i '/listen 443 ssl;/a\    client_max_body_size 35M;' "$NGINX_CONF"
+            fi
 
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            cat > .env <<'ENVEOF'
+            RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
+  
             cat > .env <<'ENVEOF'
             RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
             RDS_USERNAME=${{ secrets.RDS_USERNAME }}
@@ -75,7 +87,6 @@ jobs:
             DISCORD_VERIFICATION_WEBHOOK_URL=${{ secrets.DISCORD_VERIFICATION_WEBHOOK_URL }}
             DISCORD_VERIFICATION_MENTION_USER_IDS=${{ secrets.DISCORD_VERIFICATION_MENTION_USER_IDS }}
             APP_BASE_URL=${{ secrets.APP_BASE_URL }}
-            ES_URIS=${{ secrets.ES_URIS }}
             ENVEOF
             chmod 600 .env
 
