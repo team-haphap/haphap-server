@@ -11,6 +11,9 @@ public final class NicknamePolicy {
     public static final int MIN_LENGTH = 2;
     public static final int MAX_LENGTH = 5;
 
+    // 활성 유저 닉네임 유일성 (V43 부분 유니크 인덱스)
+    public static final String UNIQUE_CONSTRAINT = "uk_users_active_anonymous_name";
+
     // 완성형 한글, 영문, 숫자만. 자모(ㄱ, ㅏ)·공백·특수문자·이모지는 불가
     private static final Pattern DISALLOWED = Pattern.compile("[^가-힣a-zA-Z0-9]");
 

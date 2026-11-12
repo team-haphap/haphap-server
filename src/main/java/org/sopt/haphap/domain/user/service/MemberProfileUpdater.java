@@ -7,6 +7,7 @@ import org.sopt.haphap.domain.user.repository.UserRepository;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.code.MemberErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
+import org.sopt.haphap.global.util.ConstraintViolations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +33,11 @@ public class MemberProfileUpdater {
         try {
             userRepository.flush();   // 유니크 인덱스 위반을 여기서 잡기 위해 즉시 반영
         } catch (DataIntegrityViolationException e) {
-            // 사전 중복 확인과 저장 사이에 다른 유저가 같은 닉네임을 먼저 저장한 경우
-            throw new CustomException(MemberErrorCode.DUPLICATE_NICKNAME);
+            // 사전 중복 확인과 저장 사이에 다른 유저가 같은 닉네임을 먼저 저장한 경우만 409. 다른 무결성 위반은 그대로 던진다.
+            if (ConstraintViolations.isViolationOf(e, NicknamePolicy.UNIQUE_CONSTRAINT)) {
+                throw new CustomException(MemberErrorCode.DUPLICATE_NICKNAME);
+            }
+            throw e;
         }
         return new Result(MemberProfileResponse.from(user), previousProfileImageUrl);
     }

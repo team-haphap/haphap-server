@@ -8,6 +8,7 @@ import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
+import org.sopt.haphap.global.util.ConstraintViolations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class UserService {
         if (existing.isPresent()) {
             return new FindOrCreateResult(requireActive(existing.get()), false);
         }
-        for (int attempt = 1; attempt <= MAX_SIGNUP_ATTEMPTS; attempt++) {
+        for (int attempt = 1; ; attempt++) {
             try {
                 return new FindOrCreateResult(userCreator.create(provider, providerId, userInfo), true);
             } catch (DataIntegrityViolationException e) {
@@ -40,10 +41,14 @@ public class UserService {
                 if (created.isPresent()) {
                     return new FindOrCreateResult(requireActive(created.get()), false);
                 }
-                // 그 유저가 없으면 닉네임 유니크 충돌(동시 가입자가 같은 닉네임을 뽑음) → 닉네임을 새로 뽑아 재시도
+                // 닉네임 유니크 충돌(동시 가입자가 같은 닉네임을 뽑음)만 닉네임을 새로 뽑아 재시도. 다른 무결성 오류와
+                // 재시도 소진은 원래 예외를 그대로 던진다.
+                if (attempt >= MAX_SIGNUP_ATTEMPTS
+                        || !ConstraintViolations.isViolationOf(e, NicknamePolicy.UNIQUE_CONSTRAINT)) {
+                    throw e;
+                }
             }
         }
-        throw new CustomException(GlobalErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     private User requireActive(User user) {
