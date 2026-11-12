@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/pass-cards")
 @RequiredArgsConstructor
+
 public class PassCardController implements PassCardApiDocs {
 
     private final PassCardService passCardService;
@@ -37,7 +38,7 @@ public class PassCardController implements PassCardApiDocs {
             @PageableDefault(size = 20, sort = "verificationResolvedAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         return ResponseEntity.ok(SuccessResponse.of(
-                PassCardSuccessCode.GET_ARCHIVE_SUCCESS,
+                PassCardSuccessCode.PASS_CARD_LIST_FETCHED,
                 passCardService.getArchive(userId, pageable)));
     }
 
