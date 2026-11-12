@@ -4,6 +4,7 @@ import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.domain.RegistrationVerificationStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record VerificationItemResponse(
         Long registrationId,
@@ -14,18 +15,25 @@ public record VerificationItemResponse(
         RegistrationVerificationStatus status,
         LocalDateTime submittedAt,
         LocalDateTime resolvedAt,
-        boolean resubmittable
+        boolean resubmittable,
+        List<String> submittedImageUrls
 ) {
-    public static VerificationItemResponse from(Registration r) {
+    public static VerificationItemResponse from(
+            Registration registration,
+            String squareLogoImageUrl,
+            List<String> submittedImageUrls
+    ) {
         return new VerificationItemResponse(
-                r.getId(),
-                r.getPosting().getCompany().getName(),
-                r.getPosting().getCompany().getCardLogoImageUrl(),
-                r.getPosting().getTitle(),
-                r.getStage().getName(),
-                r.getVerificationStatus(),
-                r.getVerificationSubmittedAt(),
-                r.getVerificationResolvedAt(),
-                r.isVerificationResubmittable());
+                registration.getId(),
+                registration.getPosting().getCompany().getName(),
+                squareLogoImageUrl,
+                registration.getPosting().getTitle(),
+                registration.getStage().getName(),
+                registration.getVerificationStatus(),
+                registration.getVerificationSubmittedAt(),
+                registration.getVerificationResolvedAt(),
+                registration.isVerificationResubmittable(),
+                submittedImageUrls
+        );
     }
 }
