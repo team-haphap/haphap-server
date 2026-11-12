@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,13 +28,14 @@ public class RegistrationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRegistrationApproved(RegistrationApprovedEvent event) {
         try {
-            AlramDispatch dispatch = alramService.prepareStagePassedAlrams(event);   // 트랜잭션
-            if (dispatch.isEmpty()) {
+            List<AlramDispatch> dispatches = alramService.prepareStagePassedAlrams(event);
+            if (dispatches.isEmpty()) {
                 return;
             }
-            alramDispatcher.dispatch(event.postingId(), event.registrantUserId(), null, dispatch);   // 트랜잭션 밖 + 재시도
+            for (AlramDispatch dispatch : dispatches) {   // 순회로 변경
+                alramDispatcher.dispatch(event.postingId(), event.registrantUserId(), null, dispatch);
+            }
         } catch (Exception e) {
-            // DB 자체가 실패한 경우
             log.error("합격 알람 준비 실패 - postingId={}, stageId={}, registrant={}",
                     event.postingId(), event.stageId(), event.registrantUserId(), e);
             alramFailureRecorder.record(event.postingId(), event.registrantUserId(), null, e);
