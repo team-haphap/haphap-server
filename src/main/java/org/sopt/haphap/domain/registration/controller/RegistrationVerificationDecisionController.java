@@ -2,6 +2,7 @@ package org.sopt.haphap.domain.registration.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
+import org.sopt.haphap.domain.registration.code.RegistrationErrorCode;
 import org.sopt.haphap.domain.registration.security.VerificationDecisionToken;
 import org.sopt.haphap.domain.registration.security.VerificationDecisionType;
 import org.sopt.haphap.domain.registration.security.VerificationLinkSigner;
@@ -23,32 +24,61 @@ import java.nio.charset.StandardCharsets;
 public class RegistrationVerificationDecisionController {
 
     private static final MediaType HTML_UTF8 = new MediaType("text", "html", StandardCharsets.UTF_8);
+    private static final int MAX_REASON_LENGTH = 500;
+    private static final String DEFAULT_REJECT_REASON = "합격을 인증할 수 있는 화면을 다시 제출해주세요.";
 
     private final VerificationLinkSigner linkSigner;
     private final RegistrationVerificationDecisionService decisionService;
 
-    // 디스코드 링크 클릭 시 도착하는 곳. 상태 변경 절대 금지!
-    // 디스코드/슬랙 등은 링크 미리보기를 만들려고 이 URL에 자동으로 GET을 미리 보내기도 해서,
-    // 여기서 승인/반려를 실행해버리면 클릭도 안 했는데 처리되는 사고가 남.
     @GetMapping
     public ResponseEntity<String> showConfirmPage(@RequestParam String token) {
-        VerificationDecisionToken decoded = linkSigner.verify(token); // 위변조면 여기서 예외
+        VerificationDecisionToken decoded = linkSigner.verify(token);
 
         String actionLabel = decoded.action() == VerificationDecisionType.APPROVE ? "승인" : "반려";
-        String body = """
-                <h2>등록 #%d 건을 %s 처리할까요?</h2>
+
+        String body;
+        if (decoded.action() == VerificationDecisionType.REJECT) {
+            // 반려: 사유 입력 textarea 포함
+            body = """
+                <h2>등록 #%d 건을 반려 처리할까요?</h2>
                 <form method="post" action="/admin/registrations/verification/decide">
                     <input type="hidden" name="token" value="%s"/>
-                    <button type="submit" style="padding:12px 24px;font-size:16px;">%s 확정</button>
+                    <div style="margin-bottom:16px;">
+                        <label for="reason" style="display:block;margin-bottom:8px;font-weight:bold;">반려 사유</label>
+                        <textarea id="reason" name="reason" rows="4" cols="50"
+                                  maxlength="%d"
+                                  style="width:100%%;max-width:500px;padding:8px;font-size:14px;"
+                        >%s</textarea>
+                        <div style="color:#666;font-size:12px;margin-top:4px;">최대 %d자</div>
+                    </div>
+                    <button type="submit" style="padding:12px 24px;font-size:16px;background:#e74c3c;color:#fff;border:none;border-radius:6px;cursor:pointer;">반려 확정</button>
                 </form>
-                """.formatted(decoded.registrationId(), actionLabel, HtmlUtils.htmlEscape(token), actionLabel);
+                """.formatted(
+                    decoded.registrationId(),
+                    HtmlUtils.htmlEscape(token),
+                    MAX_REASON_LENGTH,
+                    HtmlUtils.htmlEscape(DEFAULT_REJECT_REASON),
+                    MAX_REASON_LENGTH
+            );
+        } else {
+            // 승인: 기존과 동일
+            body = """
+                <h2>등록 #%d 건을 승인 처리할까요?</h2>
+                <form method="post" action="/admin/registrations/verification/decide">
+                    <input type="hidden" name="token" value="%s"/>
+                    <button type="submit" style="padding:12px 24px;font-size:16px;background:#2ecc71;color:#fff;border:none;border-radius:6px;cursor:pointer;">승인 확정</button>
+                </form>
+                """.formatted(decoded.registrationId(), HtmlUtils.htmlEscape(token));
+        }
 
         return html(ResponseEntity.ok(), body);
     }
 
-    // 확인 페이지에서 버튼 눌렀을 때만 실제 처리
     @PostMapping("/decide")
-    public ResponseEntity<String> decide(@RequestParam String token) {
+    public ResponseEntity<String> decide(
+            @RequestParam String token,
+            @RequestParam(required = false) String reason
+    ) {
         VerificationDecisionToken decoded = linkSigner.verify(token);
 
         String actionLabel;
@@ -56,14 +86,18 @@ public class RegistrationVerificationDecisionController {
             decisionService.approve(decoded.registrationId(), decoded.round());
             actionLabel = "승인";
         } else {
-            decisionService.reject(decoded.registrationId(),decoded.round());
+            // 반려 사유 검증
+            String trimmedReason = (reason != null) ? reason.trim() : "";
+            if (trimmedReason.isEmpty() || trimmedReason.length() > MAX_REASON_LENGTH) {
+                throw new CustomException(RegistrationErrorCode.INVALID_REJECT_REASON);
+            }
+            decisionService.reject(decoded.registrationId(), decoded.round(), trimmedReason);
             actionLabel = "반려";
         }
         return html(ResponseEntity.ok(),
                 "<h2>등록 #%d 건이 %s 처리되었어요.</h2>".formatted(decoded.registrationId(), actionLabel));
     }
 
-    // 운영진이 브라우저로 보는 페이지라, 전역 핸들러의 JSON/XML 대신 HTML로 오류를 보여준다.
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<String> handleError(CustomException e) {
         ErrorResultCode code = e.getErrorCode();
