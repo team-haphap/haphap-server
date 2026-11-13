@@ -47,4 +47,7 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
     @Modifying(flushAutomatically = true)
     @Query("DELETE FROM Scrap s WHERE s.user.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
+
+    // 공고 상세 [찜 여부]: (user_id, posting_id) 유니크 인덱스로 한 건만 확인
+    boolean existsByUserIdAndPostingId(Long userId, Long postingId);
 }

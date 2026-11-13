@@ -43,6 +43,15 @@ public class ScrapService {
         return false;
     }
 
+    // 공고 상세 [찜 여부]. 비로그인 사용자는 항상 false
+    @Transactional(readOnly = true)
+    public boolean isScrapped(Long userId, Long postingId) {
+        if (userId == null) {
+            return false;
+        }
+        return scrapRepository.existsByUserIdAndPostingId(userId, postingId);
+    }
+
     // 마이페이지 [찜한 공고]: 찜한 시각 최신순(같으면 공고 id 역순). 페이지네이션 없이 전부, 쿼리 1번.
     @Transactional(readOnly = true)
     public MyScrapListResponse getMyScraps(Long userId) {
