@@ -13,6 +13,7 @@ import org.sopt.haphap.domain.posting.repository.CompanyImageRepository;
 import org.sopt.haphap.domain.posting.repository.PostingRepository;
 import org.sopt.haphap.domain.posting.service.calculator.CurrentStageResolver;
 import org.sopt.haphap.domain.registration.service.RegistrationQueryService;
+import org.sopt.haphap.domain.scrap.service.ScrapService;
 import org.sopt.haphap.global.exception.CustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class PostingDetailService {
     private final AlramSettingService alramSettingService;
     private final RecentViewRecorder recentViewRecorder;
     private final HomePopularViewTracker homePopularViewTracker;
+    private final ScrapService scrapService;
 
     public PostingDetailResponse getDetail(Long userId,Long postingId) {
         // 공고 + 회사 + 카테고리
@@ -63,6 +65,7 @@ public class PostingDetailService {
                 .orElse(null);
 
         boolean alarmEnabled = alramSettingService.isAlarmEnabled(userId, postingId);
+        boolean isScrapped = scrapService.isScrapped(userId, postingId);
 
         return new PostingDetailResponse(
                 posting.getCompany().getName(), posting.getTitle(), posting.getCategory().getName(),
@@ -71,6 +74,7 @@ public class PostingDetailService {
                 new PostingDetailResponse.SummaryResponse(
                         summary.registeredCount(), profileImages, additional),
                 feeds.stream().map(f -> new PostingDetailResponse.RegistrationFeedResponse(
-                        f.registrationId(),f.stage(), f.nickName(), f.status(), f.feedCreatedAt())).toList(),alarmEnabled);
+                        f.registrationId(),f.stage(), f.nickName(), f.status(), f.feedCreatedAt())).toList(),alarmEnabled,
+                isScrapped);
     }
 }

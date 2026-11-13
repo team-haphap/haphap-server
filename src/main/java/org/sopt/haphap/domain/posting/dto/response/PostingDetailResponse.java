@@ -15,7 +15,8 @@ public record PostingDetailResponse(
         String companyImageUrl,
         SummaryResponse summary,
         List<RegistrationFeedResponse> registrations,
-        boolean alarmEnabled
+        boolean alarmEnabled,
+        boolean isScrapped   // 내가 찜한 공고인지 (비로그인이면 false)
         ) {
     public record SummaryResponse(
             long registeredCount,
