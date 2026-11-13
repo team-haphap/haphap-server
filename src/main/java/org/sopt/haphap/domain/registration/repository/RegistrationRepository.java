@@ -216,7 +216,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("userId") Long userId,
             @Param("status") RegistrationVerificationStatus status);
 
-    // 보관함; 확인 완료한 합격카드
+    // 보관함; 승인된 합격카드 (승인 시점 내림차순)
     @Query("""
         SELECT r FROM Registration r
         JOIN FETCH r.user
@@ -225,8 +225,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
         JOIN FETCH p.category
         WHERE r.user.id = :userId
           AND r.verificationStatus = :status
-          AND r.passCardConfirmedAt IS NOT NULL
-        ORDER BY r.passCardConfirmedAt DESC, r.id DESC
+        ORDER BY r.verificationResolvedAt DESC, r.id DESC
         """)
     Page<Registration> findConfirmedPassCards(
             @Param("userId") Long userId,
