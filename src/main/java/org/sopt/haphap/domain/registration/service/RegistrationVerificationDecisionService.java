@@ -33,13 +33,12 @@ public class RegistrationVerificationDecisionService {
     }
 
     @Transactional
-    public void reject(Long registrationId, int round) {
+    public void reject(Long registrationId, int round, String reason) {
         Registration registration = registrationRepository.findByIdForUpdate(registrationId)
                 .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
         validateRound(registration, round);
 
-        // 반려 상세에서 사용자가 제출 이미지를 확인할 수 있도록 이미지를 유지한다.
-        registration.reject();
+        registration.reject(reason);
     }
 
     private void validateRound(Registration registration, int round) {

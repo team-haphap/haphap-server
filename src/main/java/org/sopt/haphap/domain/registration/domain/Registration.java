@@ -56,6 +56,10 @@ public class Registration extends BaseEntity {
     @Column(name = "verification_resolved_at")
     private LocalDateTime verificationResolvedAt;
 
+    //반려 사유 추가
+    @Column(name = "verification_reject_reason", length = 500)
+    private String verificationRejectReason;
+
     @Convert(converter = ContactMethodListConverter.class)
     @Column(name = "contact_methods")
     private List<ContactMethod> contactMethods;
@@ -133,9 +137,10 @@ public class Registration extends BaseEntity {
         this.verificationResolvedAt = LocalDateTime.now();
     }
 
-    public void reject() {
+    public void reject(String reason) {
         transitionTo(RegistrationVerificationStatus.REJECTED, RegistrationErrorCode.VERIFICATION_ALREADY_RESOLVED);
         this.verificationResolvedAt = LocalDateTime.now();
+        this.verificationRejectReason = reason;
     }
 
     public void resubmitVerification() {
@@ -143,6 +148,7 @@ public class Registration extends BaseEntity {
         this.verificationRound++;
         this.verificationSubmittedAt = LocalDateTime.now();
         this.verificationResolvedAt = null;
+        this.verificationRejectReason = null;
     }
 
     public boolean isVerificationResubmittable() {

@@ -16,7 +16,8 @@ public record VerificationItemResponse(
         LocalDateTime submittedAt,
         LocalDateTime resolvedAt,
         boolean resubmittable,
-        List<String> submittedImageUrls
+        List<String> submittedImageUrls,
+        String rejectReason
 ) {
     public static VerificationItemResponse from(
             Registration registration,
@@ -33,7 +34,10 @@ public record VerificationItemResponse(
                 registration.getVerificationSubmittedAt(),
                 registration.getVerificationResolvedAt(),
                 registration.isVerificationResubmittable(),
-                submittedImageUrls
+                submittedImageUrls,
+                registration.getVerificationStatus() == RegistrationVerificationStatus.REJECTED
+                        ? registration.getVerificationRejectReason()
+                        : null
         );
     }
 }
