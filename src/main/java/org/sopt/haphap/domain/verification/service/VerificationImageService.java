@@ -32,6 +32,14 @@ public class VerificationImageService {
     private final VerificationImageRepository verificationImageRepository;
     private final UserService userService;
 
+    private String extractExtension(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename != null && originalFilename.contains(".")) {
+            return originalFilename.substring(originalFilename.lastIndexOf('.') + 1).toLowerCase();
+        }
+        return "jpg";
+    }
+
     public VerificationImageUploadResponse upload(Long userId, List<MultipartFile> files) {
         validateCount(files);
         validateFiles(files);
@@ -41,7 +49,9 @@ public class VerificationImageService {
 
         List<VerificationImage> reserved = verificationImageRepository.saveAll(
                 files.stream()
-                        .map(file -> VerificationImage.uploadedBy(user, s3Uploader.newPrivateKey(dirName)))
+                        .map(file -> VerificationImage.uploadedBy(
+                                user,
+                                s3Uploader.newPrivateKey(dirName, extractExtension(file))))
                         .toList());
 
         try {

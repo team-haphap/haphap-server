@@ -54,18 +54,23 @@ public class S3Uploader {
 
     public String upload(MultipartFile file, String dirName) {
         String key = dirName + "/" + UUID.randomUUID() + "-" + baseName(file) + ".webp";
-        putObject(bucket, key, toWebp(file), PUBLIC_CACHE);
+        putObject(bucket, key, toWebp(file), "image/webp", PUBLIC_CACHE);
         return "https://%s.s3.%s.amazonaws.com/%s".formatted(bucket, region, key);
     }
 
-    // 비공개 파일용 key 생성 (원본 파일명 사용 X)
-    public String newPrivateKey(String dirName) {
-        return dirName + "/" + UUID.randomUUID() + ".webp";
+    public String newPrivateKey(String dirName, String extension) {
+        return dirName + "/" + UUID.randomUUID() + "." + extension;
     }
 
-    // 정해진 key로 비공개 업로드
     public void uploadPrivate(MultipartFile file, String key) {
-        putObject(privateBucket, key, toWebp(file), PRIVATE_CACHE);
+        try {
+            putObject(privateBucket, key,
+                    file.getBytes(),
+                    file.getContentType(),
+                    PRIVATE_CACHE);
+        } catch (IOException e) {
+            throw new CustomException(GlobalErrorCode.IMAGE_UPLOAD_FAILED);
+        }
     }
 
     public void delete(String key) {
@@ -114,11 +119,12 @@ public class S3Uploader {
         }
     }
 
-    private void putObject(String targetBucket, String key, byte[] bytes, String cacheControl) {
+    private void putObject(String targetBucket, String key, byte[] bytes,
+                           String contentType, String cacheControl) {
         try {
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(targetBucket).key(key)
-                            .contentType("image/webp")
+                            .contentType(contentType)
                             .cacheControl(cacheControl)
                             .build(),
                     RequestBody.fromBytes(bytes));
