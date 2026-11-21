@@ -63,7 +63,7 @@ public class AuthService {
     public AuthResponse appleLogin(String authorizationCode, String identityToken, String name) {
         // 1. identity token 검증 → 어느 애플 사용자인지 확정
         OAuthUserInfo userInfo = oAuthClients.get(Provider.APPLE).getUserInfo(identityToken);
-        if (userInfo.name() == null && name != null) {
+        if (userInfo.name() == null && name != null && !name.isBlank()) {
             userInfo = new OAuthUserInfo(
                     userInfo.providerId(), name, userInfo.email(),
                     userInfo.birthDate(), userInfo.gender(), userInfo.ageRange(), userInfo.phoneNumber()

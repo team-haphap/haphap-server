@@ -154,7 +154,7 @@ public interface AuthApiDocs {
                                     @ExampleObject(name = "신규 가입 시 이메일 제공 미동의", value = """
                                             { "status": 400, "code": "EMAIL_REQUIRED", "message": "이메일 동의가 필요합니다." }
                                             """),
-                                    @ExampleObject(name = "신규 가입 시 이름 제공 미동의", value = """
+                                    @ExampleObject(name = "신규 가입 시 이름 제공 미동의 (name 없으면 '애플 사용자'로 가입하게 됨)", value = """
                                             { "status": 400, "code": "NAME_REQUIRED", "message": "이름 동의가 필요합니다." }
                                             """)
                             })),
