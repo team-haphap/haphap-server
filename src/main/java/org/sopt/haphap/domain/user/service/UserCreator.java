@@ -25,21 +25,26 @@ public class UserCreator {
     private final ProfileImageAssigner profileImageAssigner;
 
     private static final int SIGNUP_BONUS_POINTS = 300;
+    private static final String DEFAULT_APPLE_NAME = "애플 사용자";
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User create(Provider provider, String providerId, OAuthUserInfo userInfo) {
         if (userInfo.email() == null) {
             throw new CustomException(AuthErrorCode.EMAIL_REQUIRED);
         }
-        if (userInfo.name() == null) {
-            throw new CustomException(AuthErrorCode.NAME_REQUIRED);
+        String name = userInfo.name();
+        if (name == null || name.isBlank()) {
+            if (provider != Provider.APPLE) {
+                throw new CustomException(AuthErrorCode.NAME_REQUIRED);
+            }
+            name = DEFAULT_APPLE_NAME;
         }
         return userRepository.saveAndFlush(   // 제약 위반을 이 메서드 안에서 처리
                 User.builder()
                         .provider(provider)
                         .providerId(providerId)
                         .pointBalance(SIGNUP_BONUS_POINTS)
-                        .name(userInfo.name())
+                        .name(name)
                         .email(userInfo.email())
                         .birthDate(userInfo.birthDate())
                         .gender(userInfo.gender())
