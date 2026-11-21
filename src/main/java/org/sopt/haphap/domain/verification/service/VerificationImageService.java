@@ -13,14 +13,14 @@ import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.s3.S3Uploader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -55,8 +55,26 @@ public class VerificationImageService {
                         .toList());
 
         try {
-            for (int i = 0; i < files.size(); i++) {
-                s3Uploader.uploadPrivate(files.get(i), reserved.get(i).getS3Key());
+            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                List<Future<?>> futures = new ArrayList<>();
+                for (int i = 0; i < files.size(); i++) {
+                    final int idx = i;
+                    futures.add(executor.submit(() ->
+                            s3Uploader.uploadPrivate(files.get(idx), reserved.get(idx).getS3Key())
+                    ));
+                }
+                for (Future<?> f : futures) {
+                    try {
+                        f.get();
+                    } catch (ExecutionException e) {
+                        Throwable cause = e.getCause();
+                        if (cause instanceof RuntimeException re) throw re;
+                        throw new RuntimeException(cause);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+                }
             }
             return VerificationImageUploadResponse.from(reserved);
 
@@ -117,12 +135,17 @@ public class VerificationImageService {
     }
 
     private String detectFormat(MultipartFile file) {
-        try (ImageInputStream in = ImageIO.createImageInputStream(file.getInputStream())) {
-            if (in == null) {
-                return null;
+        try (InputStream in = file.getInputStream()) {
+            byte[] header = in.readNBytes(8);
+            if (header.length >= 2 && header[0] == (byte) 0xFF && header[1] == (byte) 0xD8) {
+                return "jpeg";
             }
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-            return readers.hasNext() ? readers.next().getFormatName().toLowerCase() : null;
+            if (header.length >= 8
+                    && header[0] == (byte) 0x89 && header[1] == 'P'
+                    && header[2] == 'N' && header[3] == 'G') {
+                return "png";
+            }
+            return null;
         } catch (IOException e) {
             return null;
         }
