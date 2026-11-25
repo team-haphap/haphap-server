@@ -48,11 +48,6 @@ public class AlramService {
         Posting posting = postingRepository.findById(event.postingId())
                 .orElseThrow(() -> new CustomException(AlramErrorCode.POSTING_NOT_FOUND));
 
-        if (posting.isClosed()) {
-            log.info("합격 알람 스킵(마감) - postingId={}", event.postingId());
-            return List.of();
-        }
-
         PostingStage stage = postingStageRepository.findById(event.stageId())
                 .orElseThrow(() -> new CustomException(PostingErrorCode.STAGE_NOT_FOUND));
 
