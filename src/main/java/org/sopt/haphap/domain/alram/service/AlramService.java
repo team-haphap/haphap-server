@@ -43,7 +43,6 @@ public class AlramService {
     private final PushTokenRepository pushTokenRepository;
     private final UserRepository userRepository;
 
-    // 반환: [구독자 STAGE_PASSED dispatch(최초 1회), 본인 PASS_CARD dispatch(매 승인마다)]
     @Transactional
     public List<AlramDispatch> prepareStagePassedAlrams(RegistrationApprovedEvent event) {
         Posting posting = postingRepository.findById(event.postingId())
@@ -59,7 +58,7 @@ public class AlramService {
 
         List<AlramDispatch> dispatches = new ArrayList<>();
 
-        if (stage.getPassAlramSentAt() == null) {
+        if (!posting.isClosed() && stage.getPassAlramSentAt() == null) {
             stage.markPassAlramSent(LocalDateTime.now());
 
             List<AlramSetting> subscribers = alramSettingRepository.findActiveSubscribers(event.postingId());
@@ -106,7 +105,7 @@ public class AlramService {
         User registrant = userRepository.findById(event.registrantUserId())
                 .orElseThrow(() -> new CustomException(AlramErrorCode.POSTING_NOT_FOUND));
 
-        NotificationMessage message = createPassCardMessage(posting, stage);
+        NotificationMessage message = createPassCardMessage(posting, stage, event.registrationId());
 
         alramRepository.save(Alram.create(registrant, posting, AlramType.PASS_CARD,
                 message.title(), message.body()));
@@ -148,11 +147,11 @@ public class AlramService {
         return new NotificationMessage(title, body, posting.getId());
     }
 
-    private NotificationMessage createPassCardMessage(Posting posting, PostingStage stage) {
+    private NotificationMessage createPassCardMessage(Posting posting, PostingStage stage, Long registrationId) {
         String title = "합격카드가 발급됐어요!";
         String body = "[%s] %s 전형 합격카드를 확인해보세요."
                 .formatted(posting.getTitle(), stage.getName());
-        return new NotificationMessage(title, body, posting.getId());
+        return new NotificationMessage(title, body, posting.getId(), registrationId);  // 4-arg 생성자
     }
 
     private NotificationMessage createClosedMessage(Posting posting) {
