@@ -43,7 +43,6 @@ public class AlramService {
     private final PushTokenRepository pushTokenRepository;
     private final UserRepository userRepository;
 
-    // 반환: [구독자 STAGE_PASSED dispatch(최초 1회), 본인 PASS_CARD dispatch(매 승인마다)]
     @Transactional
     public List<AlramDispatch> prepareStagePassedAlrams(RegistrationApprovedEvent event) {
         Posting posting = postingRepository.findById(event.postingId())
@@ -59,7 +58,7 @@ public class AlramService {
 
         List<AlramDispatch> dispatches = new ArrayList<>();
 
-        if (stage.getPassAlramSentAt() == null) {
+        if (!posting.isClosed() && stage.getPassAlramSentAt() == null) {
             stage.markPassAlramSent(LocalDateTime.now());
 
             List<AlramSetting> subscribers = alramSettingRepository.findActiveSubscribers(event.postingId());
