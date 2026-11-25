@@ -62,6 +62,7 @@ public interface PassCardApiDocs {
                                         "title": "카카오 2026 신입 카카오 AI 신규 서비스 기획 공개 채용",
                                         "cardImageUrl": "https://.../card-planning.png",
                                         "confirmed": false,
+                                        "approvedAt": "2026-11-20T14:30:00",
                                         "stageId": 11,
                                         "stageName": "서류",
                                         "orderIndex": 1,

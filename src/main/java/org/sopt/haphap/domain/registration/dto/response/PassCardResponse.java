@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.registration.dto.response;
 
+import java.time.LocalDateTime;
 import org.sopt.haphap.domain.posting.domain.Category;
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.registration.domain.Registration;
@@ -14,7 +15,8 @@ public record PassCardResponse(
         boolean confirmed,
         Long stageId,
         String stageName,
-        int orderIndex
+        int orderIndex,
+        LocalDateTime approvedAt
 ) {
     public static PassCardResponse from(Registration registration) {
         Posting posting = registration.getPosting();
@@ -29,7 +31,8 @@ public record PassCardResponse(
                 registration.isPassCardConfirmed(),
                 registration.getStage().getId(),
                 registration.getStage().getName(),
-                registration.getStage().getOrderIndex()
+                registration.getStage().getOrderIndex(),
+                registration.getVerificationResolvedAt()
         );
     }
 }

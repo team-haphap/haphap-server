@@ -1,5 +1,6 @@
 package org.sopt.haphap.domain.passcard.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.sopt.haphap.domain.registration.domain.Registration;
 import org.sopt.haphap.domain.registration.dto.response.PassCardResponse;
@@ -15,6 +16,7 @@ public record PassCardDetailResponse(
         Long stageId,
         String stageName,
         int orderIndex,
+        LocalDateTime approvedAt,
         List<PassCardStageOptionResponse> availableStages
 ) {
     public static PassCardDetailResponse from(
@@ -33,6 +35,7 @@ public record PassCardDetailResponse(
                 card.stageId(),
                 card.stageName(),
                 card.orderIndex(),
+                card.approvedAt(),
                 availableStages
         );
     }
