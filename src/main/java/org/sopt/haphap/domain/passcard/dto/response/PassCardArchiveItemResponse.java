@@ -12,11 +12,11 @@ public record PassCardArchiveItemResponse(
         String status,    //항상 pass
         LocalDateTime confirmedAt
 ) {
-    public static PassCardArchiveItemResponse from(Registration registration) {
+    public static PassCardArchiveItemResponse from(Registration registration, String calendarLogoUrl) {
         return new PassCardArchiveItemResponse(
                 registration.getId(),
                 registration.getPosting().getCompany().getName(),
-                registration.getPosting().getCompany().getCardLogoImageUrl(),
+                calendarLogoUrl,
                 registration.getPosting().getTitle(),
                 registration.getPosting().getCategory().getName(),
                 "PASS",
