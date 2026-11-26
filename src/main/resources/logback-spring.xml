@@ -11,11 +11,26 @@
             name="FILE_PATTERN"
             value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{requestId:-NO_ID}] %-5level %logger{36} - %msg%n"/>
 
+    <!-- ==================== 텍스트 어펜더 (local/dev용) ==================== -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_PATTERN}</pattern>
-            <!-- 한글 로그 깨짐 방지 -->
             <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== JSON 어펜더 (prod용) ==================== -->
+    <appender name="JSON_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>Asia/Seoul</timeZone>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <message>message</message>
+                <stackTrace>stackTrace</stackTrace>
+            </fieldNames>
         </encoder>
     </appender>
 
@@ -26,6 +41,14 @@
     -->
     <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="STDOUT"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>false</neverBlock>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <appender name="ASYNC_JSON_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="JSON_STDOUT"/>
         <queueSize>512</queueSize>
         <discardingThreshold>0</discardingThreshold>
         <neverBlock>false</neverBlock>
@@ -52,7 +75,7 @@
         <logger name="org.sopt.haphap" level="INFO"/>
 
         <root level="INFO">
-            <appender-ref ref="ASYNC_STDOUT"/>
+            <appender-ref ref="ASYNC_JSON_STDOUT"/>
         </root>
     </springProfile>
 

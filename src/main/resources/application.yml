@@ -35,6 +35,18 @@ spring:
       max-file-size: 10MB
       max-request-size: 30MB
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  health:
+    elasticsearch:
+      enabled: false
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiry: 1h
@@ -74,15 +86,11 @@ discord:
 
 app:
   base_url: ${APP_BASE_URL}
+
 crypto:
   apple-token-key: ${APPLE_TOKEN_ENCRYPTION_KEY:}
 
-management:
-  health:
-    elasticsearch:
-      enabled: false
-
-search: #이거 말고 다르게 사전 채워놓는법 미리 찾아보기
+search:
   synonyms:
     - ["네이버", "naver"]
     - ["한국전력공사", "한전", "kepco"]
