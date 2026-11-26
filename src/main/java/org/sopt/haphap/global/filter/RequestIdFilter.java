@@ -37,13 +37,17 @@ public class RequestIdFilter extends OncePerRequestFilter {
 
         try {
             MDC.put(MDC_KEY, requestId);
+            MDC.put("method", request.getMethod());
+            MDC.put("uri", request.getRequestURI());
             response.setHeader(HEADER_NAME, requestId);
 
             filterChain.doFilter(request, response);
 
         } finally {
-            // (clear() 는 다른 컴포넌트가 넣은 MDC 값까지 지움.) 내가 넣은 것만 제거.
             MDC.remove(MDC_KEY);
+            MDC.remove("method");
+            MDC.remove("uri");
+            MDC.remove("userId");
         }
     }
 

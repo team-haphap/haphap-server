@@ -1,0 +1,16 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: discord-ops
+    receivers:
+      - uid: discord-ops-1
+        type: discord
+        settings:
+          url: ${DISCORD_OPS_WEBHOOK_URL}
+          use_discord_username: true
+          message: |
+            {{ range .Alerts }}
+            **{{ .Labels.alertname }}** ({{ .Labels.severity }})
+            {{ .Annotations.summary }}
+            {{ end }}

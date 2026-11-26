@@ -86,6 +86,7 @@ jobs:
             DISCORD_VERIFICATION_WEBHOOK_URL=${{ secrets.DISCORD_VERIFICATION_WEBHOOK_URL }}
             DISCORD_VERIFICATION_MENTION_USER_IDS=${{ secrets.DISCORD_VERIFICATION_MENTION_USER_IDS }}
             APP_BASE_URL=${{ secrets.APP_BASE_URL }}
+            DISCORD_OPS_WEBHOOK_URL=${{ secrets.DISCORD_OPS_WEBHOOK_URL }}
             ENVEOF
             chmod 600 .env
 
