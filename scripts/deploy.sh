@@ -4,7 +4,21 @@ IMAGE="haphapsopt/haphap-server:${IMAGE_TAG:?IMAGE_TAG is required}"
 WORK_DIR="/home/ubuntu/haphap"
 
 cd "$WORK_DIR"
-docker compose up -d redis
+docker compose up -d redis elasticsearch
+
+echo ">>> Elasticsearch 준비 확인 중..."
+for i in $(seq 1 20); do
+  if curl -sf "http://localhost:9200/_cluster/health" > /dev/null 2>&1; then
+    echo "Elasticsearch OK (시도 $i)"
+    break
+  fi
+  if [ "$i" -eq 20 ]; then
+    echo "Elasticsearch에 연결할 수 없어 배포를 중단합니다. 최근 로그:"
+    docker logs haphap-es --tail 50 || true
+    exit 1
+  fi
+  sleep 3
+done
 
 if docker ps --format '{{.Names}}' | grep -q "^haphap-blue$"; then
   CURRENT="blue"
@@ -34,6 +48,7 @@ docker run -d \
   -p "${NEXT_PORT}:8080" \
   --env-file "$WORK_DIR/.env" \
   -e REDIS_HOST=redis \
+  -e ELASTICSEARCH_HOST=haphap-es \
   -e FIREBASE_CONFIG_PATH=/app/firebase-service-account.json \
   -v "$WORK_DIR/firebase-service-account.json:/app/firebase-service-account.json:ro" \
   --restart unless-stopped \
@@ -41,13 +56,17 @@ docker run -d \
 
 # health check
 echo ">>> haphap-$NEXT health check 중..."
-for i in $(seq 1 15); do
+MAX_HEALTH_ATTEMPTS=60
+
+for i in $(seq 1 "$MAX_HEALTH_ATTEMPTS"); do
   if curl -sf "http://localhost:${NEXT_PORT}/actuator/health" > /dev/null 2>&1; then
     echo "Health check 통과 (시도 $i)"
     break
   fi
-  if [ "$i" -eq 15 ]; then
-    echo "Health check 실패. 롤백합니다."
+  if [ "$i" -eq "$MAX_HEALTH_ATTEMPTS" ]; then
+    echo "Health check 실패. 최근 로그:"
+    docker logs "haphap-$NEXT" --tail 200
+    echo "위 로그 확인 후 롤백합니다."
     docker stop "haphap-$NEXT" || true
     docker rm   "haphap-$NEXT" || true
     exit 1

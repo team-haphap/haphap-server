@@ -4,19 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.posting.dto.response.PopularPostingListResponse;
 import org.sopt.haphap.domain.posting.service.support.CategoryParser;
 import org.sopt.haphap.domain.search.code.SearchSuccessCode;
-import org.sopt.haphap.domain.search.dto.AutocompleteResponse;
-import org.sopt.haphap.domain.search.dto.PostingSearchCondition;
-import org.sopt.haphap.domain.search.dto.SearchPostingListResponse;
+import org.sopt.haphap.domain.search.dto.*;
+import org.sopt.haphap.domain.search.keyword.PopularSearchKeywordQueryService;
+import org.sopt.haphap.domain.search.keyword.SearchExecutionService;
 import org.sopt.haphap.domain.search.service.AutocompleteService;
 import org.sopt.haphap.domain.search.service.PopularSearchPostingQueryService;
 import org.sopt.haphap.domain.search.service.PostingSearchQueryService;
 import org.sopt.haphap.global.dto.ApiResponse;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,6 +25,8 @@ public class SearchController implements SearchApiDocs {
     private final PopularSearchPostingQueryService popularSearchPostingQueryService;
     private final AutocompleteService autocompleteService;
     private final PostingSearchQueryService postingSearchQueryService;
+    private final PopularSearchKeywordQueryService popularSearchKeywordQueryService;
+    private final SearchExecutionService searchExecutionService;
 
     @GetMapping("/popular")
     public ResponseEntity<SuccessResponse<PopularPostingListResponse>> getPopularPostings() {
@@ -64,5 +63,19 @@ public class SearchController implements SearchApiDocs {
                 ApiResponse.success(SearchSuccessCode.POSTING_SEARCH_FETCHED, response);
 
         return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @GetMapping("/popular-keywords")
+    public ResponseEntity<SuccessResponse<PopularKeywordListResponse>> getPopularKeywords() {
+        SuccessResponse<PopularKeywordListResponse> body = ApiResponse.success(
+                SearchSuccessCode.POPULAR_KEYWORDS_FETCHED,
+                popularSearchKeywordQueryService.getPopularKeywords());
+        return ResponseEntity.status(body.status()).body(body);
+    }
+
+    @PostMapping("/executions")
+    public ResponseEntity<Void> recordExecution(@RequestBody SearchExecutionRequest request) {
+        searchExecutionService.record(request.keyword());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -30,7 +30,7 @@ public interface CalendarApiDocs {
                                 "postings": [
                                   {
                                     "postingId": 12,
-                                    "title": "2026 상반기 신입 공채",
+                                    "title": "토스 2026 상반기 신입 공채",
                                     "stageName": "1차 서류",
                                     "likelihood": "HIGH",
                                     "participantCount": 34,

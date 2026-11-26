@@ -2,11 +2,13 @@ package org.sopt.haphap.domain.posting.repository;
 
 import org.sopt.haphap.domain.posting.domain.Posting;
 import org.sopt.haphap.domain.posting.dto.projection.PostingAutocompleteProjection;
+import org.sopt.haphap.domain.posting.dto.projection.PostingCategoryProjection;
 import org.sopt.haphap.domain.posting.dto.response.PostingSummaryResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +24,39 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
             SELECT p FROM Posting p
             JOIN FETCH p.company
             JOIN FETCH p.category
+            LEFT JOIN FETCH p.currentStage
             WHERE p.id IN :ids
             """)
     List<Posting> findAllWithCompanyAndCategoryByIds(@Param("ids") List<Long> ids);
+
+    // 홈 인기 공고 정각 갱신용 - 카테고리별로 나눠 캐싱하기 위해 postingId -> 카테고리명만 가볍게 조회.
+    // 동점(조회수 동일) 처리는 점수 임계값(threshold)만으로 판단해서 제목은 필요 없다 - 제목 기준 최종 정렬은
+    // 읽기 시점(HomePopularPostingService)에서, 이미 훨씬 작아진 캐시 후보만 대상으로 한다.
+    @Query("""
+            SELECT p.id AS postingId, p.category.name AS categoryName
+            FROM Posting p
+            WHERE p.id IN :ids
+            """)
+    List<PostingCategoryProjection> findCategoryNamesByIds(@Param("ids") List<Long> ids);
+
+    // 마감 알림 스케줄러용 - 최종합격 전형까지 왔고 아직 마감 알림을 안 보낸 공고 후보.
+    // 실제 마감(+4일 경과) 판정은 Posting.isClosed()로 다시 거른다 - 날짜 계산 로직을 SQL에 중복 구현하지 않기 위함.
+    @Query("""
+            SELECT p FROM Posting p
+            JOIN FETCH p.currentStage cs
+            WHERE cs.stageType = org.sopt.haphap.domain.posting.domain.StageType.FINAL_PASS
+              AND cs.movedAt IS NOT NULL
+              AND p.closedAlramSentAt IS NULL
+            """)
+    List<Posting> findClosedAlramCandidates();
+
+    // 온고잉 카운트/조회수 정리 스케줄러처럼 회사·카테고리 없이 마감 여부만 보면 되는 배치용
+    @Query("""
+            SELECT p FROM Posting p
+            LEFT JOIN FETCH p.currentStage
+            WHERE p.id IN :ids
+            """)
+    List<Posting> findAllWithCurrentStageByIds(@Param("ids") List<Long> ids);
 
     @Query("""
             SELECT p FROM Posting p
@@ -67,4 +99,14 @@ public interface PostingRepository extends JpaRepository<Posting, Long> {
     List<Long> searchPostingIds(
             @Param("keyword") String keyword,
             @Param("categories") List<String> categories);
+
+    //자동완성용 ID 목록 조회
+    @Query(value = """
+    SELECT p.id AS id, p.title AS title, c.name AS companyName, ci.image_url AS logoImageUrl
+    FROM posting p
+    JOIN company c ON c.id = p.company_id
+    LEFT JOIN company_image ci ON ci.company_id = c.id AND ci.type = 'AUTOCOMPLETE'
+    WHERE p.id IN (:ids)
+    """, nativeQuery = true)
+    List<PostingAutocompleteProjection> findAutocompleteRowsByIds(@Param("ids") Collection<Long> ids);
 }

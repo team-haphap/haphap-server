@@ -51,21 +51,43 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             set -e
+            umask 077
             cd /home/ubuntu/haphap
             git pull origin main
+            NGINX_CONF=/etc/nginx/conf.d/haphap.conf
+            if sudo grep -qE '^[[:space:]]*client_max_body_size[[:space:]]+' "$NGINX_CONF"; then
+              sudo sed -i -E 's/^[[:space:]]*client_max_body_size[[:space:]]+.*/    client_max_body_size 35M;/' "$NGINX_CONF"
+            else
+              sudo sed -i '/listen 443 ssl;/a\    client_max_body_size 35M;' "$NGINX_CONF"
+            fi
 
+            sudo nginx -t
+            sudo systemctl reload nginx
+  
             cat > .env <<'ENVEOF'
             RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}
             RDS_USERNAME=${{ secrets.RDS_USERNAME }}
             RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
+            APPLE_TEAM_ID=${{ secrets.APPLE_TEAM_ID }}
+            APPLE_KEY_ID=${{ secrets.APPLE_KEY_ID }}
+            APPLE_PRIVATE_KEY_BASE64=${{ secrets.APPLE_PRIVATE_KEY_BASE64 }}
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             GRAFANA_ADMIN_USER=${{ secrets.GRAFANA_ADMIN_USER }}
             GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+            AWS_S3_PRIVATE_BUCKET=${{ secrets.AWS_S3_PRIVATE_BUCKET }}
             ADMIN_LOGIN_ID=${{ secrets.ADMIN_LOGIN_ID }}
             ADMIN_PASSWORD_HASH=${{ secrets.ADMIN_PASSWORD_HASH }}
             ADMIN_NAME=${{ secrets.ADMIN_NAME }}
+            APPLE_CLIENT_ID=${{ secrets.APPLE_CLIENT_ID }}
+            APPLE_TOKEN_ENCRYPTION_KEY=${{ secrets.APPLE_TOKEN_ENCRYPTION_KEY }}
+            KAKAO_ADMIN_KEY=${{ secrets.KAKAO_ADMIN_KEY }}
+            VERIFICATION_LINK_SECRET=${{ secrets.VERIFICATION_LINK_SECRET }}
+            DISCORD_VERIFICATION_WEBHOOK_URL=${{ secrets.DISCORD_VERIFICATION_WEBHOOK_URL }}
+            DISCORD_VERIFICATION_MENTION_USER_IDS=${{ secrets.DISCORD_VERIFICATION_MENTION_USER_IDS }}
+            APP_BASE_URL=${{ secrets.APP_BASE_URL }}
             ENVEOF
+            chmod 600 .env
 
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}" | base64 -d > firebase-service-account.json
             chmod 644 firebase-service-account.json

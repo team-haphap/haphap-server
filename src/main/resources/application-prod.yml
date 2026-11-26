@@ -5,17 +5,41 @@ spring:
     password: ${RDS_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
+  elasticsearch:
+    uris: http://${ELASTICSEARCH_HOST:haphap-es}:9200
+
   jpa:
     hibernate:
       ddl-auto: validate
+  flyway:
+    out-of-order: true
 
 management:
   endpoint:
     health:
       show-details: never
 
+apple:
+  team-id: ${APPLE_TEAM_ID}
+  key-id: ${APPLE_KEY_ID}
+  private-key-base64: ${APPLE_PRIVATE_KEY_BASE64}
+  client-id: ${APPLE_CLIENT_ID}
+
+kakao:
+  admin-key: ${KAKAO_ADMIN_KEY}
+
+crypto:
+  apple-token-key: ${APPLE_TOKEN_ENCRYPTION_KEY}
+
 jwt:
   secret: ${JWT_SECRET}
 
 firebase:
   service-account-path: ${FIREBASE_CONFIG_PATH:/app/firebase-service-account.json}
+
+discord:
+  webhook:
+    verification-url: ${DISCORD_VERIFICATION_WEBHOOK_URL}
+
+app:
+  base-url: ${APP_BASE_URL}

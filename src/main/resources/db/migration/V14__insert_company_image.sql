@@ -87,16 +87,16 @@ FROM company WHERE name = '현대자동차'
 -- LG
 UNION ALL
 SELECT id, 'POPULAR', 'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/images/5f49eca0-59c9-4f26-a9b3-e8790a8f1606-home_lg.png', NOW(), NOW()
-FROM company WHERE name = 'LG'
+FROM company WHERE name = 'LG생활건강'
 UNION ALL
 SELECT id, 'LISTING', 'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/images/80fc1ddf-6f99-4f9b-bd7b-cd33e51d38b1-list_lg.png', NOW(), NOW()
-FROM company WHERE name = 'LG'
+FROM company WHERE name = 'LG생활건강'
 UNION ALL
 SELECT id, 'DETAIL', 'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/images/3fad0aab-3de5-47a8-80b7-14c6b782dfa0-detail_lg.png', NOW(), NOW()
-FROM company WHERE name = 'LG'
+FROM company WHERE name = 'LG생활건강'
 UNION ALL
 SELECT id, 'TODAY_LOGO', 'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/logo-images/25035d03-1558-4c9b-adf7-5615d9d1f6af-home_lg.png', NOW(), NOW()
-FROM company WHERE name = 'LG'
+FROM company WHERE name = 'LG생활건강'
 UNION ALL
 SELECT id, 'CALENDAR_LOGO', 'https://haphap-images-654801597877-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/logo-images/01bbc81d-eba3-454d-af5d-e11fa899452a-calender_lg.png', NOW(), NOW()
-FROM company WHERE name = 'LG';
+FROM company WHERE name = 'LG생활건강';

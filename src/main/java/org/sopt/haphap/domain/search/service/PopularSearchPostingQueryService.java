@@ -35,7 +35,7 @@ public class PopularSearchPostingQueryService {
 
         List<PopularPostingResponse> responses = topIds.stream()
                 .filter(id -> agg.posting(id) != null)
-                .map(id -> assembler.assemble(agg.posting(id), agg.stages(id), agg.counts(id), agg.companyImageUrl(id)))
+                .map(id -> assembler.assemble(agg.posting(id), agg.companyImageUrl(id)))
                 .filter(scored -> !scored.closed())
                 .map(Scored::response)
                 .toList();

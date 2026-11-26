@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface BannerRepository extends JpaRepository<Banner, Long> {
 
     @Query("""
-            SELECT new org.sopt.haphap.domain.banner.dto.response.BannerResponse(b.imageUrl, b.displayOrder)
+            SELECT new org.sopt.haphap.domain.banner.dto.response.BannerResponse(b.imageUrl, b.displayOrder, b.linkUrl)
             FROM Banner b
             WHERE b.isActive = true
             ORDER BY b.displayOrder ASC

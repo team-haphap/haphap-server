@@ -1,6 +1,14 @@
 spring:
   application:
     name: haphap
+  task:
+    scheduling:
+      pool:
+        size: 4
+  elasticsearch:
+    uris: "http://${ELASTICSEARCH_HOST:localhost}:9200"
+    connection-timeout: 2s
+    socket-timeout: 5s
 
   jpa:
     hibernate:
@@ -34,15 +42,27 @@ management:
   servlet:
     multipart:
       max-file-size: 10MB
-      max-request-size: 100MB
+      max-request-size: 30MB
 
 jwt:
   secret: ${JWT_SECRET}
+  access-token-expiry: 1h
+  refresh-token-expiry: 30d
 
 aws:
   s3:
     bucket: ${AWS_S3_BUCKET}
+    private-bucket: ${AWS_S3_PRIVATE_BUCKET}
     region: ap-northeast-2
+
+apple:
+  client-id: ${APPLE_CLIENT_ID:}
+  team-id: ${APPLE_TEAM_ID:}
+  key-id: ${APPLE_KEY_ID:}
+  private-key-base64: ${APPLE_PRIVATE_KEY_BASE64:}
+
+kakao:
+  admin-key: ${KAKAO_ADMIN_KEY:}
 
 admin:
   login-id: ${ADMIN_LOGIN_ID:}
@@ -51,3 +71,28 @@ admin:
 
 logging:
   config: classpath:logback-spring.xml
+
+verification:
+  link:
+    secret: ${VERIFICATION_LINK_SECRET}
+
+discord:
+  webhook:
+    verification-url: ${DISCORD_VERIFICATION_WEBHOOK_URL}
+    mention-user-ids: ${DISCORD_VERIFICATION_MENTION_USER_IDS:}
+
+app:
+  base_url: ${APP_BASE_URL}
+crypto:
+  apple-token-key: ${APPLE_TOKEN_ENCRYPTION_KEY:}
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
+search: #이거 말고 다르게 사전 채워놓는법 미리 찾아보기
+  synonyms:
+    - ["네이버", "naver"]
+    - ["한국전력공사", "한전", "kepco"]
+    - ["카카오뱅크", "카뱅"]

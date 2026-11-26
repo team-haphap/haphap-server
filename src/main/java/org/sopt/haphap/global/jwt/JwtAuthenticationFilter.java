@@ -30,11 +30,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(token) && jwtProvider.validateAccessToken(token) && !tokenService.isBlacklisted(token)) {
             Long id = jwtProvider.getUserId(token);
-            Role role = jwtProvider.getRole(token);
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(id, null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            if (!tokenService.isWithdrawn(id)) {
+                Role role = jwtProvider.getRole(token);
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(id, null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
         }
 
         filterChain.doFilter(request, response);

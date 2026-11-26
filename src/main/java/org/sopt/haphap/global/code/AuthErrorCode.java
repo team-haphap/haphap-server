@@ -16,6 +16,10 @@ public enum AuthErrorCode implements ErrorResultCode {
     EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "이메일 동의가 필요합니다."),
     NAME_REQUIRED(HttpStatus.BAD_REQUEST, "이름 동의가 필요합니다."),
     KAKAO_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "카카오 서버 응답이 원활하지 않습니다. 잠시 후 다시 시도해주세요."),
+    APPLE_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 애플 ID 토큰입니다."),
+    APPLE_ACCOUNT_NOT_FOUND(HttpStatus.BAD_REQUEST, "애플 계정 정보를 가져올 수 없습니다."),
+    APPLE_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "애플 서버 응답이 원활하지 않습니다. 잠시 후 다시 시도해주세요."),
+    WITHDRAWAL_IN_PROGRESS(HttpStatus.FORBIDDEN, "탈퇴 처리 중인 계정입니다. 문제가 계속되면 관리자에게 문의해주세요."),
     ;
 
     private final HttpStatus status;

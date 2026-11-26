@@ -10,9 +10,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.sopt.haphap.domain.posting.domain.CompanyImageType;
+import org.sopt.haphap.domain.posting.domain.StageType;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface PostingStageRepository extends JpaRepository<PostingStage, Long> {
     @Query("""
@@ -58,7 +60,7 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
     SELECT s.posting.id AS postingId, s.id AS stageId,
            s.name AS stageName, s.expectedScore AS expectedScore,
            s.expectedAnnouncementDate AS expectedAnnouncementDate,
-           p.title AS title, ci.imageUrl AS logoImageUrl,
+           p.title AS title, c.name AS companyName, ci.imageUrl AS logoImageUrl,
            s.orderIndex AS orderIndex
     FROM PostingStage s
     JOIN s.posting p
@@ -88,15 +90,18 @@ public interface PostingStageRepository extends JpaRepository<PostingStage, Long
         """)
     long countPostingsAnnouncedToday(@Param("today") LocalDate today);
 
-    // 전체 전형 (공고별 그룹핑용)
-    @Query("""
-    SELECT s.posting.id AS postingId, s.id AS stageId,
-           s.name AS name, s.orderIndex AS orderIndex,
-           s.expectedAnnouncementDate AS expectedAnnouncementDate,
-           s.announcedDate AS announcedDate
-    FROM PostingStage s
-    ORDER BY s.posting.id ASC, s.orderIndex ASC
-    """)
-    List<PostingStageFlatProjection> findAllStages();
+    // 전형이 1개라도 있는 공고 id (온고잉 카운트/조회수 정리 스케줄러가 대상 추리는 용도)
+    @Query("SELECT DISTINCT s.posting.id FROM PostingStage s")
+    List<Long> findDistinctPostingIds();
+
     boolean existsByPostingIdAndOrderIndex(Long postingId, int orderIndex);
+
+    // 전형 이동: 현재 전형의 바로 다음 전형 조회
+    Optional<PostingStage> findByPostingIdAndOrderIndex(Long postingId, int orderIndex);
+
+    // 같은 공고 안에서 canonical 전형 유형이 중복되지 않게 방지 (최소 시차표는 유형당 1개를 전제로 함)
+    boolean existsByPostingIdAndStageType(Long postingId, StageType stageType);
+
+    // 마이페이지 [이번 주 발표 예상]: 기간 안에 발표 예상일이 잡힌 전형이 하나라도 있는지 (LIMIT 1로 끊김)
+    boolean existsByExpectedAnnouncementDateBetween(LocalDate start, LocalDate end);
 }

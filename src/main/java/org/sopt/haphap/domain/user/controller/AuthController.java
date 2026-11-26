@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.haphap.domain.user.dto.AuthResponse;
 import org.sopt.haphap.domain.user.dto.KakaoLoginRequest;
+import org.sopt.haphap.domain.user.dto.LogoutRequest;
 import org.sopt.haphap.global.code.AuthSuccessCode;
 import org.sopt.haphap.global.dto.SuccessResponse;
 import org.sopt.haphap.domain.user.service.AuthService;
@@ -12,6 +13,7 @@ import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.global.jwt.BearerTokenExtractor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.sopt.haphap.domain.user.dto.AppleLoginRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -25,6 +27,12 @@ public class AuthController implements AuthApiDocs {
         return ResponseEntity.ok(SuccessResponse.of(AuthSuccessCode.KAKAO_LOGIN_SUCCESS, authService.kakaoLogin(request.accessToken())));
     }
 
+    @PostMapping("/apple")
+    public ResponseEntity<SuccessResponse<AuthResponse>> appleLogin(@Valid @RequestBody AppleLoginRequest request) {
+        return ResponseEntity.ok(SuccessResponse.of(AuthSuccessCode.APPLE_LOGIN_SUCCESS,
+                authService.appleLogin(request.authorizationCode(), request.identityToken(), request.name())));
+    }
+
     @PostMapping("/reissue")
     public ResponseEntity<SuccessResponse<AuthResponse>> reissue(@RequestHeader("Authorization") String authorization) {
         String token = BearerTokenExtractor.extract(authorization);
@@ -33,10 +41,11 @@ public class AuthController implements AuthApiDocs {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization,
+                                       @RequestBody(required = false) LogoutRequest request) {
         String token = BearerTokenExtractor.extract(authorization);
         if (token == null) { throw new CustomException(GlobalErrorCode.BAD_REQUEST); }
-        authService.logout(token);
+        authService.logout(token, request == null ? null : request.deviceId());
         return ResponseEntity.noContent().build();
     }
 }

@@ -23,6 +23,8 @@ public class PushTokenRegisterService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
 
+        pushTokenRepository.deactivateOthersOnDevice(request.deviceId(), userId);
+
         // (유저, 이 기기)의 토큰이 이미 있으면 갱신, 없으면 새로 생성
         pushTokenRepository.findByUserIdAndDeviceId(userId, request.deviceId())
                 .ifPresentOrElse(

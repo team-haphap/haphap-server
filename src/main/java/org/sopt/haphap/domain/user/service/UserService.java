@@ -8,62 +8,76 @@ import org.sopt.haphap.global.client.dto.OAuthUserInfo;
 import org.sopt.haphap.global.code.AuthErrorCode;
 import org.sopt.haphap.global.code.GlobalErrorCode;
 import org.sopt.haphap.global.exception.CustomException;
-import org.sopt.haphap.global.util.AnonymousNameGenerator;
-import org.sopt.haphap.global.util.NicknameAssigner;
-import org.sopt.haphap.global.util.ProfileImageAssigner;
+import org.sopt.haphap.global.util.ConstraintViolations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final NicknameAssigner nicknameAssigner;
-    private final ProfileImageAssigner profileImageAssigner;
+    private final UserCreator userCreator;
+
+    private static final int MAX_SIGNUP_ATTEMPTS = 3;
 
     // User + isNew를 함께 담는 record
     public record FindOrCreateResult(User user, boolean isNew) {}
 
-    @Transactional
     public FindOrCreateResult findOrCreate(Provider provider, String providerId, OAuthUserInfo userInfo) {
-        if (userInfo.email() == null) {
-            throw new CustomException(AuthErrorCode.EMAIL_REQUIRED);
+        Optional<User> existing = userRepository.findByProviderAndProviderId(provider, providerId);
+        if (existing.isPresent()) {
+            return new FindOrCreateResult(requireActive(existing.get()), false);
         }
-        if (userInfo.name() == null) {
-            throw new CustomException(AuthErrorCode.NAME_REQUIRED);
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return new FindOrCreateResult(userCreator.create(provider, providerId, userInfo), true);
+            } catch (DataIntegrityViolationException e) {
+                // 동시 첫 로그인: 다른 요청이 먼저 가입시킴 → 그 유저로 로그인 처리
+                Optional<User> created = userRepository.findByProviderAndProviderId(provider, providerId);
+                if (created.isPresent()) {
+                    return new FindOrCreateResult(requireActive(created.get()), false);
+                }
+                // 닉네임 유니크 충돌(동시 가입자가 같은 닉네임을 뽑음)만 닉네임을 새로 뽑아 재시도. 다른 무결성 오류와
+                // 재시도 소진은 원래 예외를 그대로 던진다.
+                if (attempt >= MAX_SIGNUP_ATTEMPTS
+                        || !ConstraintViolations.isViolationOf(e, NicknamePolicy.UNIQUE_CONSTRAINT)) {
+                    throw e;
+                }
+            }
         }
-        return userRepository.findByProviderAndProviderId(provider, providerId)
-                .map(user -> new FindOrCreateResult(user, false))
-                .orElseGet(() -> {
-                    try {
-                        User newUser = userRepository.save(
-                                User.builder()
-                                        .provider(provider)
-                                        .providerId(providerId)
-                                        .name(userInfo.name())
-                                        .email(userInfo.email())
-                                        .birthDate(userInfo.birthDate())
-                                        .gender(userInfo.gender())
-                                        .ageRange(userInfo.ageRange())
-                                        .phoneNumber(userInfo.phoneNumber())
-                                        .anonymousName(nicknameAssigner.assign())
-                                        .profileImageUrl(profileImageAssigner.assign())
-                                        .build()
-                        );
-                        return new FindOrCreateResult(newUser, true);
-                    } catch (DataIntegrityViolationException e) {
-                        User existing = userRepository.findByProviderAndProviderId(provider, providerId)
-                                .orElseThrow(() -> new CustomException(GlobalErrorCode.INTERNAL_SERVER_ERROR));
-                        return new FindOrCreateResult(existing, false);
-                    }
-                });
+    }
+
+    private User requireActive(User user) {
+        if (!user.isActive()) {
+            throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
+        }
+        return user;
     }
 
     @Transactional(readOnly = true)
     public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public User findActiveByIdForUpdate(Long userId) {
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+        return requireActive(user);
+    }
+
+    @Transactional
+    public void updateAppleRefreshToken(Long userId, String refreshToken) {
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.USER_NOT_FOUND));
+        if (!user.isActive()) {
+            throw new CustomException(AuthErrorCode.WITHDRAWAL_IN_PROGRESS);
+        }
+        user.updateAppleRefreshToken(refreshToken);
     }
 }

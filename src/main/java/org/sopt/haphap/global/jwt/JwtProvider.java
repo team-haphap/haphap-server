@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,18 +13,14 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@RequiredArgsConstructor
 @Component
 public class JwtProvider {
 
-    @Value("${jwt.secret}")
-    private String secret;
-
-    // TODO. 만료 토큰을 바꾸어요~
-    private static final long ACCESS_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 30;      // 1달
-    private static final long REFRESH_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 90;     // 3달
+    private final JwtProperties jwtProperties;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 
     public String createAccessToken(Long id) {
@@ -36,7 +33,7 @@ public class JwtProvider {
                 .claim("type", "access")
                 .claim("role", role.name())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.accessTokenExpiry().toMillis()))
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -51,7 +48,7 @@ public class JwtProvider {
                 .claim("type", "refresh")
                 .claim("role", role.name())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.refreshTokenExpiry().toMillis()))
                 .signWith(getSigningKey())
                 .compact();
     }

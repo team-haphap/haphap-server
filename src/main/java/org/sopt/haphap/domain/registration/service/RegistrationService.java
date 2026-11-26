@@ -1,12 +1,18 @@
 package org.sopt.haphap.domain.registration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.haphap.domain.alram.service.AlramSettingService;
 import org.sopt.haphap.domain.posting.domain.PostingStage;
 import org.sopt.haphap.domain.registration.domain.ContactMethod;
 import org.sopt.haphap.domain.registration.domain.RegistrationResult;
 import org.sopt.haphap.domain.registration.event.RegistrationResultChangedEvent;
 import org.sopt.haphap.domain.registration.event.StageResultCountedEvent;
+import org.sopt.haphap.domain.verification.code.VerificationErrorCode;
+import org.sopt.haphap.domain.verification.code.VerificationImagePolicy;
+import org.sopt.haphap.domain.verification.entity.VerificationImage;
+import org.sopt.haphap.domain.verification.repository.VerificationImageRepository;
+import org.sopt.haphap.domain.verification.service.VerificationImageAttacher;
 import org.sopt.haphap.global.exception.CustomException;
 import org.sopt.haphap.domain.user.entity.User;
 import org.sopt.haphap.domain.posting.domain.Posting;
@@ -20,9 +26,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
@@ -31,38 +39,36 @@ public class RegistrationService {
     private final ApplicationEventPublisher eventPublisher;
     private final RegistrationTargetValidator registrationTargetValidator;
     private final AlramSettingService alramSettingService;
+    private final VerificationImageRepository verificationImageRepository;
+    private final VerificationImageAttacher verificationImageAttacher;
 
     @Transactional
     public RegistrationCreateResponse createRegistration(Long userId, RegistrationCreateRequest request) {
-        validateResultConsistency(request);
 
+        validateResultConsistency(request);
         RegistrationTargetValidator.RegistrationTarget target =
                 registrationTargetValidator.validate(userId, request.postingId(), request.stageId());
-
 
         Optional<Registration> existing = registrationRepository
                 .findByUserIdAndPostingIdAndStageId(userId, request.postingId(), request.stageId());
 
         Registration registration = existing
-                .map(e -> updateExisting(e,target, request))       // 기존 있으면 갱신 or 막기
-                .orElseGet(() -> createNew(target.user(), target.posting(), target.stage(), request));  // 없으면 신규
+                .map(e -> updateExisting(e,target, request, userId))       // 기존 있으면 갱신 or 막기
+                .orElseGet(() -> createNew(target.user(), target.posting(), target.stage(), request, userId));  // 없으면 신규
 
         alramSettingService.apply(target.user(), target.posting(), request.alarmEnabled());
         publishEvent(registration, target.posting(), target.user());
 
         // PASS일 때만 연관을 fetch join으로 당겨와 카드 정보 구성, 아니면 ID만
-        if (registration.isPass()) {
-            Registration detailed = registrationRepository.findByIdWithDetails(registration.getId())
-                    .orElseThrow(() -> new CustomException(RegistrationErrorCode.REGISTRATION_NOT_FOUND));
-            return RegistrationCreateResponse.pass(detailed);
-        }
-        return RegistrationCreateResponse.idOnly(registration.getId());
-
+        return registration.isPass()
+                ? RegistrationCreateResponse.pass(registration)
+                : RegistrationCreateResponse.idOnly(registration.getId());
     }
 
     private Registration updateExisting(Registration existing,
                                         RegistrationTargetValidator.RegistrationTarget target,
-                                        RegistrationCreateRequest request) {
+                                        RegistrationCreateRequest request,
+                                        Long userId) {
         // 이미 확정인데 또 등록 시도 → 막기
         if (!existing.isPending()) {
             throw new CustomException(RegistrationErrorCode.DUPLICATE_REGISTRATION);
@@ -76,17 +82,23 @@ public class RegistrationService {
         // 여기까지 왔으면 PENDING → PASS/FAIL 확정
         existing.updateRegistration(request.result(), parseContactMethods(request.contactMethods()),
                 request.contactedAt(), request.anonymous());
+
+        attachVerificationImagesIfPass(existing, userId, request);
+
         eventPublisher.publishEvent(new RegistrationResultChangedEvent(
                 target.posting().getId(), target.stage().getId(), request.result()));
 
         return existing;
     }
+
     private Registration createNew(User user, Posting posting, PostingStage stage,
-                                   RegistrationCreateRequest request) {
+                                   RegistrationCreateRequest request, Long userId) {
         Registration registration = Registration.create(
                 user, posting, stage, request.result(),
                 parseContactMethods(request.contactMethods()), request.contactedAt(), request.anonymous());
         registrationRepository.save(registration);
+
+        attachVerificationImagesIfPass(registration, userId, request); //save 이후 호출
         // 집계 신규 이벤트만
         eventPublisher.publishEvent(new StageResultCountedEvent(
                 posting.getId(), stage.getId(), request.result()));
@@ -94,6 +106,25 @@ public class RegistrationService {
         return registration;
     }
 
+    private void attachVerificationImagesIfPass(Registration registration, Long userId,
+                                                 RegistrationCreateRequest request) {
+        if (registration.getResult() != RegistrationResult.PASS) {
+            return;
+        }
+        // TODO: 업로드 임시 비필수화 — 원복 시 이 if문도 같이 제거할 것
+
+        if (!request.hasVerificationImages()) {
+            return;
+        }
+        verificationImageAttacher.attach(registration, userId, request.verificationImageIds());
+    }
+
+    private void validateImageCount(List<Long> imageIds) {
+        int count = (imageIds == null) ? 0 : imageIds.size();
+        if (count < VerificationImagePolicy.MIN_IMAGE_COUNT || count > VerificationImagePolicy.MAX_IMAGE_COUNT) {
+            throw new CustomException(VerificationErrorCode.IMAGE_COUNT_INVALID);
+        }
+    }
 
     private void publishEvent(Registration registration, Posting posting, User user) {
         eventPublisher.publishEvent(new RegistrationCreatedEvent(
@@ -102,6 +133,7 @@ public class RegistrationService {
 
     private void validateResultConsistency(RegistrationCreateRequest request) {
         boolean isPending = request.result() == RegistrationResult.PENDING;
+        boolean isPass = request.result() == RegistrationResult.PASS;
         boolean hasContactMethods = request.contactMethods() != null && !request.contactMethods().isEmpty();
 
         if (isPending) {
@@ -115,7 +147,16 @@ public class RegistrationService {
                 throw new CustomException(RegistrationErrorCode.CONFIRMED_MUST_HAVE_CONTACT);
             }
         }
+
+        // TODO: 클라 요청으로 합격 인증 이미지 업로드를 임시로 필수 아니게 풂. 추후 원복 필요.
+        // if (isPass && !request.hasVerificationImages()) {
+        //     throw new CustomException(VerificationErrorCode.IMAGE_REQUIRED);
+        // }
+        if (!isPass && request.hasVerificationImages()) {
+            throw new CustomException(VerificationErrorCode.IMAGE_NOT_ALLOWED);
+        }
     }
+
     private List<ContactMethod> parseContactMethods(List<String> raw) {
         if (raw == null || raw.isEmpty()) {
             return List.of();
