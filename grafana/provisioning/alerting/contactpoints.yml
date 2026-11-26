@@ -10,6 +10,7 @@ contactPoints:
           url: ${DISCORD_OPS_WEBHOOK_URL}
           use_discord_username: true
           message: |
+            <@1096651144115265569> <@946041628198568017>
             {{ range .Alerts }}
             **{{ .Labels.alertname }}** ({{ .Labels.severity }})
             {{ .Annotations.summary }}
